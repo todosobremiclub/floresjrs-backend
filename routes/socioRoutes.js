@@ -1,3 +1,4 @@
+// socioRoutes.js con GET /:id y PUT /:id completos
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
@@ -17,6 +18,7 @@ router.get('/', async (req, res) => {
          nombre,
          apellido,
          subcategoria AS categoria,
+         telefono,
          TO_CHAR(fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
          TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
          foto_url,
@@ -27,7 +29,7 @@ router.get('/', async (req, res) => {
 
     res.json(resultado.rows);
   } catch (err) {
-    console.error('❌ Error al listar socios:', err); // log detallado
+    console.error('❌ Error al listar socios:', err);
     res.status(500).json({ error: 'Error al obtener socios' });
   }
 });
@@ -59,8 +61,74 @@ router.get('/:numero/:dni', async (req, res) => {
 
     res.json(resultado.rows[0]);
   } catch (err) {
-    console.error('❌ Error al buscar socio:', err); // log detallado
+    console.error('❌ Error al buscar socio:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET /socio/:id → obtener un socio por número
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const resultado = await db.query(
+      `SELECT 
+         numero_socio AS numero,
+         dni,
+         nombre,
+         apellido,
+         subcategoria AS categoria,
+         telefono,
+         TO_CHAR(fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
+         TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
+         foto_url
+       FROM socios
+       WHERE numero_socio = $1`,
+      [id]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ error: 'Socio no encontrado' });
+    }
+
+    res.json(resultado.rows[0]);
+  } catch (err) {
+    console.error('❌ Error al buscar socio por ID:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// PUT /socio/:id → actualizar socio
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    numero_socio,
+    dni,
+    nombre,
+    apellido,
+    subcategoria,
+    telefono,
+    fecha_nacimiento,
+    fecha_ingreso,
+  } = req.body;
+
+  try {
+    await db.query(
+      `UPDATE socios SET
+         dni = $1,
+         nombre = $2,
+         apellido = $3,
+         subcategoria = $4,
+         telefono = $5,
+         fecha_nacimiento = $6,
+         fecha_ingreso = $7
+       WHERE numero_socio = $8`,
+      [dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso, id]
+    );
+
+    res.json({ mensaje: 'Socio actualizado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al actualizar socio:', err);
+    res.status(500).json({ error: 'Error al actualizar socio' });
   }
 });
 
@@ -89,7 +157,7 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
     const imageUrl = response.data.data.link;
 
     await db.query(
-      'UPDATE socios SET foto_url = $1 WHERE id = $2',
+      'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
       [imageUrl, id]
     );
 
@@ -103,45 +171,7 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
   }
 });
 
-// POST /socio → crear un nuevo socio
-router.post('/', async (req, res) => {
-  const {
-    numero_socio,
-    dni,
-    nombre,
-    apellido,
-    subcategoria,
-    telefono,
-    fecha_nacimiento,
-    fecha_ingreso,
-  } = req.body;
-
-  try {
-    await db.query(
-      `INSERT INTO socios (
-        numero_socio, dni, nombre, apellido,
-        subcategoria, telefono, fecha_nacimiento, fecha_ingreso
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        numero_socio,
-        dni,
-        nombre,
-        apellido,
-        subcategoria,
-        telefono,
-        fecha_nacimiento,
-        fecha_ingreso,
-      ]
-    );
-
-    res.json({ mensaje: 'Socio creado correctamente' });
-  } catch (err) {
-    console.error('❌ Error al crear socio:', err);
-    res.status(500).json({ error: 'Error al crear socio' });
-  }
-});
-
-
 module.exports = router;
+
 
 
