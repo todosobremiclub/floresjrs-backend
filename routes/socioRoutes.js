@@ -1,4 +1,3 @@
-// socioRoutes.js con GET /:id y PUT /:id completos
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
@@ -8,7 +7,7 @@ const upload = multer();
 
 console.log("✅ socioRoutes.js se está ejecutando");
 
-// GET /socio → obtener todos los socios (para el panel admin)
+// GET /socio → obtener todos los socios
 router.get('/', async (req, res) => {
   try {
     const resultado = await db.query(
@@ -26,7 +25,6 @@ router.get('/', async (req, res) => {
        FROM socios
        ORDER BY numero_socio ASC`
     );
-
     res.json(resultado.rows);
   } catch (err) {
     console.error('❌ Error al listar socios:', err);
@@ -34,10 +32,9 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /socio/:numero/:dni → Buscar socio específico (Flutter)
+// GET /socio/:numero/:dni → Flutter
 router.get('/:numero/:dni', async (req, res) => {
   const { numero, dni } = req.params;
-
   try {
     const resultado = await db.query(
       `SELECT 
@@ -66,7 +63,7 @@ router.get('/:numero/:dni', async (req, res) => {
   }
 });
 
-// GET /socio/:id → obtener un socio por número
+// GET /socio/:id → obtener socio por número para editar
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -132,10 +129,21 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// POST /socio/:id/foto → Subir imagen a Imgur y guardar en DB
+// DELETE /socio/:id → eliminar socio por número
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query('DELETE FROM socios WHERE numero_socio = $1', [id]);
+    res.json({ mensaje: 'Socio eliminado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al eliminar socio:', err);
+    res.status(500).json({ error: 'Error al eliminar socio' });
+  }
+});
+
+// POST /socio/:id/foto → Subir imagen a Imgur
 router.post('/:id/foto', upload.single('foto'), async (req, res) => {
   const { id } = req.params;
-
   if (!req.file) {
     return res.status(400).json({ error: 'No se envió ninguna imagen' });
   }
@@ -172,6 +180,4 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
 });
 
 module.exports = router;
-
-
 
