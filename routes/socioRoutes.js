@@ -94,6 +94,35 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST /socio → crear nuevo socio
+router.post('/', async (req, res) => {
+  const {
+    numero_socio,
+    dni,
+    nombre,
+    apellido,
+    subcategoria,
+    telefono,
+    fecha_nacimiento,
+    fecha_ingreso,
+  } = req.body;
+
+  try {
+    await db.query(
+      `INSERT INTO socios (
+         numero_socio, dni, nombre, apellido,
+         subcategoria, telefono, fecha_nacimiento, fecha_ingreso
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [numero_socio, dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso]
+    );
+
+    res.status(201).json({ mensaje: 'Socio creado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al crear socio:', err);
+    res.status(500).json({ error: 'Error al crear socio' });
+  }
+});
+
 // PUT /socio/:id → actualizar socio
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
@@ -180,4 +209,5 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
 });
 
 module.exports = router;
+
 
