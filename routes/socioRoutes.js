@@ -186,7 +186,8 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
       },
       {
         headers: {
-          Authorization: 'Client-ID baf7f53f74f3fab',
+          Authorization: 'Client-ID 43e90f0c2d308b2,
+
         },
       }
     );
