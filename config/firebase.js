@@ -2,23 +2,31 @@ const path = require('path');
 const fs = require('fs');
 const admin = require('firebase-admin');
 
-// Ruta al Secret File montado por Render
-const saPath =
-  process.env.FIREBASE_SERVICE_ACCOUNT_PATH ||
-  path.join(__dirname, '../firebase-service-account.json') ||
-  '/etc/secrets/firebase-service-account.json';
+// Definimos posibles rutas para el archivo de credenciales
+const localPath = path.join(__dirname, 'firebase-service-account.json');
+const renderPath = '/etc/secrets/firebase-service-account.json';
 
-if (!fs.existsSync(saPath)) {
-  console.error('❌ No se encontró el Service Account en:', saPath);
+// Elegimos ruta según si existe
+const saPath = fs.existsSync(localPath)
+  ? localPath
+  : fs.existsSync(renderPath)
+    ? renderPath
+    : null;
+
+// Si no existe en ninguna, salimos con error
+if (!saPath) {
+  console.error('❌ No se encontró el Service Account en:', localPath, 'ni en', renderPath);
   process.exit(1);
 }
 
 const serviceAccount = require(saPath);
 
+// ✅ Atención: el bucket debe terminar en .appspot.com
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'floresjrs-b43c7.firebasestorage.app'
+  storageBucket: 'floresjrs-b43c7.appspot.com',
 });
 
 module.exports = admin;
+
 
