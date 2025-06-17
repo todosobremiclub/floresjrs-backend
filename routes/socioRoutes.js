@@ -197,6 +197,8 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
     await db.query(
       'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
       [imageUrl, id]
+console.log('🧾 Actualizando foto socio', id, imageUrl);
+
     );
 
     res.json({ mensaje: 'Foto subida correctamente', url: imageUrl });
