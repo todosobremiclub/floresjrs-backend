@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
-const multer = require('multer');
-const axios = require('axios');
-const upload = multer();
+const upload = require('multer')();
+const admin = require('../config/firebase');
+const { v4: uuidv4 } = require('uuid');
+
+const bucket = admin.storage().bucket();
 
 console.log("✅ socioRoutes.js se está ejecutando");
 
@@ -170,52 +172,37 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST /socio/:id/foto → Subir imagen a Imgur y guardar en DB
+// POST /socio/:id/foto → Subir imagen a Firebase Storage
 router.post('/:id/foto', upload.single('foto'), async (req, res) => {
   const { id } = req.params;
+
   if (!req.file) {
     return res.status(400).json({ error: 'No se envió ninguna imagen' });
   }
 
   try {
-    const response = await axios.post(
-      'https://api.imgur.com/3/image',
-      {
-        image: req.file.buffer.toString('base64'),
-        type: 'base64',
-      },
-      {
-        headers: {
-          Authorization: 'Client-ID 43e90f0c2d308b2',
-        },
-      }
-    );
+    const nombreArchivo = `socios/${id}_${uuidv4()}.jpg`;
+    const file = bucket.file(nombreArchivo);
 
-    const imageUrl = response.data.data.link;
+    await file.save(req.file.buffer, {
+      metadata: { contentType: req.file.mimetype },
+    });
 
-console.log('🖼️ URL recibida de Imgur:', imageUrl);
-
+    await file.makePublic();
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
 
     await db.query(
       'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
-      [imageUrl, id]
+      [publicUrl, id]
     );
 
-    console.log('🧾 Actualizando foto socio', id, imageUrl);
-    console.log('🧾 POST /:id/foto → ID recibido:', id);
-
-
-    res.json({ mensaje: 'Foto subida correctamente', url: imageUrl });
+    console.log('✅ Imagen subida a Firebase:', publicUrl);
+    res.json({ mensaje: 'Imagen subida correctamente', url: publicUrl });
   } catch (err) {
-    console.error('❌ Error Imgur:', err.response?.data || err.message);
-    res.status(500).json({
-      error: 'Error al subir la imagen a Imgur',
-      detalle: err.response?.data || err.message,
-    });
+    console.error('❌ Error al subir imagen a Firebase:', err);
+    res.status(500).json({ error: 'Error al subir imagen' });
   }
 });
 
 module.exports = router;
-
-
 
