@@ -193,12 +193,17 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
 
     const imageUrl = response.data.data.link;
 
+console.log('🖼️ URL recibida de Imgur:', imageUrl);
+
+
     await db.query(
       'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
       [imageUrl, id]
     );
 
     console.log('🧾 Actualizando foto socio', id, imageUrl);
+    console.log('🧾 POST /:id/foto → ID recibido:', id);
+
 
     res.json({ mensaje: 'Foto subida correctamente', url: imageUrl });
   } catch (err) {
