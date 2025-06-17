@@ -169,7 +169,7 @@ if (fotoInput.files.length > 0) {
       }
     });
 
-    form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = form.dataset.editing;
       const data = {
@@ -189,15 +189,35 @@ if (fotoInput.files.length > 0) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
+
         if (!res.ok) throw new Error('Error al guardar');
+
+        const result = await res.json();
+        const socioId = id || result.numero;
+
+        // Subir imagen si hay
+        const fotoInput = document.getElementById('foto');
+        if (fotoInput.files.length > 0) {
+          const formData = new FormData();
+          formData.append('foto', fotoInput.files[0]);
+
+          const upload = await fetch(`/socio/${socioId}/foto`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!upload.ok) throw new Error('Error al subir imagen');
+          const respuesta = await upload.json();
+          console.log('✅ Imagen subida:', respuesta.url);
+        }
+
         modal.hide();
         await cargarSocios();
-form.reset();
-document.getElementById('foto').value = ''; // 🔧 limpia el input de imagen
-delete form.dataset.editing;
-
-      } catch {
-        alert('❌ Error al guardar socio');
+        form.reset();
+        document.getElementById('foto').value = '';
+        delete form.dataset.editing;
+      } catch (err) {
+        alert('❌ Error al guardar socio: ' + err.message);
       }
     });
 
