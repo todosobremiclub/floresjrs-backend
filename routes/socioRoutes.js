@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
-const upload = require('multer')();
+const multer = require('multer');
+const upload = multer();
 const admin = require('../config/firebase');
 const { v4: uuidv4 } = require('uuid');
 
@@ -34,7 +35,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /socio/:numero/:dni → Flutter
+// GET /socio/:numero/:dni → consulta para Flutter
 router.get('/:numero/:dni', async (req, res) => {
   const { numero, dni } = req.params;
   try {
@@ -65,7 +66,7 @@ router.get('/:numero/:dni', async (req, res) => {
   }
 });
 
-// GET /socio/:id → obtener socio por número para editar
+// GET /socio/:id → obtener socio por número
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -129,7 +130,6 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const {
-    numero_socio,
     dni,
     nombre,
     apellido,
@@ -160,7 +160,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /socio/:id → eliminar socio por número
+// DELETE /socio/:id → eliminar socio
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -172,7 +172,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST /socio/:id/foto → Subir imagen a Firebase Storage
+// POST /socio/:id/foto → subir imagen a Firebase Storage
 router.post('/:id/foto', upload.single('foto'), async (req, res) => {
   const { id } = req.params;
 
@@ -189,6 +189,7 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
     });
 
     await file.makePublic();
+
     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
 
     await db.query(
@@ -204,5 +205,39 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
   }
 });
 
+// POST /socio/login → login real para Flutter
+router.post('/login', async (req, res) => {
+  const { numero, dni } = req.body;
+
+  try {
+    const resultado = await db.query(
+      `SELECT 
+         numero_socio AS numero,
+         dni,
+         CONCAT(nombre, ' ', apellido) AS nombre,
+         subcategoria AS categoria,
+         EXTRACT(YEAR FROM fecha_nacimiento)::text AS nacimiento,
+         TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
+         'Activo' AS estado,
+         foto_url AS "fotoUrl",
+         'Flores Jrs' AS club
+       FROM socios
+       WHERE numero_socio = $1 AND dni = $2
+       LIMIT 1`,
+      [numero, dni]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+
+    res.json(resultado.rows[0]);
+  } catch (err) {
+    console.error('❌ Error en /socio/login:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 module.exports = router;
+
 

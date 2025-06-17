@@ -1,4 +1,4 @@
-<!-- index.html -->
+<!-- index.html (modificado) -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -62,7 +62,6 @@
         <input class="form-control mb-2" type="date" id="fecha_nacimiento" required />
         <input class="form-control mb-2" type="date" id="fecha_ingreso" required />
         <input class="form-control mb-2" type="file" id="foto" accept="image/*" />
-
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-yellow">Guardar</button>
@@ -144,24 +143,6 @@
             const res = await fetch(`/socio/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error();
             await cargarSocios();
-// Si hay una imagen seleccionada, subirla
-const fotoInput = document.getElementById('foto');
-if (fotoInput.files.length > 0) {
-  const formData = new FormData();
-  formData.append('foto', fotoInput.files[0]);
-  try {
-    const upload = await fetch(`/socio/${id || data.numero_socio}/foto`, {
-      method: 'POST',
-      body: formData,
-    });
-    if (!upload.ok) throw new Error();
-    const resultado = await upload.json();
-    console.log('✅ Foto subida:', resultado.url);
-  } catch {
-    alert('⚠️ El socio fue guardado pero falló la subida de foto');
-  }
-}
-
           } catch {
             alert('❌ No se pudo eliminar el socio');
           }
@@ -169,7 +150,7 @@ if (fotoInput.files.length > 0) {
       }
     });
 
-        form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = form.dataset.editing;
       const data = {
