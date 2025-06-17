@@ -116,7 +116,7 @@ router.post('/', async (req, res) => {
       [numero_socio, dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso]
     );
 
-    res.status(201).json({ mensaje: 'Socio creado correctamente' });
+    res.status(201).json({ mensaje: 'Socio creado correctamente', numero: numero_socio });
   } catch (err) {
     console.error('❌ Error al crear socio:', err);
     res.status(500).json({ error: 'Error al crear socio' });
@@ -170,7 +170,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST /socio/:id/foto → Subir imagen a Imgur
+// POST /socio/:id/foto → Subir imagen a Imgur y guardar en DB
 router.post('/:id/foto', upload.single('foto'), async (req, res) => {
   const { id } = req.params;
   if (!req.file) {
@@ -187,7 +187,6 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
       {
         headers: {
           Authorization: 'Client-ID 43e90f0c2d308b2',
-
         },
       }
     );
@@ -197,9 +196,9 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
     await db.query(
       'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
       [imageUrl, id]
-console.log('🧾 Actualizando foto socio', id, imageUrl);
-
     );
+
+    console.log('🧾 Actualizando foto socio', id, imageUrl);
 
     res.json({ mensaje: 'Foto subida correctamente', url: imageUrl });
   } catch (err) {
@@ -212,5 +211,6 @@ console.log('🧾 Actualizando foto socio', id, imageUrl);
 });
 
 module.exports = router;
+
 
 
