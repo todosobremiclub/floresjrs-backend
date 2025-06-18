@@ -21,7 +21,7 @@
       <img src="flores_jrs_logo.png" alt="Escudo" class="logo me-3" />
       <h2 class="text-warning m-0">Gestión de Socios</h2>
     </div>
-    <button class="btn btn-outline-light">admin ▼</button>
+    <button class="btn btn-outline-light" onclick="logout()">Cerrar sesión</button>
   </div>
 
   <div class="d-flex mb-3">
@@ -202,15 +202,20 @@
 
     cargarSocios();
   });
-</script>
-
-<!-- 🔐 Protección de acceso directo -->
 <script>
+  // 🔐 Protección de acceso directo
   const token = localStorage.getItem('token');
   if (!token) {
     window.location.href = '/admin-panel/login.html';
   }
+
+  // 🔓 Función de cierre de sesión
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/admin-panel/login.html';
+  }
 </script>
+
 </body>
 </html>
 
