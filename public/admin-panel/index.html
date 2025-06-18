@@ -35,7 +35,7 @@
         <tr>
           <th>N° Socio</th><th>DNI</th><th>Nombre</th><th>Apellido</th>
           <th>Categoría</th><th>Teléfono</th><th>Fecha de Nacimiento</th>
-          <th>Edad</th><th>Activo</th><th>Foto</th><th>Opciones</th>
+          <th>Año Nacimiento</th><th>Activo</th><th>Foto</th><th>Opciones</th>
         </tr>
       </thead>
       <tbody id="tablaSocios"></tbody>
@@ -82,11 +82,10 @@
         tabla.innerHTML = '';
         socios.filter(s => (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtro.toLowerCase()))
         .forEach(s => {
-          const edad = s.nacimiento ? new Date().getFullYear() - new Date(s.nacimiento).getFullYear() : '';
           const fila = document.createElement('tr');
           fila.innerHTML = `
             <td>${s.numero}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.apellido}</td><td>${s.categoria}</td>
-            <td>${s.telefono ?? '—'}</td><td>${s.nacimiento ?? ''}</td><td>${edad}</td>
+            <td>${s.telefono ?? '—'}</td><td>${s.nacimiento ?? ''}</td><td>${s.nacimiento ?? ''}</td>
             <td><input type="checkbox" ${s.activo ? 'checked' : ''} disabled /></td>
             <td>${s.foto_url ? `<img src="${s.foto_url}" width="50"/>` : 'Sin foto'}</td>
             <td>
