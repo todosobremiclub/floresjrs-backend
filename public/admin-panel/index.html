@@ -1,4 +1,3 @@
-<!-- index.html (modificado) -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -176,7 +175,6 @@
         const result = await res.json();
         const socioId = id || result.numero;
 
-        // Subir imagen si hay
         const fotoInput = document.getElementById('foto');
         if (fotoInput.files.length > 0) {
           const formData = new FormData();
@@ -205,6 +203,15 @@
     cargarSocios();
   });
 </script>
+
+<!-- 🔐 Protección de acceso directo -->
+<script>
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/admin-panel/login.html';
+  }
+</script>
 </body>
 </html>
+
 
