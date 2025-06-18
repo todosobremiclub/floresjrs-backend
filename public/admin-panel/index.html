@@ -71,18 +71,6 @@
 </div>
 
 <script>
-  // 🔐 Protección de acceso directo
-  const token = localStorage.getItem('token');
-  if (!token) {
-    window.location.href = '/admin-panel/login.html';
-  }
-
-  // 🔓 Cerrar sesión
-  function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/admin-panel/login.html';
-  }
-
   async function cargarSocios() {
     try {
       const res = await fetch('/socio/');
@@ -214,8 +202,21 @@
 
     cargarSocios();
   });
+
+  // 🔐 Protección: redirige si no hay token
+  const token = localStorage.getItem('token');
+  if (!token) {
+    window.location.href = '/admin-panel/login.html';
+  }
+
+  // 🔓 Función de cierre de sesión
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/admin-panel/login.html';
+  }
 </script>
 </body>
 </html>
+
 
 
