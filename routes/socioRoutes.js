@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /socio/:numero/:dni → consulta para Flutter
+// GET /socio/:numero/:dni → consulta para Flutter (antiguo)
 router.get('/:numero/:dni', async (req, res) => {
   const { numero, dni } = req.params;
   try {
@@ -207,6 +207,8 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
 
 // POST /socio/login → login real para Flutter
 router.post('/login', async (req, res) => {
+  console.log('🔍 POST /socio/login body:', req.body); // LOG de entrada
+
   const { numero, dni } = req.body;
 
   try {
@@ -233,7 +235,8 @@ router.post('/login', async (req, res) => {
 
     res.json(resultado.rows[0]);
   } catch (err) {
-    console.error('❌ Error en /socio/login:', err);
+    console.error('❌ Error en /socio/login:', err.message);
+    console.error(err.stack);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
