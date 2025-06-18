@@ -53,6 +53,26 @@
   </div>
 
   <script>
+    // Si ya hay un token válido, redirigir directamente al panel
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('/admin/verificar-token', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      })
+      .then(res => {
+        if (res.ok) {
+          window.location.href = '/admin-panel/index.html';
+        }
+      })
+      .catch(() => {
+        // Si falla, no hacemos nada, permite login manual
+      });
+    }
+
+    // Login manual
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const usuario = document.getElementById('usuario').value;
@@ -68,7 +88,7 @@
         const data = await res.json();
 
         if (res.ok) {
-          localStorage.setItem('token', data.token); // se puede mejorar con cookies si querés
+          localStorage.setItem('token', data.token);
           window.location.href = '/admin-panel/index.html';
         } else {
           document.getElementById('mensaje').innerText = data.error || 'Login incorrecto';
@@ -80,3 +100,4 @@
   </script>
 </body>
 </html>
+
