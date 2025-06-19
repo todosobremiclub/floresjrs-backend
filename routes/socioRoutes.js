@@ -5,7 +5,7 @@ const multer = require('multer');
 const upload = multer();
 const admin = require('../config/firebase');
 const { v4: uuidv4 } = require('uuid');
-const verificarToken = require('../middleware/verificarToken');
+const verificarToken = require('../middlewares/verificarToken');
 
 const bucket = admin.storage().bucket();
 
