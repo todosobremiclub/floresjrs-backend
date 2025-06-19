@@ -143,11 +143,14 @@
 <td>${s.fecha_ingreso ?? ''}</td>
 
             <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
-            <td>${s.foto_url ? `<img src="${s.foto_url}" width="50"/>` : 'Sin foto'}</td>
-            <td>
-              <button class="btn btn-sm btn-blue btn-editar" data-id="${s.numero}">Editar</button>
-              <button class="btn btn-sm btn-yellow ms-2 btn-eliminar" data-id="${s.numero}">Eliminar</button>
-            </td>`;
+            <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
+            <td class="p-1">
+  <div class="d-flex justify-content-center gap-1">
+    <button class="btn btn-sm btn-outline-light btn-editar px-2 py-1" data-id="${s.numero}">✏️</button>
+    <button class="btn btn-sm btn-outline-warning btn-eliminar px-2 py-1" data-id="${s.numero}">🗑️</button>
+  </div>
+</td>
+
           tabla.appendChild(fila);
         });
       }
