@@ -97,8 +97,8 @@
   }
 
   async function cargarSocios() {
-    try {
-      const res = await fetchConToken('/socio/');
+  try {
+    const res = await fetch('/socio/');
       const socios = await res.json();
       const tabla = document.getElementById('tablaSocios');
       const buscador = document.getElementById('buscador');
