@@ -36,37 +36,6 @@ router.get('/', verificarToken, async (req, res) => {
   }
 });
 
-// GET /socio/:numero/:dni → para Flutter (sin protección)
-router.get('/:numero/:dni', async (req, res) => {
-  const { numero, dni } = req.params;
-  try {
-    const resultado = await db.query(
-      `SELECT 
-         numero_socio AS numero,
-         dni,
-         CONCAT(nombre, ' ', apellido) AS nombre,
-         subcategoria AS categoria,
-         EXTRACT(YEAR FROM fecha_nacimiento)::text AS nacimiento,
-         TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
-         'Activo' AS estado,
-         foto_url AS "fotoUrl",
-         'Flores Jrs' AS club
-       FROM socios 
-       WHERE numero_socio = $1 AND dni = $2`,
-      [numero, dni]
-    );
-
-    if (resultado.rows.length === 0) {
-      return res.status(404).json({ error: 'Socio no encontrado' });
-    }
-
-    res.json(resultado.rows[0]);
-  } catch (err) {
-    console.error('❌ Error al buscar socio:', err);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
-
 // GET /socio/:id → obtener socio por número (protegido)
 router.get('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
@@ -81,7 +50,8 @@ router.get('/:id', verificarToken, async (req, res) => {
          telefono,
          TO_CHAR(fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
          TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
-         foto_url
+         foto_url,
+         activo
        FROM socios
        WHERE numero_socio = $1`,
       [id]
@@ -109,15 +79,16 @@ router.post('/', verificarToken, async (req, res) => {
     telefono,
     fecha_nacimiento,
     fecha_ingreso,
+    activo
   } = req.body;
 
   try {
     await db.query(
       `INSERT INTO socios (
          numero_socio, dni, nombre, apellido,
-         subcategoria, telefono, fecha_nacimiento, fecha_ingreso
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [numero_socio, dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso]
+         subcategoria, telefono, fecha_nacimiento, fecha_ingreso, activo
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [numero_socio, dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso, activo]
     );
 
     res.status(201).json({ mensaje: 'Socio creado correctamente', numero: numero_socio });
@@ -131,6 +102,7 @@ router.post('/', verificarToken, async (req, res) => {
 router.put('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   const {
+    numero_socio,
     dni,
     nombre,
     apellido,
@@ -138,20 +110,23 @@ router.put('/:id', verificarToken, async (req, res) => {
     telefono,
     fecha_nacimiento,
     fecha_ingreso,
+    activo
   } = req.body;
 
   try {
     await db.query(
       `UPDATE socios SET
-         dni = $1,
-         nombre = $2,
-         apellido = $3,
-         subcategoria = $4,
-         telefono = $5,
-         fecha_nacimiento = $6,
-         fecha_ingreso = $7
-       WHERE numero_socio = $8`,
-      [dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso, id]
+         numero_socio = $1,
+         dni = $2,
+         nombre = $3,
+         apellido = $4,
+         subcategoria = $5,
+         telefono = $6,
+         fecha_nacimiento = $7,
+         fecha_ingreso = $8,
+         activo = $9
+       WHERE numero_socio = $10`,
+      [numero_socio, dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso, activo, id]
     );
 
     res.json({ mensaje: 'Socio actualizado correctamente' });
@@ -222,7 +197,7 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
 
 // POST /socio/login → login real para Flutter (sin protección)
 router.post('/login', async (req, res) => {
-  console.log('🔍 POST /socio/login body:', req.body); // LOG de entrada
+  console.log('🔍 POST /socio/login body:', req.body);
 
   const { numero, dni } = req.body;
 
@@ -251,11 +226,42 @@ router.post('/login', async (req, res) => {
     res.json(resultado.rows[0]);
   } catch (err) {
     console.error('❌ Error en /socio/login:', err.message);
-    console.error(err.stack);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// GET /socio/:numero/:dni → para Flutter (sin protección) [MOVER AL FINAL]
+router.get('/:numero/:dni', async (req, res) => {
+  const { numero, dni } = req.params;
+  try {
+    const resultado = await db.query(
+      `SELECT 
+         numero_socio AS numero,
+         dni,
+         CONCAT(nombre, ' ', apellido) AS nombre,
+         subcategoria AS categoria,
+         EXTRACT(YEAR FROM fecha_nacimiento)::text AS nacimiento,
+         TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
+         'Activo' AS estado,
+         foto_url AS "fotoUrl",
+         'Flores Jrs' AS club
+       FROM socios 
+       WHERE numero_socio = $1 AND dni = $2`,
+      [numero, dni]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ error: 'Socio no encontrado' });
+    }
+
+    res.json(resultado.rows[0]);
+  } catch (err) {
+    console.error('❌ Error al buscar socio:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
 module.exports = router;
+
 
 
