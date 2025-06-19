@@ -144,7 +144,7 @@
   <td>${s.telefono ?? '—'}</td>
   <td>${s.nacimiento ?? ''}</td>
   <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
-  <td>${s.ingreso ?? ''}</td>
+  <td>${s.fecha_ingreso ?? ''}</td>
   <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
   <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
   <td class="p-1">
