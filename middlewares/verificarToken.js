@@ -1,10 +1,23 @@
-// middleware/verificarToken.js
-module.exports = (req, res, next) => {
-  const token = req.headers.authorization;
+// middlewares/verificarToken.js
+const jwt = require('jsonwebtoken');
+const claveSecreta = process.env.JWT_SECRET;
 
-  if (!token || token !== process.env.ADMIN_TOKEN) {
-    return res.status(401).json({ error: 'No autorizado' });
+module.exports = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Token no proporcionado' });
   }
 
-  next();
+  const token = authHeader.split(' ')[1]; // quita "Bearer "
+  if (!token) {
+    return res.status(401).json({ error: 'Token inválido' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, claveSecreta);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Token no válido' });
+  }
 };
