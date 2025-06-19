@@ -198,13 +198,17 @@ router.delete('/:id', verificarToken, async (req, res) => {
 router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res) => {
   const { id } = req.params;
 
+  console.log('🔍 Subiendo imagen para socio', id);
   if (!req.file) {
+    console.error('⚠️ No llegó el archivo');
     return res.status(400).json({ error: 'No se envió ninguna imagen' });
   }
 
   try {
     const nombreArchivo = `socios/${id}_${uuidv4()}.jpg`;
     const file = bucket.file(nombreArchivo);
+
+    console.log('📤 Guardando archivo en bucket:', bucket.name, nombreArchivo);
 
     await file.save(req.file.buffer, {
       metadata: { contentType: req.file.mimetype },
@@ -219,10 +223,9 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
       [publicUrl, id]
     );
 
-    console.log('✅ Imagen subida a Firebase:', publicUrl);
     res.json({ mensaje: 'Imagen subida correctamente', url: publicUrl });
   } catch (err) {
-    console.error('❌ Error al subir imagen a Firebase:', err);
+    console.error('❌ Error al subir imagen:', err);
     res.status(500).json({ error: 'Error al subir imagen' });
   }
 });
