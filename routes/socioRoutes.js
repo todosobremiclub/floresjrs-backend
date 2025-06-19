@@ -84,10 +84,17 @@ router.post('/', verificarToken, async (req, res) => {
 
   try {
     // 🔒 Verificar si ya existe un socio con ese DNI
-    const existe = await db.query('SELECT 1 FROM socios WHERE dni = $1', [dni]);
-    if (existe.rows.length > 0) {
-      return res.status(400).json({ error: 'Ya existe un socio con ese DNI' });
-    }
+const dniExiste = await db.query('SELECT 1 FROM socios WHERE dni = $1', [dni]);
+if (dniExiste.rows.length > 0) {
+  return res.status(400).json({ error: 'Ya existe un socio con ese DNI' });
+}
+
+// 🔒 Verificar si ya existe un socio con ese número
+const numExiste = await db.query('SELECT 1 FROM socios WHERE numero_socio = $1', [numero_socio]);
+if (numExiste.rows.length > 0) {
+  return res.status(400).json({ error: 'Ya existe un socio con ese número' });
+}
+
 
     await db.query(
       `INSERT INTO socios (
@@ -105,6 +112,7 @@ router.post('/', verificarToken, async (req, res) => {
 });
 
 // PUT /socio/:id → actualizar socio (protegido)
+// PUT /socio/:id → actualizar socio (protegido)
 router.put('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   const {
@@ -120,6 +128,24 @@ router.put('/:id', verificarToken, async (req, res) => {
   } = req.body;
 
   try {
+    // 🔒 Validar que el DNI no esté en uso por otro socio
+    const dniExiste = await db.query(
+      'SELECT 1 FROM socios WHERE dni = $1 AND numero_socio != $2',
+      [dni, id]
+    );
+    if (dniExiste.rows.length > 0) {
+      return res.status(400).json({ error: 'Ya existe otro socio con ese DNI' });
+    }
+
+    // 🔒 Validar que el número de socio no esté en uso por otro
+    const numExiste = await db.query(
+      'SELECT 1 FROM socios WHERE numero_socio = $1 AND numero_socio != $2',
+      [numero_socio, id]
+    );
+    if (numExiste.rows.length > 0) {
+      return res.status(400).json({ error: 'Ese número de socio ya está asignado a otro' });
+    }
+
     await db.query(
       `UPDATE socios SET
          numero_socio = $1,
