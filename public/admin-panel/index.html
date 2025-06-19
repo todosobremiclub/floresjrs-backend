@@ -137,7 +137,7 @@
           fila.innerHTML = `
             <td>${s.numero}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.apellido}</td><td>${s.categoria}</td>
             <td>${s.telefono ?? '—'}</td><td>${s.nacimiento ?? ''}</td><td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
-            <td><input type="checkbox" class="check-activo" data-numero="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
+            <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
             <td>${s.foto_url ? `<img src="${s.foto_url}" width="50"/>` : 'Sin foto'}</td>
             <td>
               <button class="btn btn-sm btn-blue btn-editar" data-id="${s.numero}">Editar</button>
@@ -156,7 +156,6 @@
           mostrarFiltrados(buscador.value);
         });
       });
-
     } catch (error) {
       alert('❌ Error al cargar socios: ' + error.message);
     }
@@ -166,6 +165,103 @@
     localStorage.removeItem('token');
     window.location.href = '/admin-panel/login.html';
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
+    const form = document.getElementById('formNuevoSocio');
+
+    document.getElementById('btnAbrirFormulario').addEventListener('click', () => {
+      form.reset();
+      delete form.dataset.editing;
+      modal.show();
+    });
+
+    document.body.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('btn-editar')) {
+        const id = e.target.dataset.id;
+        try {
+          const res = await fetchConToken(`/socio/${id}`);
+          const socio = await res.json();
+          document.getElementById('numero_socio').value = socio.numero;
+          document.getElementById('dni').value = socio.dni;
+          document.getElementById('nombre').value = socio.nombre;
+          document.getElementById('apellido').value = socio.apellido;
+          document.getElementById('subcategoria').value = socio.categoria;
+          document.getElementById('telefono').value = socio.telefono ?? '';
+          document.getElementById('fecha_nacimiento').value = socio.nacimiento;
+          document.getElementById('fecha_ingreso').value = socio.ingreso;
+          form.dataset.editing = id;
+          modal.show();
+        } catch {
+          alert('❌ Error al obtener socio');
+        }
+      }
+
+      if (e.target.classList.contains('btn-eliminar')) {
+        const id = e.target.dataset.id;
+        if (confirm('¿Eliminar este socio?')) {
+          try {
+            const res = await fetchConToken(`/socio/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error();
+            await cargarSocios();
+          } catch {
+            alert('❌ No se pudo eliminar el socio');
+          }
+        }
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = form.dataset.editing;
+      const data = {
+        numero_socio: document.getElementById('numero_socio').value,
+        dni: document.getElementById('dni').value,
+        nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        subcategoria: document.getElementById('subcategoria').value,
+        telefono: document.getElementById('telefono').value,
+        fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
+        fecha_ingreso: document.getElementById('fecha_ingreso').value
+      };
+
+      try {
+        const res = await fetchConToken(id ? `/socio/${id}` : '/socio', {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (!res.ok) throw new Error('Error al guardar');
+
+        const result = await res.json();
+        const socioId = id || result.numero;
+
+        const fotoInput = document.getElementById('foto');
+        if (fotoInput.files.length > 0) {
+          const formData = new FormData();
+          formData.append('foto', fotoInput.files[0]);
+
+          const upload = await fetchConToken(`/socio/${socioId}/foto`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!upload.ok) throw new Error('Error al subir imagen');
+        }
+
+        modal.hide();
+        await cargarSocios();
+        form.reset();
+        document.getElementById('foto').value = '';
+        delete form.dataset.editing;
+      } catch (err) {
+        alert('❌ Error al guardar socio: ' + err.message);
+      }
+    });
+
+    cargarSocios();
+  });
 </script>
 </body>
 </html>
