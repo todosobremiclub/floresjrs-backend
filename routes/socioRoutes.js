@@ -225,8 +225,9 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
 
     res.json({ mensaje: 'Imagen subida correctamente', url: publicUrl });
   } catch (err) {
-    console.error('❌ Error al subir imagen:', err);
-    res.status(500).json({ error: 'Error al subir imagen' });
+   console.error('❌ Error al subir imagen a Firebase:', err.message, err);
+res.status(500).json({ error: `Error al subir imagen: ${err.message}` });
+
   }
 });
 
