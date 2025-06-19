@@ -83,6 +83,12 @@ router.post('/', verificarToken, async (req, res) => {
   } = req.body;
 
   try {
+    // 🔒 Verificar si ya existe un socio con ese DNI
+    const existe = await db.query('SELECT 1 FROM socios WHERE dni = $1', [dni]);
+    if (existe.rows.length > 0) {
+      return res.status(400).json({ error: 'Ya existe un socio con ese DNI' });
+    }
+
     await db.query(
       `INSERT INTO socios (
          numero_socio, dni, nombre, apellido,
