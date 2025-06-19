@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
          TO_CHAR(fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
          TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
          foto_url,
-         true AS activo
+         activo
        FROM socios
        ORDER BY numero_socio ASC`
     );
@@ -207,7 +207,7 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
 
 // POST /socio/login → login real para Flutter
 router.post('/login', async (req, res) => {
-  console.log('🔍 POST /socio/login body:', req.body); // LOG de entrada
+  console.log('🔍 POST /socio/login body:', req.body);
 
   const { numero, dni } = req.body;
 
@@ -241,6 +241,22 @@ router.post('/login', async (req, res) => {
   }
 });
 
-module.exports = router;
+// ✅ PUT /socio/estado/:numero → actualizar campo activo
+router.put('/estado/:numero', async (req, res) => {
+  const { numero } = req.params;
+  const { activo } = req.body;
 
+  try {
+    await db.query(
+      'UPDATE socios SET activo = $1 WHERE numero_socio = $2',
+      [activo, numero]
+    );
+    res.json({ mensaje: 'Estado actualizado correctamente' });
+  } catch (error) {
+    console.error('❌ Error al actualizar estado del socio:', error);
+    res.status(500).json({ error: 'Error al actualizar estado del socio' });
+  }
+});
+
+module.exports = router;
 

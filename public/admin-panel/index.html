@@ -86,7 +86,8 @@
           fila.innerHTML = `
             <td>${s.numero}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.apellido}</td><td>${s.categoria}</td>
             <td>${s.telefono ?? '—'}</td><td>${s.nacimiento ?? ''}</td><td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
-            <td><input type="checkbox" ${s.estado === 'activo' ? 'checked' : ''} disabled /></td>
+            <td><input type="checkbox" class="check-activo" data-numero="${s.numero}" ${s.activo ? 'checked' : ''} />
+</td>
             <td>${s.foto_url ? `<img src="${s.foto_url}" width="50"/>` : 'Sin foto'}</td>
             <td>
               <button class="btn btn-sm btn-blue btn-editar" data-id="${s.numero}">Editar</button>
@@ -148,7 +149,7 @@
       }
     });
 
-    form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = form.dataset.editing;
       const data = {
@@ -200,8 +201,33 @@
     });
 
     cargarSocios();
-  });
 
+    // ✅ Checkbox de ACTIVO
+    document.addEventListener("change", async function (event) {
+      if (event.target.classList.contains("check-activo")) {
+        const numeroSocio = event.target.dataset.numero;
+        const nuevoEstado = event.target.checked;
+
+        try {
+          const response = await fetch(`/socio/estado/${numeroSocio}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ activo: nuevoEstado }),
+          });
+
+          if (!response.ok) throw new Error("Error al actualizar estado");
+          console.log(`✅ Estado de socio ${numeroSocio} actualizado a: ${nuevoEstado}`);
+        } catch (err) {
+          console.error("❌ Error:", err);
+          alert("No se pudo actualizar el estado del socio.");
+        }
+      }
+    });
+  }); // cierre de DOMContentLoaded
+
+  // ✅ Protección de sesión
   const token = localStorage.getItem('token');
   if (!token) {
     window.location.href = '/admin-panel/login.html';
@@ -211,6 +237,7 @@
     localStorage.removeItem('token');
     window.location.href = '/admin-panel/login.html';
   }
+
 </script>
 </body>
 </html>
