@@ -13,8 +13,18 @@ const PORT = process.env.PORT || 3000;
 app.use(cors()); // ✅ habilita CORS para Flutter Web
 app.use(express.json()); // ✅ parsea JSON en el body
 
-// 👉 Servir archivos estáticos (login y panel admin)
-app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin-panel')));
+// 👉 Rutas protegidas: solo sirven si token es válido
+app.use('/admin-panel', (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (token === process.env.ADMIN_TOKEN) {
+    express.static(path.join(__dirname, 'public', 'admin-panel'))(req, res, next);
+  } else {
+    res.status(401).send('Acceso denegado');
+  }
+});
+
+// 👉 Servir archivos públicos normales
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 👉 Rutas API
 app.use('/socio', socioRoutes);

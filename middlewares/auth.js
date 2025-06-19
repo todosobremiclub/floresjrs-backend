@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const secretKey = 'clave-secreta-supersegura'; // Usar la misma del login
+const secretKey = process.env.JWT_SECRET; // Usamos la clave desde .env
 
 function verificarToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -15,3 +15,4 @@ function verificarToken(req, res, next) {
 }
 
 module.exports = verificarToken;
+

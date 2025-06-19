@@ -5,13 +5,14 @@ const multer = require('multer');
 const upload = multer();
 const admin = require('../config/firebase');
 const { v4: uuidv4 } = require('uuid');
+const verificarToken = require('../middleware/verificarToken');
 
 const bucket = admin.storage().bucket();
 
 console.log("✅ socioRoutes.js se está ejecutando");
 
-// GET /socio → obtener todos los socios
-router.get('/', async (req, res) => {
+// GET /socio → obtener todos los socios (protegido)
+router.get('/', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(
       `SELECT 
@@ -35,7 +36,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /socio/:numero/:dni → consulta para Flutter (antiguo)
+// GET /socio/:numero/:dni → para Flutter (sin protección)
 router.get('/:numero/:dni', async (req, res) => {
   const { numero, dni } = req.params;
   try {
@@ -66,8 +67,8 @@ router.get('/:numero/:dni', async (req, res) => {
   }
 });
 
-// GET /socio/:id → obtener socio por número
-router.get('/:id', async (req, res) => {
+// GET /socio/:id → obtener socio por número (protegido)
+router.get('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   try {
     const resultado = await db.query(
@@ -97,8 +98,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /socio → crear nuevo socio
-router.post('/', async (req, res) => {
+// POST /socio → crear nuevo socio (protegido)
+router.post('/', verificarToken, async (req, res) => {
   const {
     numero_socio,
     dni,
@@ -126,8 +127,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /socio/:id → actualizar socio
-router.put('/:id', async (req, res) => {
+// PUT /socio/:id → actualizar socio (protegido)
+router.put('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   const {
     dni,
@@ -160,8 +161,22 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /socio/:id → eliminar socio
-router.delete('/:id', async (req, res) => {
+// PUT /socio/estado/:numero → cambiar estado activo/inactivo (protegido)
+router.put('/estado/:numero', verificarToken, async (req, res) => {
+  const { numero } = req.params;
+  const { activo } = req.body;
+
+  try {
+    await db.query('UPDATE socios SET activo = $1 WHERE numero_socio = $2', [activo, numero]);
+    res.json({ mensaje: 'Estado actualizado' });
+  } catch (err) {
+    console.error('❌ Error al cambiar estado del socio:', err);
+    res.status(500).json({ error: 'Error al cambiar estado' });
+  }
+});
+
+// DELETE /socio/:id → eliminar socio (protegido)
+router.delete('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   try {
     await db.query('DELETE FROM socios WHERE numero_socio = $1', [id]);
@@ -172,8 +187,8 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// POST /socio/:id/foto → subir imagen a Firebase Storage
-router.post('/:id/foto', upload.single('foto'), async (req, res) => {
+// POST /socio/:id/foto → subir imagen a Firebase Storage (protegido)
+router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res) => {
   const { id } = req.params;
 
   if (!req.file) {
@@ -205,9 +220,9 @@ router.post('/:id/foto', upload.single('foto'), async (req, res) => {
   }
 });
 
-// POST /socio/login → login real para Flutter
+// POST /socio/login → login real para Flutter (sin protección)
 router.post('/login', async (req, res) => {
-  console.log('🔍 POST /socio/login body:', req.body);
+  console.log('🔍 POST /socio/login body:', req.body); // LOG de entrada
 
   const { numero, dni } = req.body;
 
@@ -241,22 +256,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// ✅ PUT /socio/estado/:numero → actualizar campo activo
-router.put('/estado/:numero', async (req, res) => {
-  const { numero } = req.params;
-  const { activo } = req.body;
-
-  try {
-    await db.query(
-      'UPDATE socios SET activo = $1 WHERE numero_socio = $2',
-      [activo, numero]
-    );
-    res.json({ mensaje: 'Estado actualizado correctamente' });
-  } catch (error) {
-    console.error('❌ Error al actualizar estado del socio:', error);
-    res.status(500).json({ error: 'Error al actualizar estado del socio' });
-  }
-});
-
 module.exports = router;
+
 
