@@ -245,7 +245,11 @@
           body: JSON.stringify(data),
         });
 
-        if (!res.ok) throw new Error('Error al guardar');
+        if (!res.ok) {
+  const error = await res.json();
+  throw new Error(error.error || 'Error al guardar socio');
+}
+
 
         const result = await res.json();
         const socioId = id || result.numero;
