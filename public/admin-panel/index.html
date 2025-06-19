@@ -32,12 +32,21 @@
   <div class="table-responsive">
     <table class="table table-striped table-bordered text-center bg-white">
       <thead class="table-primary">
-        <tr>
-          <th>Nº Socio</th><th>DNI</th><th>Nombre</th><th>Apellido</th>
-          <th>Categoría</th><th>Teléfono</th><th>Fecha de Nacimiento</th>
-          <th>Año Nacimiento</th><th>Activo</th><th>Foto</th><th>Opciones</th>
-        </tr>
-      </thead>
+  <tr>
+    <th style="cursor:pointer" data-sort="numero">Nº Socio</th>
+    <th style="cursor:pointer" data-sort="dni">DNI</th>
+    <th>Nombre</th>
+    <th style="cursor:pointer" data-sort="apellido">Apellido</th>
+    <th style="cursor:pointer" data-sort="categoria">Categoría</th>
+    <th>Teléfono</th>
+    <th>Fecha de Nacimiento</th>
+    <th style="cursor:pointer" data-sort="nacimiento">Año Nacimiento</th>
+    <th>Activo</th>
+    <th>Foto</th>
+    <th>Opciones</th>
+  </tr>
+</thead>
+
       <tbody id="tablaSocios"></tbody>
     </table>
   </div>
@@ -78,27 +87,63 @@
       const tabla = document.getElementById('tablaSocios');
       const buscador = document.getElementById('buscador');
 
+let ordenActual = { campo: null, asc: true };
+
+function ordenarSocios(lista, campo) {
+  const asc = (ordenActual.campo === campo) ? !ordenActual.asc : true;
+  ordenActual = { campo, asc };
+
+  return lista.sort((a, b) => {
+    let valA = (a[campo] ?? '').toString().toLowerCase();
+    let valB = (b[campo] ?? '').toString().toLowerCase();
+
+    if (!isNaN(valA) && !isNaN(valB)) {
+      valA = parseFloat(valA);
+      valB = parseFloat(valB);
+    }
+
+    return asc ? (valA > valB ? 1 : valA < valB ? -1 : 0) : (valA < valB ? 1 : valA > valB ? -1 : 0);
+  });
+}
+
+
       function mostrarFiltrados(filtro = '') {
-        tabla.innerHTML = '';
-        socios.filter(s => (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtro.toLowerCase()))
-        .forEach(s => {
-          const fila = document.createElement('tr');
-          fila.innerHTML = `
-            <td>${s.numero}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.apellido}</td><td>${s.categoria}</td>
-            <td>${s.telefono ?? '—'}</td><td>${s.nacimiento ?? ''}</td><td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
-            <td><input type="checkbox" class="check-activo" data-numero="${s.numero}" ${s.activo ? 'checked' : ''} />
-</td>
-            <td>${s.foto_url ? `<img src="${s.foto_url}" width="50"/>` : 'Sin foto'}</td>
-            <td>
-              <button class="btn btn-sm btn-blue btn-editar" data-id="${s.numero}">Editar</button>
-              <button class="btn btn-sm btn-yellow ms-2 btn-eliminar" data-id="${s.numero}">Eliminar</button>
-            </td>`;
-          tabla.appendChild(fila);
-        });
-      }
+  tabla.innerHTML = '';
+
+  let sociosFiltrados = socios.filter(s =>
+    (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtro.toLowerCase())
+  );
+
+  if (ordenActual.campo) {
+    sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
+  }
+
+  sociosFiltrados.forEach(s => {
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+      <td>${s.numero}</td><td>${s.dni}</td><td>${s.nombre}</td><td>${s.apellido}</td><td>${s.categoria}</td>
+      <td>${s.telefono ?? '—'}</td><td>${s.nacimiento ?? ''}</td><td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
+      <td><input type="checkbox" class="check-activo" data-numero="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
+      <td>${s.foto_url ? `<img src="${s.foto_url}" width="50"/>` : 'Sin foto'}</td>
+      <td>
+        <button class="btn btn-sm btn-blue btn-editar" data-id="${s.numero}">Editar</button>
+        <button class="btn btn-sm btn-yellow ms-2 btn-eliminar" data-id="${s.numero}">Eliminar</button>
+      </td>`;
+    tabla.appendChild(fila);
+  });
+}
+
 
       mostrarFiltrados();
       buscador.addEventListener('input', e => mostrarFiltrados(e.target.value));
+document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const campo = th.dataset.sort;
+    ordenActual.campo = campo;
+    mostrarFiltrados(buscador.value);
+  });
+});
+
     } catch (error) {
       alert('❌ Error al cargar socios: ' + error.message);
     }
