@@ -10,32 +10,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 👉 Middlewares globales
-app.use(cors()); // ✅ habilita CORS para Flutter Web
-app.use(express.json()); // ✅ parsea JSON en el body
+app.use(cors());
+app.use(express.json());
 
-// 👉 Rutas protegidas: solo sirven si token es válido
-app.use('/admin-panel', (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (token === process.env.ADMIN_TOKEN) {
-    express.static(path.join(__dirname, 'public', 'admin-panel'))(req, res, next);
-  } else {
-    res.status(401).send('Acceso denegado');
-  }
-});
+// 👉 Servir login y panel admin (sin proteger el login)
+app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin-panel')));
 
-// 👉 Servir archivos públicos normales
+// 👉 Servir cualquier otro archivo público (por ejemplo imágenes u otros)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 👉 Rutas API
-app.use('/socio', socioRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/socio', socioRoutes);           // Estas rutas sí están protegidas internamente
+app.use('/api/admin', adminRoutes);       // Login de admin también lo está
 
-// 👉 Redirección raíz → al login directamente
+// 👉 Redirección raíz
 app.get('/', (req, res) => {
   res.redirect('/admin-panel/login.html');
 });
 
-// 👉 Ruta de diagnóstico DB (opcional)
+// 👉 Ruta de diagnóstico
 app.get('/test-db', async (req, res) => {
   try {
     const result = await db.query('SELECT NOW()');
@@ -59,4 +52,3 @@ app.listen(PORT, () => {
     }
   });
 });
-
