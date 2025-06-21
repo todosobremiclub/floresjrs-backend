@@ -57,8 +57,9 @@
       </div>
       <div class="modal-body text-black">
         <div class="mb-3">
-          <label for="socio" class="form-label">Socio</label>
-          <select id="socio" class="form-select" required></select>
+          <label for="buscadorSocio" class="form-label">Buscar socio por DNI o Apellido</label>
+          <input class="form-control" list="listaSocios" id="buscadorSocio" required />
+          <datalist id="listaSocios"></datalist>
         </div>
         <div class="mb-3">
           <label for="fecha_pago" class="form-label">Fecha de Pago</label>
@@ -92,10 +93,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnGuardarMonto = document.getElementById('btnGuardarMonto');
   const btnNuevoPago = document.getElementById('btnNuevoPago');
   const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
-  const selectSocio = document.getElementById('socio');
   const inputFecha = document.getElementById('fecha_pago');
+  const inputBusqueda = document.getElementById('buscadorSocio');
   const formPago = document.getElementById('formPago');
   const tablaPagos = document.getElementById('tablaPagos');
+  const listaSocios = document.getElementById('listaSocios');
 
   // 👉 Leer monto actual del backend
   try {
@@ -125,15 +127,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 👉 Abrir modal y cargar socios
   btnNuevoPago.addEventListener('click', async () => {
-    selectSocio.innerHTML = '';
+    listaSocios.innerHTML = '';
+    inputBusqueda.value = '';
+
     try {
       const res = await fetchConToken('/socio');
       const socios = await res.json();
+
       socios.forEach(s => {
         const opt = document.createElement('option');
-        opt.value = s.numero;
-        opt.textContent = `${s.numero} - ${s.nombre} ${s.apellido}`;
-        selectSocio.appendChild(opt);
+        opt.value = `${s.numero} - ${s.nombre} ${s.apellido} (${s.dni})`;
+        opt.dataset.numero = s.numero;
+        listaSocios.appendChild(opt);
       });
     } catch {
       alert('❌ Error al cargar socios');
@@ -147,7 +152,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 👉 Registrar nuevo pago
   formPago.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const socio_id = parseInt(selectSocio.value);
+
+    const opcion = [...document.querySelectorAll('#listaSocios option')]
+      .find(opt => opt.value === inputBusqueda.value);
+
+    if (!opcion) {
+      alert('❌ Socio inválido');
+      return;
+    }
+
+    const socio_id = parseInt(opcion.dataset.numero);
     const fecha_pago = inputFecha.value;
     const monto = parseFloat(inputMonto.value);
 
