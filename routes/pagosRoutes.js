@@ -22,19 +22,18 @@ router.post('/monto', verificarToken, (req, res) => {
 
 // 👉 Registrar nuevo pago
 router.post('/', verificarToken, async (req, res) => {
-  const { numero_socio, fecha_pago, monto } = req.body;
+  const { socio_id, fecha_pago, monto } = req.body;
 
-  if (!numero_socio || !fecha_pago || !monto || isNaN(monto)) {
+  if (!socio_id || !fecha_pago || !monto || isNaN(monto)) {
     return res.status(400).json({ error: 'Datos incompletos' });
   }
 
   try {
     await db.query(
-      `INSERT INTO pagos (numero_socio, fecha_pago, monto, registrado_por)
+      `INSERT INTO pagos (socio_id, fecha_pago, monto, observaciones)
        VALUES ($1, $2, $3, $4)`,
-      [numero_socio, fecha_pago, monto, 'admin']
+      [socio_id, fecha_pago, monto, 'admin']
     );
-
     res.status(201).json({ mensaje: 'Pago registrado correctamente' });
   } catch (err) {
     console.error('❌ Error al registrar pago:', err);
@@ -42,19 +41,18 @@ router.post('/', verificarToken, async (req, res) => {
   }
 });
 
-
 // 👉 Obtener todos los pagos (con nombre del socio)
 router.get('/', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(
       `SELECT 
          p.id,
-         p.numero_socio,
+         p.socio_id,
          s.nombre || ' ' || s.apellido AS nombre,
          TO_CHAR(p.fecha_pago, 'YYYY-MM-DD') AS fecha_pago,
          p.monto
        FROM pagos p
-       JOIN socios s ON s.numero_socio = p.numero_socio
+       JOIN socios s ON s.numero_socio = p.socio_id
        ORDER BY p.fecha_pago DESC`
     );
 
@@ -66,4 +64,3 @@ router.get('/', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
-
