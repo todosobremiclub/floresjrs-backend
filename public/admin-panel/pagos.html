@@ -7,33 +7,82 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
-    body { background-color: #004aad; color: white; }
-    .table td, .table th { vertical-align: middle; }
-    .btn { font-weight: bold; }
-    .table thead { background-color: #002f6c; }
-    .table tbody tr:nth-child(even) { background-color: #0c4ca4; }
+    body {
+      background-color: #004aad;
+      color: white;
+      margin: 0;
+    }
+    .sidebar {
+      width: 200px;
+      background-color: #002f6c;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .sidebar h4 {
+      color: white;
+    }
+    .sidebar button,
+    .sidebar a {
+      text-align: left;
+      width: 100%;
+    }
+    .main-content {
+      margin-left: 200px;
+      padding: 2rem;
+    }
+    .table td, .table th {
+      vertical-align: middle;
+    }
+    .btn-yellow {
+      background-color: #ffd500;
+      color: black;
+      font-weight: bold;
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      line-height: 1;
+    }
+    h2.text-warning {
+      font-size: 1.4rem;
+    }
   </style>
 </head>
 <body>
-<div class="container mt-4">
-  <h2 class="mb-4 text-center">📋 Gestión de Pagos</h2>
+<!-- Menú lateral -->
+<div class="sidebar">
+  <h4>Menú</h4>
+  <a href="index.html" class="btn btn-outline-light">🏠 Home</a>
+  <a href="pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+  <a href="#" class="btn btn-outline-light">📢 Novedades</a>
+  <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
+  <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
+</div>
 
-  <!-- 👉 Sección de monto editable -->
+<!-- Contenido principal -->
+<div class="main-content">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-warning">📋 Gestión de Pagos</h2>
+  </div>
+
   <div class="mb-4">
     <label for="monto" class="form-label">💰 Monto de cuota actual</label>
     <div class="input-group">
       <input type="number" id="monto" class="form-control" />
-      <button class="btn btn-warning" id="btnGuardarMonto">Guardar</button>
+      <button class="btn btn-yellow" id="btnGuardarMonto">Guardar</button>
     </div>
   </div>
 
   <div class="d-flex justify-content-between mb-3">
     <button class="btn btn-success" id="btnNuevoPago">+ Registrar Pago</button>
-    <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Volver</button>
   </div>
 
-  <table class="table table-bordered text-white">
-    <thead>
+  <table class="table table-bordered text-white bg-white text-dark">
+    <thead class="table-primary">
       <tr>
         <th>N° Socio</th>
         <th>Nombre</th>
@@ -41,9 +90,7 @@
         <th>Monto</th>
       </tr>
     </thead>
-    <tbody id="tablaPagos">
-      <!-- Filas dinámicas -->
-    </tbody>
+    <tbody id="tablaPagos"></tbody>
   </table>
 </div>
 
@@ -75,17 +122,15 @@
 </div>
 
 <script>
-// 👉 Redirigir al login si no hay token
 const token = localStorage.getItem('token');
-if (!token) {
+if (!token) window.location.href = 'login.html';
+
+function logout() {
+  localStorage.removeItem('token');
   window.location.href = 'login.html';
 }
-</script>
 
-<script>
-// 👉 función que incluye el token automáticamente
 function fetchConToken(url, options = {}) {
-  const token = localStorage.getItem('token');
   return fetch(url, {
     ...options,
     headers: {
@@ -107,7 +152,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tablaPagos = document.getElementById('tablaPagos');
   const listaSocios = document.getElementById('listaSocios');
 
-  // 👉 Leer monto actual del backend
   try {
     const res = await fetchConToken('/pagos/monto');
     const data = await res.json();
@@ -116,7 +160,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     alert('❌ Error al obtener monto actual');
   }
 
-  // 👉 Guardar nuevo monto
   btnGuardarMonto.addEventListener('click', async () => {
     const nuevoMonto = parseFloat(inputMonto.value);
     if (isNaN(nuevoMonto) || nuevoMonto <= 0) return alert('❌ Ingresá un monto válido');
@@ -133,7 +176,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 👉 Abrir modal y cargar socios
   btnNuevoPago.addEventListener('click', async () => {
     listaSocios.innerHTML = '';
     inputBusqueda.value = '';
@@ -157,7 +199,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     modal.show();
   });
 
-  // 👉 Registrar nuevo pago
   formPago.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -189,7 +230,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 👉 Cargar tabla de pagos
   async function cargarPagos() {
     try {
       const res = await fetchConToken('/pagos');
@@ -216,270 +256,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </body>
 </html>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gestión de Pagos - Flores Jrs</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <style>
-    body {
-      background-color: #004aad;
-      color: white;
-      margin: 0;
-    }
-    .sidebar {
-      width: 200px;
-      background-color: #002f6c;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .sidebar h4 {
-      color: white;
-    }
-    .sidebar button,
-    .sidebar a {
-      text-align: left;
-      width: 100%;
-    }
-    .main-content {
-      margin-left: 200px;
-      padding: 2rem;
-    }
-    .btn-yellow {
-      background-color: #ffd500;
-      color: black;
-      font-weight: bold;
-    }
-    .logo {
-      height: 50px;
-    }
-    .table td, .table th {
-      vertical-align: middle;
-    }
-    .table thead {
-      background-color: #002f6c;
-    }
-    .table tbody tr:nth-child(even) {
-      background-color: #0c4ca4;
-    }
-  </style>
-</head>
-<body>
-  <!-- Menú lateral -->
-  <div class="sidebar">
-    <h4>Menú</h4>
-    <a href="index.html" class="btn btn-outline-light">🏠 Home</a>
-    <a href="pagos.html" class="btn btn-outline-light">💰 Pagos</a>
-    <a href="#" class="btn btn-outline-light">📢 Novedades</a>
-    <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
-    <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
-  </div>
-
-  <!-- Contenido principal -->
-  <div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div class="d-flex align-items-center">
-        <img src="flores_jrs_logo.png" alt="Escudo" class="logo me-3" />
-        <h2 class="text-warning m-0">Gestión de Pagos</h2>
-      </div>
-    </div>
-
-    <div class="mb-4">
-      <label for="monto" class="form-label">💰 Monto de cuota actual</label>
-      <div class="input-group">
-        <input type="number" id="monto" class="form-control" />
-        <button class="btn btn-warning" id="btnGuardarMonto">Guardar</button>
-      </div>
-    </div>
-
-    <div class="d-flex justify-content-between mb-3">
-      <button class="btn btn-success" id="btnNuevoPago">+ Registrar Pago</button>
-    </div>
-
-    <table class="table table-bordered text-white">
-      <thead>
-        <tr>
-          <th>N° Socio</th>
-          <th>Nombre</th>
-          <th>Fecha de Pago</th>
-          <th>Monto</th>
-        </tr>
-      </thead>
-      <tbody id="tablaPagos"></tbody>
-    </table>
-  </div>
-
-  <!-- Modal nuevo pago -->
-  <div class="modal fade" id="modalNuevoPago" tabindex="-1">
-    <div class="modal-dialog">
-      <form class="modal-content" id="formPago">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title">Registrar Pago</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body text-black">
-          <div class="mb-3">
-            <label for="buscadorSocio" class="form-label">Buscar socio por DNI o Apellido</label>
-            <input class="form-control" list="listaSocios" id="buscadorSocio" required />
-            <datalist id="listaSocios"></datalist>
-          </div>
-          <div class="mb-3">
-            <label for="fecha_pago" class="form-label">Fecha de Pago</label>
-            <input type="date" id="fecha_pago" class="form-control" required />
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-          <button class="btn btn-success" type="submit">Guardar Pago</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Scripts -->
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/admin-panel/login.html';
-
-    function logout() {
-      localStorage.removeItem('token');
-      window.location.href = '/admin-panel/login.html';
-    }
-
-    function fetchConToken(url, options = {}) {
-      const token = localStorage.getItem('token');
-      return fetch(url, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + token,
-          ...options.headers,
-        },
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      const inputMonto = document.getElementById('monto');
-      const btnGuardarMonto = document.getElementById('btnGuardarMonto');
-      const btnNuevoPago = document.getElementById('btnNuevoPago');
-      const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
-      const inputFecha = document.getElementById('fecha_pago');
-      const inputBusqueda = document.getElementById('buscadorSocio');
-      const formPago = document.getElementById('formPago');
-      const tablaPagos = document.getElementById('tablaPagos');
-      const listaSocios = document.getElementById('listaSocios');
-
-      try {
-        const res = await fetchConToken('/pagos/monto');
-        const data = await res.json();
-        inputMonto.value = data.monto;
-      } catch {
-        alert('❌ Error al obtener monto actual');
-      }
-
-      btnGuardarMonto.addEventListener('click', async () => {
-        const nuevoMonto = parseFloat(inputMonto.value);
-        if (isNaN(nuevoMonto) || nuevoMonto <= 0) return alert('❌ Ingresá un monto válido');
-
-        try {
-          const res = await fetchConToken('/pagos/monto', {
-            method: 'POST',
-            body: JSON.stringify({ monto: nuevoMonto })
-          });
-          if (!res.ok) throw new Error();
-          alert('✅ Monto actualizado correctamente');
-        } catch {
-          alert('❌ Error al actualizar el monto');
-        }
-      });
-
-      btnNuevoPago.addEventListener('click', async () => {
-        listaSocios.innerHTML = '';
-        inputBusqueda.value = '';
-
-        try {
-          const res = await fetchConToken('/socio');
-          const socios = await res.json();
-
-          socios.forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = `${s.numero} - ${s.nombre} ${s.apellido} (${s.dni})`;
-            opt.dataset.numero = s.numero;
-            listaSocios.appendChild(opt);
-          });
-        } catch {
-          alert('❌ Error al cargar socios');
-          return;
-        }
-
-        inputFecha.valueAsDate = new Date();
-        modal.show();
-      });
-
-      formPago.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const opcion = [...document.querySelectorAll('#listaSocios option')]
-          .find(opt => opt.value === inputBusqueda.value);
-
-        if (!opcion) {
-          alert('❌ Socio inválido');
-          return;
-        }
-
-        const socio_id = parseInt(opcion.dataset.numero);
-        const fecha_pago = inputFecha.value;
-        const monto = parseFloat(inputMonto.value);
-
-        try {
-          const res = await fetchConToken('/pagos', {
-            method: 'POST',
-            body: JSON.stringify({ socio_id, fecha_pago, monto })
-          });
-
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          alert('✅ Pago registrado correctamente');
-          modal.hide();
-          cargarPagos();
-        } catch (err) {
-          alert(err.message || '❌ Error al registrar el pago');
-        }
-      });
-
-      async function cargarPagos() {
-        try {
-          const res = await fetchConToken('/pagos');
-          const pagos = await res.json();
-          tablaPagos.innerHTML = '';
-          pagos.forEach(p => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${p.socio_id}</td>
-              <td>${p.nombre}</td>
-              <td>${p.fecha_pago}</td>
-              <td>$${parseFloat(p.monto).toFixed(2)}</td>
-            `;
-            tablaPagos.appendChild(row);
-          });
-        } catch {
-          alert('❌ Error al cargar pagos');
-        }
-      }
-
-      cargarPagos();
-    });
-  </script>
-</body>
-</html>
 
 
