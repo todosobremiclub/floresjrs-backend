@@ -115,56 +115,60 @@ if (numExiste.rows.length > 0) {
 // PUT /socio/:id → actualizar socio (protegido)
 // PUT /socio/:id → actualizar socio (protegido)
 router.put('/:id', verificarToken, async (req, res) => {
-  const { id } = req.params;
-  const {
-    numero_socio,
-    dni,
-    nombre,
-    apellido,
-    subcategoria,
-    telefono,
-    fecha_nacimiento,
-    fecha_ingreso,
-    activo
-  } = req.body;
-
   try {
-    // 🔒 Validar que el DNI no esté en uso por otro socio
-    const dniExiste = await db.query(
-      'SELECT 1 FROM socios WHERE dni = $1 AND numero_socio != $2',
-      [dni, id]
-    );
-    if (dniExiste.rows.length > 0) {
-      return res.status(400).json({ error: 'Ya existe otro socio con ese DNI' });
+    const id = req.params.id;
+
+    // Si solo se quiere actualizar el estado activo
+    if (req.body.activo !== undefined && Object.keys(req.body).length === 1) {
+      await db.query(`UPDATE socios SET activo = $1 WHERE numero_socio = $2`, [
+        req.body.activo,
+        id
+      ]);
+      return res.json({ mensaje: 'Estado actualizado correctamente' });
     }
 
-    // 🔒 Validar que el número de socio no esté en uso por otro
-    const numExiste = await db.query(
-      'SELECT 1 FROM socios WHERE numero_socio = $1 AND numero_socio != $2',
-      [numero_socio, id]
-    );
-    if (numExiste.rows.length > 0) {
-      return res.status(400).json({ error: 'Ese número de socio ya está asignado a otro' });
-    }
+    // Resto de los campos para edición completa
+    const {
+      numero_socio,
+      dni,
+      nombre,
+      apellido,
+      subcategoria,
+      telefono,
+      fecha_nacimiento,
+      fecha_ingreso,
+      activo
+    } = req.body;
 
     await db.query(
       `UPDATE socios SET
-         numero_socio = $1,
-         dni = $2,
-         nombre = $3,
-         apellido = $4,
-         subcategoria = $5,
-         telefono = $6,
-         fecha_nacimiento = $7,
-         fecha_ingreso = $8,
-         activo = $9
-       WHERE numero_socio = $10`,
-      [numero_socio, dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso, activo, id]
+        numero_socio = $1,
+        dni = $2,
+        nombre = $3,
+        apellido = $4,
+        subcategoria = $5,
+        telefono = $6,
+        fecha_nacimiento = $7,
+        fecha_ingreso = $8,
+        activo = $9
+      WHERE numero_socio = $10`,
+      [
+        numero_socio,
+        dni,
+        nombre,
+        apellido,
+        subcategoria,
+        telefono,
+        fecha_nacimiento,
+        fecha_ingreso,
+        activo,
+        id
+      ]
     );
 
     res.json({ mensaje: 'Socio actualizado correctamente' });
-  } catch (err) {
-    console.error('❌ Error al actualizar socio:', err);
+  } catch (error) {
+    console.error('❌ Error al actualizar socio:', error);
     res.status(500).json({ error: 'Error al actualizar socio' });
   }
 });
