@@ -208,13 +208,14 @@
     window.location.href = '/admin-panel/login.html';
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+ document.addEventListener('DOMContentLoaded', () => {
   const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
   const form = document.getElementById('formNuevoSocio');
 
   document.getElementById('btnAbrirFormulario').addEventListener('click', () => {
     form.reset();
     delete form.dataset.editing;
+    document.getElementById('activo').checked = true; // ✅ Paso 3: check activo por defecto
     modal.show();
   });
 
@@ -255,7 +256,6 @@
     }
   });
 
-  // ✅ Nuevo: guardar activo desde el check de la tabla
   document.body.addEventListener('change', async (e) => {
     if (e.target.classList.contains('check-activo')) {
       const id = e.target.dataset.id;
@@ -275,66 +275,62 @@
     }
   });
 
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = form.dataset.editing;
+    const data = {
+      numero_socio: document.getElementById('numero_socio').value,
+      dni: document.getElementById('dni').value,
+      nombre: document.getElementById('nombre').value,
+      apellido: document.getElementById('apellido').value,
+      subcategoria: document.getElementById('subcategoria').value,
+      telefono: document.getElementById('telefono').value,
+      fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
+      fecha_ingreso: document.getElementById('fecha_ingreso').value,
+      activo: document.getElementById('activo').checked
+    };
+
+    try {
+      const res = await fetchConToken(id ? `/socio/${id}` : '/socio', {
+        method: id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Error al guardar socio');
+      }
+
+      const result = await res.json();
+      const socioId = id || result.numero;
+
+      const fotoInput = document.getElementById('foto');
+      if (fotoInput.files.length > 0) {
+        const formData = new FormData();
+        formData.append('foto', fotoInput.files[0]);
+
+        const upload = await fetchConToken(`/socio/${socioId}/foto`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!upload.ok) throw new Error('Error al subir imagen');
+      }
+
+      modal.hide();
+      await cargarSocios();
+      form.reset();
+      document.getElementById('foto').value = '';
+      delete form.dataset.editing;
+    } catch (err) {
+      alert('❌ Error al guardar socio: ' + err.message);
+    }
+  });
+
   cargarSocios();
 });
 
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = form.dataset.editing;
-      const data = {
-        numero_socio: document.getElementById('numero_socio').value,
-        dni: document.getElementById('dni').value,
-        nombre: document.getElementById('nombre').value,
-        apellido: document.getElementById('apellido').value,
-        subcategoria: document.getElementById('subcategoria').value,
-        telefono: document.getElementById('telefono').value,
-        fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
-        fecha_ingreso: document.getElementById('fecha_ingreso').value,
-        activo: document.getElementById('activo').checked
-      };
-
-      try {
-        const res = await fetchConToken(id ? `/socio/${id}` : '/socio', {
-          method: id ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-
-        if (!res.ok) {
-  const error = await res.json();
-  throw new Error(error.error || 'Error al guardar socio');
-}
-
-
-        const result = await res.json();
-        const socioId = id || result.numero;
-
-        const fotoInput = document.getElementById('foto');
-        if (fotoInput.files.length > 0) {
-          const formData = new FormData();
-          formData.append('foto', fotoInput.files[0]);
-
-          const upload = await fetchConToken(`/socio/${socioId}/foto`, {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!upload.ok) throw new Error('Error al subir imagen');
-        }
-
-        modal.hide();
-        await cargarSocios();
-        form.reset();
-        document.getElementById('foto').value = '';
-        delete form.dataset.editing;
-      } catch (err) {
-        alert('❌ Error al guardar socio: ' + err.message);
-      }
-    });
-
-    cargarSocios();
-  });
 </script>
 </body>
 </html>
