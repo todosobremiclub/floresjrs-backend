@@ -232,7 +232,7 @@
         document.getElementById('subcategoria').value = socio.categoria;
         document.getElementById('telefono').value = socio.telefono ?? '';
         document.getElementById('fecha_nacimiento').value = socio.nacimiento;
-        document.getElementById('fecha_ingreso').value = socio.fecha_ingreso;
+        document.getElementById('fecha_ingreso').value = socio.fecha_ingreso?.substring(0, 10) ?? '';
         document.getElementById('activo').checked = socio.activo;
 
         form.dataset.editing = id;
