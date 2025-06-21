@@ -214,28 +214,16 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
       metadata: { contentType: req.file.mimetype },
     });
 
-    const [signedUrl] = await file.getSignedUrl({
-  action: 'read',
-  expires: Date.now() + 60 * 60 * 1000, // 1 hora
-});
+    await file.makePublic();
 
-
-    await db.query(
-      'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
-      [publicUrl, id]
-    );
-
-    res.json({ mensaje: 'Imagen subida correctamente', url: publicUrl });const [signedUrl] = await file.getSignedUrl({
-  action: 'read',
-  expires: Date.now() + 60 * 60 * 1000, // 1 hora
-});
+const publicUrl = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
 
 await db.query(
   'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
-  [signedUrl, id]
+  [publicUrl, id]
 );
 
-res.json({ mensaje: 'Imagen subida correctamente', url: signedUrl });
+res.json({ mensaje: 'Imagen subida correctamente', url: publicUrl });
 
   } catch (err) {
    console.error('❌ Error al subir imagen a Firebase:', err.message, err);
