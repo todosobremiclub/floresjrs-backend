@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       pagos.forEach(p => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${p.numero_socio}</td>
+          <td>${p.socio_id}</td>
           <td>${p.nombre}</td>
           <td>${p.fecha_pago}</td>
           <td>$${parseFloat(p.monto).toFixed(2)}</td>
