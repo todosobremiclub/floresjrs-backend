@@ -5,6 +5,7 @@ const path = require('path');
 const db = require('./config/db');
 const socioRoutes = require('./routes/socioRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const pagosRoutes = require('./routes/pagosRoutes'); // 👉 nueva línea
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,8 +21,9 @@ app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin-panel'
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 👉 Rutas API
-app.use('/socio', socioRoutes);           // Estas rutas sí están protegidas internamente
-app.use('/api/admin', adminRoutes);       // Login de admin también lo está
+app.use('/socio', socioRoutes);            // Rutas protegidas
+app.use('/api/admin', adminRoutes);        // Login admin
+app.use('/pagos', pagosRoutes);            // 👉 NUEVA ruta para pagos
 
 // 👉 Redirección raíz
 app.get('/', (req, res) => {
@@ -52,3 +54,4 @@ app.listen(PORT, () => {
     }
   });
 });
+
