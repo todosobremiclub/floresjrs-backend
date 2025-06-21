@@ -67,6 +67,7 @@
           <th style="cursor:pointer" data-sort="nacimiento">Año Nacimiento</th>
           <th>Fecha de Ingreso</th>
           <th>Activo</th>
+          <th>Becado</th>
           <th>Foto</th>
           <th>Opciones</th>
         </tr>
@@ -175,6 +176,7 @@
   <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
   <td>${s.fecha_ingreso ?? ''}</td>
   <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
+  <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
   <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
   <td class="p-1">
     <div class="d-flex justify-content-center gap-1">
@@ -215,36 +217,35 @@
   document.getElementById('btnAbrirFormulario').addEventListener('click', () => {
     form.reset();
     delete form.dataset.editing;
-    document.getElementById('activo').checked = true; // ✅ Paso 3: check activo por defecto
+    document.getElementById('activo').checked = true;
+    document.getElementById('becado').checked = false;
     modal.show();
   });
 
   document.body.addEventListener('click', async (e) => {
     if (e.target.classList.contains('btn-editar')) {
-  const id = e.target.dataset.id;
-  try {
-    const res = await fetchConToken(`/socio/${id}`);
-const socio = await res.json();
-console.log('👉 socio.fecha_ingreso:', socio.fecha_ingreso);
+      const id = e.target.dataset.id;
+      try {
+        const res = await fetchConToken(`/socio/${id}`);
+        const socio = await res.json();
 
+        document.getElementById('numero_socio').value = socio.numero;
+        document.getElementById('dni').value = socio.dni;
+        document.getElementById('nombre').value = socio.nombre;
+        document.getElementById('apellido').value = socio.apellido;
+        document.getElementById('subcategoria').value = socio.categoria;
+        document.getElementById('telefono').value = socio.telefono ?? '';
+        document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(0, 10) ?? '';
+        document.getElementById('fecha_ingreso').value = socio.ingreso?.substring(0, 10) ?? '';
+        document.getElementById('activo').checked = socio.activo;
+        document.getElementById('becado').checked = socio.becado;
 
-    document.getElementById('numero_socio').value = socio.numero;
-    document.getElementById('dni').value = socio.dni;
-    document.getElementById('nombre').value = socio.nombre;
-    document.getElementById('apellido').value = socio.apellido;
-    document.getElementById('subcategoria').value = socio.categoria;
-    document.getElementById('telefono').value = socio.telefono ?? '';
-    document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(0, 10) ?? '';
-    document.getElementById('fecha_ingreso').value = socio.ingreso?.substring(0, 10) ?? '';
-    document.getElementById('activo').checked = socio.activo;
-
-    form.dataset.editing = id;
-    modal.show();
-  } catch {
-    alert('❌ Error al obtener socio');
-  }
-}
-
+        form.dataset.editing = id;
+        modal.show();
+      } catch {
+        alert('❌ Error al obtener socio');
+      }
+    }
 
     if (e.target.classList.contains('btn-eliminar')) {
       const id = e.target.dataset.id;
@@ -277,6 +278,23 @@ console.log('👉 socio.fecha_ingreso:', socio.fecha_ingreso);
         alert('❌ No se pudo actualizar el estado del socio');
       }
     }
+
+    if (e.target.classList.contains('check-becado')) {
+      const id = e.target.dataset.id;
+      const becado = e.target.checked;
+
+      try {
+        const res = await fetchConToken(`/socio/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ becado })
+        });
+
+        if (!res.ok) throw new Error();
+      } catch {
+        alert('❌ No se pudo actualizar el estado de beca');
+      }
+    }
   });
 
   form.addEventListener('submit', async (e) => {
@@ -291,7 +309,8 @@ console.log('👉 socio.fecha_ingreso:', socio.fecha_ingreso);
       telefono: document.getElementById('telefono').value,
       fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
       fecha_ingreso: document.getElementById('fecha_ingreso').value,
-      activo: document.getElementById('activo').checked
+      activo: document.getElementById('activo').checked,
+      becado: document.getElementById('becado').checked
     };
 
     try {
@@ -334,6 +353,7 @@ console.log('👉 socio.fecha_ingreso:', socio.fecha_ingreso);
 
   cargarSocios();
 });
+
 
 </script>
 </body>

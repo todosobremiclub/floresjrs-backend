@@ -26,7 +26,8 @@ router.get('/', verificarToken, async (req, res) => {
          TO_CHAR(fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
          TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
          foto_url,
-         activo
+         activo,
+         becado
        FROM socios
        ORDER BY numero_socio ASC`
     );
@@ -52,7 +53,8 @@ router.get('/:id', verificarToken, async (req, res) => {
          TO_CHAR(fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
          TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
          foto_url,
-         activo
+         activo,
+         becado
        FROM socios
        WHERE numero_socio = $1`,
       [id]
@@ -80,7 +82,8 @@ router.post('/', verificarToken, async (req, res) => {
     telefono,
     fecha_nacimiento,
     fecha_ingreso,
-    activo
+    activo,
+    becado
   } = req.body;
 
   try {
@@ -100,9 +103,9 @@ if (numExiste.rows.length > 0) {
     await db.query(
       `INSERT INTO socios (
          numero_socio, dni, nombre, apellido,
-         subcategoria, telefono, fecha_nacimiento, fecha_ingreso, activo
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [numero_socio, dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso, activo]
+         subcategoria, telefono, fecha_nacimiento, fecha_ingreso, activo, becado
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [numero_socio, dni, nombre, apellido, subcategoria, telefono, fecha_nacimiento, fecha_ingreso, activo, becado]
     );
 
     res.status(201).json({ mensaje: 'Socio creado correctamente', numero: numero_socio });
@@ -137,7 +140,8 @@ router.put('/:id', verificarToken, async (req, res) => {
       telefono,
       fecha_nacimiento,
       fecha_ingreso,
-      activo
+      activo,
+      becado
     } = req.body;
 
     await db.query(
@@ -150,8 +154,9 @@ router.put('/:id', verificarToken, async (req, res) => {
         telefono = $6,
         fecha_nacimiento = $7,
         fecha_ingreso = $8,
-        activo = $9
-      WHERE numero_socio = $10`,
+        activo = $9,
+        becado = $10
+      WHERE numero_socio = $11`,
       [
         numero_socio,
         dni,
@@ -162,6 +167,7 @@ router.put('/:id', verificarToken, async (req, res) => {
         fecha_nacimiento,
         fecha_ingreso,
         activo,
+        becado,
         id
       ]
     );
