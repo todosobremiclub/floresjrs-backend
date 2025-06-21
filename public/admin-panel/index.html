@@ -209,53 +209,75 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
-    const form = document.getElementById('formNuevoSocio');
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
+  const form = document.getElementById('formNuevoSocio');
 
-    document.getElementById('btnAbrirFormulario').addEventListener('click', () => {
-      form.reset();
-      delete form.dataset.editing;
-      modal.show();
-    });
+  document.getElementById('btnAbrirFormulario').addEventListener('click', () => {
+    form.reset();
+    delete form.dataset.editing;
+    modal.show();
+  });
 
-    document.body.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('btn-editar')) {
-        const id = e.target.dataset.id;
+  document.body.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-editar')) {
+      const id = e.target.dataset.id;
+      try {
+        const res = await fetchConToken(`/socio/${id}`);
+        const socio = await res.json();
+        document.getElementById('numero_socio').value = socio.numero;
+        document.getElementById('dni').value = socio.dni;
+        document.getElementById('nombre').value = socio.nombre;
+        document.getElementById('apellido').value = socio.apellido;
+        document.getElementById('subcategoria').value = socio.categoria;
+        document.getElementById('telefono').value = socio.telefono ?? '';
+        document.getElementById('fecha_nacimiento').value = socio.nacimiento;
+        document.getElementById('fecha_ingreso').value = socio.fecha_ingreso;
+        document.getElementById('activo').checked = socio.activo;
+
+        form.dataset.editing = id;
+        modal.show();
+      } catch {
+        alert('❌ Error al obtener socio');
+      }
+    }
+
+    if (e.target.classList.contains('btn-eliminar')) {
+      const id = e.target.dataset.id;
+      if (confirm('¿Eliminar este socio?')) {
         try {
-          const res = await fetchConToken(`/socio/${id}`);
-          const socio = await res.json();
-          document.getElementById('numero_socio').value = socio.numero;
-          document.getElementById('dni').value = socio.dni;
-          document.getElementById('nombre').value = socio.nombre;
-          document.getElementById('apellido').value = socio.apellido;
-          document.getElementById('subcategoria').value = socio.categoria;
-          document.getElementById('telefono').value = socio.telefono ?? '';
-          document.getElementById('fecha_nacimiento').value = socio.nacimiento;
-document.getElementById('fecha_ingreso').value = socio.fecha_ingreso;
-document.getElementById('activo').checked = socio.activo;
-
-
-document.getElementById('activo').checked = socio.activo;
-          form.dataset.editing = id;
-          modal.show();
+          const res = await fetchConToken(`/socio/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error();
+          await cargarSocios();
         } catch {
-          alert('❌ Error al obtener socio');
+          alert('❌ No se pudo eliminar el socio');
         }
       }
+    }
+  });
 
-      if (e.target.classList.contains('btn-eliminar')) {
-        const id = e.target.dataset.id;
-        if (confirm('¿Eliminar este socio?')) {
-          try {
-            const res = await fetchConToken(`/socio/${id}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error();
-            await cargarSocios();
-          } catch {
-            alert('❌ No se pudo eliminar el socio');
-          }
-        }
+  // ✅ Nuevo: guardar activo desde el check de la tabla
+  document.body.addEventListener('change', async (e) => {
+    if (e.target.classList.contains('check-activo')) {
+      const id = e.target.dataset.id;
+      const activo = e.target.checked;
+
+      try {
+        const res = await fetchConToken(`/socio/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ activo })
+        });
+
+        if (!res.ok) throw new Error();
+      } catch {
+        alert('❌ No se pudo actualizar el estado del socio');
       }
-    });
+    }
+  });
+
+  cargarSocios();
+});
+
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
