@@ -229,12 +229,14 @@ async function cargarSocios() {
 
     mostrarFiltrados();
     buscador.addEventListener('input', e => mostrarFiltrados(e.target.value));
-    document.querySelectorAll('th[data-sort]').forEach(th => {
-      th.addEventListener('click', () => {
-        const campo = th.dataset.sort;
-        mostrarFiltrados(buscador.value);
-      });
-    });
+   document.querySelectorAll('th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const campo = th.dataset.sort;
+    ordenActual.campo = campo; // <-- ESTA LÍNEA FALTABA
+    mostrarFiltrados(buscador.value);
+  });
+});
+;
   } catch (err) {
     alert('❌ Error al cargar socios: ' + err.message);
   }
