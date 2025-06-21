@@ -72,28 +72,31 @@
   </div>
 </div>
 
-<script src="pagos.js"></script>
-
-<!-- Script para manejar el monto actual -->
 <script>
+// 👉 función que incluye el token automáticamente
+function fetchConToken(url, options = {}) {
+  const token = localStorage.getItem('token');
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: token,
+      ...options.headers,
+    },
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const inputMonto = document.getElementById('monto');
   const btnGuardarMonto = document.getElementById('btnGuardarMonto');
 
   // 👉 Leer monto actual del backend
   try {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/pagos/monto', {
-      headers: {
-        Authorization: token
-      }
-    });
-
-    if (!res.ok) throw new Error('No se pudo obtener el monto');
-
+    const res = await fetchConToken('/pagos/monto');
+    if (!res.ok) throw new Error();
     const data = await res.json();
     inputMonto.value = data.monto;
-  } catch (err) {
+  } catch {
     alert('❌ Error al obtener monto actual');
   }
 
@@ -107,18 +110,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/pagos/monto', {
+      const res = await fetchConToken('/pagos/monto', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token
-        },
         body: JSON.stringify({ monto: nuevoMonto })
       });
 
       if (!res.ok) throw new Error();
-
       alert('✅ Monto actualizado correctamente');
     } catch {
       alert('❌ Error al actualizar el monto');
@@ -127,6 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 </script>
 
+<script src="pagos.js"></script>
 </body>
 </html>
+
 

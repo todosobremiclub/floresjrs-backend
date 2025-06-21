@@ -6,6 +6,7 @@ const db = require('./config/db');
 const socioRoutes = require('./routes/socioRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const pagosRoutes = require('./routes/pagosRoutes'); // 👉 nueva línea
+const montoRoutes = require('./routes/montoRoutes'); // 👉 para monto fijo
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 // 👉 Middlewares globales
 app.use(cors());
 app.use(express.json());
+
 
 // 👉 Servir login y panel admin (sin proteger el login)
 app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin-panel')));
@@ -24,6 +26,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/socio', socioRoutes);            // Rutas protegidas
 app.use('/api/admin', adminRoutes);        // Login admin
 app.use('/pagos', pagosRoutes);            // 👉 NUEVA ruta para pagos
+app.use('/api/monto', montoRoutes); // 👉 para obtener y actualizar el monto
+
 
 // 👉 Redirección raíz
 app.get('/', (req, res) => {
