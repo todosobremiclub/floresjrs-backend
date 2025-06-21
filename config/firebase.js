@@ -24,7 +24,7 @@ const serviceAccount = require(saPath);
 // ✅ Atención: el bucket debe terminar en .appspot.com
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket:storageBucket: 'floresjrs-b43c7.appspot.com',
+  storageBucket:'floresjrs-b43c7.appspot.com',
 
 
 });
