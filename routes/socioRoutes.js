@@ -3,11 +3,12 @@ const router = express.Router();
 const db = require('../config/db');
 const multer = require('multer');
 const upload = multer();
-const admin = require('../config/firebase');
 const { v4: uuidv4 } = require('uuid');
 const verificarToken = require('../middlewares/verificarToken');
+const subirAImgur = require('../utils/subirAImgur');
 
-const bucket = admin.storage().bucket();
+
+
 
 console.log("✅ socioRoutes.js se está ejecutando");
 
@@ -194,44 +195,26 @@ router.delete('/:id', verificarToken, async (req, res) => {
   }
 });
 
-// POST /socio/:id/foto → subir imagen a Firebase Storage (protegido)
+// POST /socio/:id/foto → subir imagen a Imgur (protegido)
 router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res) => {
   const { id } = req.params;
 
-  console.log('🔍 Subiendo imagen para socio', id);
   if (!req.file) {
-    console.error('⚠️ No llegó el archivo');
     return res.status(400).json({ error: 'No se envió ninguna imagen' });
   }
 
   try {
-    const nombreArchivo = `socios/${id}_${uuidv4()}.jpg`;
-    const file = bucket.file(nombreArchivo);
+    const imagenUrl = await subirAImgur(req.file.buffer);
 
-    console.log('📤 Guardando archivo en bucket:', bucket.name, nombreArchivo);
-
-    await file.save(req.file.buffer, {
-      metadata: { contentType: req.file.mimetype },
-    });
-
-    // ✅ Hacer el archivo público
-    await file.makePublic();
-
-    // ✅ URL pública permanente
-    const publicUrl = `https://storage.googleapis.com/floresjrs-b43c7.appspot.com/${nombreArchivo}`;
-
-
-    // ✅ Guardar en la base de datos
     await db.query(
       'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
-      [publicUrl, id]
+      [imagenUrl, id]
     );
 
-    console.log('✅ Imagen subida a Firebase:', publicUrl);
-    res.json({ mensaje: 'Imagen subida correctamente', url: publicUrl });
+    res.json({ mensaje: 'Foto subida correctamente', url: imagenUrl });
   } catch (err) {
-    console.error('❌ Error al subir imagen a Firebase:', err.message, err);
-    res.status(500).json({ error: `Error al subir imagen: ${err.message}` });
+    console.error('❌ Error al subir a Imgur:', err.message);
+    res.status(500).json({ error: 'Error al subir imagen' });
   }
 });
 
