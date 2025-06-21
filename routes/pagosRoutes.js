@@ -30,16 +30,18 @@ router.post('/', verificarToken, async (req, res) => {
 
   try {
     await db.query(
-      `INSERT INTO pagos (numero_socio, fecha_pago, monto)
-       VALUES ($1, $2, $3)`,
-      [numero_socio, fecha_pago, monto]
+      `INSERT INTO pagos (numero_socio, fecha_pago, monto, registrado_por)
+       VALUES ($1, $2, $3, $4)`,
+      [numero_socio, fecha_pago, monto, 'admin']
     );
+
     res.status(201).json({ mensaje: 'Pago registrado correctamente' });
   } catch (err) {
     console.error('❌ Error al registrar pago:', err);
     res.status(500).json({ error: 'Error al registrar pago' });
   }
 });
+
 
 // 👉 Obtener todos los pagos (con nombre del socio)
 router.get('/', verificarToken, async (req, res) => {
