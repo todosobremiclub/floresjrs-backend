@@ -221,26 +221,28 @@
 
   document.body.addEventListener('click', async (e) => {
     if (e.target.classList.contains('btn-editar')) {
-      const id = e.target.dataset.id;
-      try {
-        const res = await fetchConToken(`/socio/${id}`);
-        const socio = await res.json();
-        document.getElementById('numero_socio').value = socio.numero;
-        document.getElementById('dni').value = socio.dni;
-        document.getElementById('nombre').value = socio.nombre;
-        document.getElementById('apellido').value = socio.apellido;
-        document.getElementById('subcategoria').value = socio.categoria;
-        document.getElementById('telefono').value = socio.telefono ?? '';
-        document.getElementById('fecha_nacimiento').value = socio.nacimiento;
-        document.getElementById('fecha_ingreso').value = socio.fecha_ingreso?.substring(0, 10) ?? '';
-        document.getElementById('activo').checked = socio.activo;
+  const id = e.target.dataset.id;
+  try {
+    const res = await fetchConToken(`/socio/${id}`);
+    const socio = await res.json();
 
-        form.dataset.editing = id;
-        modal.show();
-      } catch {
-        alert('❌ Error al obtener socio');
-      }
-    }
+    document.getElementById('numero_socio').value = socio.numero;
+    document.getElementById('dni').value = socio.dni;
+    document.getElementById('nombre').value = socio.nombre;
+    document.getElementById('apellido').value = socio.apellido;
+    document.getElementById('subcategoria').value = socio.categoria;
+    document.getElementById('telefono').value = socio.telefono ?? '';
+    document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(0, 10) ?? '';
+    document.getElementById('fecha_ingreso').value = socio.fecha_ingreso?.substring(0, 10) ?? '';
+    document.getElementById('activo').checked = socio.activo;
+
+    form.dataset.editing = id;
+    modal.show();
+  } catch {
+    alert('❌ Error al obtener socio');
+  }
+}
+
 
     if (e.target.classList.contains('btn-eliminar')) {
       const id = e.target.dataset.id;
