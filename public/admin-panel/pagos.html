@@ -75,6 +75,14 @@
 </div>
 
 <script>
+// 👉 Redirigir al login si no hay token
+const token = localStorage.getItem('token');
+if (!token) {
+  window.location.href = 'login.html';
+}
+</script>
+
+<script>
 // 👉 función que incluye el token automáticamente
 function fetchConToken(url, options = {}) {
   const token = localStorage.getItem('token');
