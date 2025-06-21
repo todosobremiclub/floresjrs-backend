@@ -115,13 +115,13 @@ if (numExiste.rows.length > 0) {
   }
 });
 
-// PUT /socio/:id → actualizar socio (protegido)
+
 // PUT /socio/:id → actualizar socio (protegido)
 router.put('/:id', verificarToken, async (req, res) => {
   try {
     const id = req.params.id;
 
-    // Si solo se quiere actualizar el estado activo
+    // ✅ Solo actualizar "activo"
     if (req.body.activo !== undefined && Object.keys(req.body).length === 1) {
       await db.query(`UPDATE socios SET activo = $1 WHERE numero_socio = $2`, [
         req.body.activo,
@@ -130,7 +130,16 @@ router.put('/:id', verificarToken, async (req, res) => {
       return res.json({ mensaje: 'Estado actualizado correctamente' });
     }
 
-    // Resto de los campos para edición completa
+    // ✅ Solo actualizar "becado"
+    if (req.body.becado !== undefined && Object.keys(req.body).length === 1) {
+      await db.query(`UPDATE socios SET becado = $1 WHERE numero_socio = $2`, [
+        req.body.becado,
+        id
+      ]);
+      return res.json({ mensaje: 'Estado de beca actualizado correctamente' });
+    }
+
+    // 🛠️ Edición completa
     const {
       numero_socio,
       dni,
