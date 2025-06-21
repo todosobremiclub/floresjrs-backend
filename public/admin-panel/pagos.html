@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnNuevoPago.addEventListener('click', async () => {
     selectSocio.innerHTML = '';
     try {
-      const res = await fetchConToken('/socios');
+      const res = await fetchConToken('/socio');
       const socios = await res.json();
       socios.forEach(s => {
         const opt = document.createElement('option');
