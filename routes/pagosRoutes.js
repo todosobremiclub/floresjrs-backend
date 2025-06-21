@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
 const { getMonto, setMonto } = require('../config/montoCuota');
 
-// GET monto actual
+// 👉 Obtener monto actual
 router.get('/monto', verificarToken, (req, res) => {
   res.json({ monto: getMonto() });
 });
 
-// POST actualizar monto
+// 👉 Actualizar monto
 router.post('/monto', verificarToken, (req, res) => {
   const { monto } = req.body;
   if (typeof monto !== 'number' || monto <= 0) {
@@ -19,4 +20,48 @@ router.post('/monto', verificarToken, (req, res) => {
   res.json({ mensaje: 'Monto actualizado correctamente' });
 });
 
+// 👉 Registrar nuevo pago
+router.post('/', verificarToken, async (req, res) => {
+  const { numero_socio, fecha_pago, monto } = req.body;
+
+  if (!numero_socio || !fecha_pago || !monto || isNaN(monto)) {
+    return res.status(400).json({ error: 'Datos incompletos' });
+  }
+
+  try {
+    await db.query(
+      `INSERT INTO pagos (numero_socio, fecha_pago, monto)
+       VALUES ($1, $2, $3)`,
+      [numero_socio, fecha_pago, monto]
+    );
+    res.status(201).json({ mensaje: 'Pago registrado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al registrar pago:', err);
+    res.status(500).json({ error: 'Error al registrar pago' });
+  }
+});
+
+// 👉 Obtener todos los pagos (con nombre del socio)
+router.get('/', verificarToken, async (req, res) => {
+  try {
+    const resultado = await db.query(
+      `SELECT 
+         p.id,
+         p.numero_socio,
+         s.nombre || ' ' || s.apellido AS nombre,
+         TO_CHAR(p.fecha_pago, 'YYYY-MM-DD') AS fecha_pago,
+         p.monto
+       FROM pagos p
+       JOIN socios s ON s.numero_socio = p.numero_socio
+       ORDER BY p.fecha_pago DESC`
+    );
+
+    res.json(resultado.rows);
+  } catch (err) {
+    console.error('❌ Error al obtener pagos:', err);
+    res.status(500).json({ error: 'Error al obtener pagos' });
+  }
+});
+
 module.exports = router;
+
