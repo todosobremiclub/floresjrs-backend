@@ -38,6 +38,7 @@
         <th>N° Socio</th>
         <th>Nombre</th>
         <th>Fecha de Pago</th>
+        <th>Monto</th>
       </tr>
     </thead>
     <tbody id="tablaPagos">
@@ -89,43 +90,109 @@ function fetchConToken(url, options = {}) {
 document.addEventListener('DOMContentLoaded', async () => {
   const inputMonto = document.getElementById('monto');
   const btnGuardarMonto = document.getElementById('btnGuardarMonto');
+  const btnNuevoPago = document.getElementById('btnNuevoPago');
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
+  const selectSocio = document.getElementById('socio');
+  const inputFecha = document.getElementById('fecha_pago');
+  const formPago = document.getElementById('formPago');
+  const tablaPagos = document.getElementById('tablaPagos');
 
   // 👉 Leer monto actual del backend
   try {
     const res = await fetchConToken('/pagos/monto');
-    if (!res.ok) throw new Error();
     const data = await res.json();
     inputMonto.value = data.monto;
   } catch {
     alert('❌ Error al obtener monto actual');
   }
 
-  // 👉 Guardar nuevo monto al hacer clic
+  // 👉 Guardar nuevo monto
   btnGuardarMonto.addEventListener('click', async () => {
     const nuevoMonto = parseFloat(inputMonto.value);
-
-    if (isNaN(nuevoMonto) || nuevoMonto <= 0) {
-      alert('❌ Ingresá un monto válido');
-      return;
-    }
+    if (isNaN(nuevoMonto) || nuevoMonto <= 0) return alert('❌ Ingresá un monto válido');
 
     try {
       const res = await fetchConToken('/pagos/monto', {
         method: 'POST',
         body: JSON.stringify({ monto: nuevoMonto })
       });
-
       if (!res.ok) throw new Error();
       alert('✅ Monto actualizado correctamente');
     } catch {
       alert('❌ Error al actualizar el monto');
     }
   });
+
+  // 👉 Abrir modal y cargar socios
+  btnNuevoPago.addEventListener('click', async () => {
+    selectSocio.innerHTML = '';
+    try {
+      const res = await fetchConToken('/socios');
+      const socios = await res.json();
+      socios.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.numero;
+        opt.textContent = `${s.numero} - ${s.nombre} ${s.apellido}`;
+        selectSocio.appendChild(opt);
+      });
+    } catch {
+      alert('❌ Error al cargar socios');
+      return;
+    }
+
+    inputFecha.valueAsDate = new Date();
+    modal.show();
+  });
+
+  // 👉 Registrar nuevo pago
+  formPago.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const numero_socio = parseInt(selectSocio.value);
+    const fecha_pago = inputFecha.value;
+    const monto = parseFloat(inputMonto.value);
+
+    try {
+      const res = await fetchConToken('/pagos', {
+        method: 'POST',
+        body: JSON.stringify({ numero_socio, fecha_pago, monto })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      alert('✅ Pago registrado correctamente');
+      modal.hide();
+      cargarPagos();
+    } catch (err) {
+      alert(err.message || '❌ Error al registrar el pago');
+    }
+  });
+
+  // 👉 Cargar tabla de pagos
+  async function cargarPagos() {
+    try {
+      const res = await fetchConToken('/pagos');
+      const pagos = await res.json();
+      tablaPagos.innerHTML = '';
+      pagos.forEach(p => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${p.numero_socio}</td>
+          <td>${p.nombre}</td>
+          <td>${p.fecha_pago}</td>
+          <td>$${parseFloat(p.monto).toFixed(2)}</td>
+        `;
+        tablaPagos.appendChild(row);
+      });
+    } catch {
+      alert('❌ Error al cargar pagos');
+    }
+  }
+
+  cargarPagos();
 });
 </script>
-
-<script src="pagos.js"></script>
 </body>
 </html>
+
 
 
