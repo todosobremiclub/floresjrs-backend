@@ -235,7 +235,7 @@ console.log('👉 socio.fecha_ingreso:', socio.fecha_ingreso);
     document.getElementById('subcategoria').value = socio.categoria;
     document.getElementById('telefono').value = socio.telefono ?? '';
     document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(0, 10) ?? '';
-    document.getElementById('fecha_ingreso').value = socio.fecha_ingreso?.substring(0, 10) ?? '';
+    document.getElementById('fecha_ingreso').value = socio.ingreso?.substring(0, 10) ?? '';
     document.getElementById('activo').checked = socio.activo;
 
     form.dataset.editing = id;
