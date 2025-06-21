@@ -231,7 +231,10 @@
           document.getElementById('subcategoria').value = socio.categoria;
           document.getElementById('telefono').value = socio.telefono ?? '';
           document.getElementById('fecha_nacimiento').value = socio.nacimiento;
-          document.getElementById('fecha_ingreso').value = socio.ingreso;
+document.getElementById('fecha_ingreso').value = socio.fecha_ingreso;
+document.getElementById('activo').checked = socio.activo;
+
+
 document.getElementById('activo').checked = socio.activo;
           form.dataset.editing = id;
           modal.show();
@@ -265,8 +268,8 @@ document.getElementById('activo').checked = socio.activo;
         subcategoria: document.getElementById('subcategoria').value,
         telefono: document.getElementById('telefono').value,
         fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
-        fecha_ingreso: document.getElementById('fecha_ingreso').value
-activo: document.getElementById('activo').checked
+        fecha_ingreso: document.getElementById('fecha_ingreso').value,
+        activo: document.getElementById('activo').checked
       };
 
       try {
