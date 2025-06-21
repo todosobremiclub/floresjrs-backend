@@ -218,7 +218,8 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
     await file.makePublic();
 
     // ✅ URL pública permanente
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
+    const publicUrl = `https://storage.googleapis.com/floresjrs-b43c7.appspot.com/${nombreArchivo}`;
+
 
     // ✅ Guardar en la base de datos
     await db.query(
