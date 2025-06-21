@@ -173,6 +173,83 @@
     window.location.href = '/admin-panel/login.html';
   }
 
+async function cargarSocios() {
+  try {
+    const res = await fetchConToken('/socio');
+    if (!res.ok) throw new Error('Error al obtener socios');
+    const socios = await res.json();
+    const tabla = document.getElementById('tablaSocios');
+    const buscador = document.getElementById('buscador');
+
+    let ordenActual = { campo: null, asc: true };
+
+    function ordenarSocios(lista, campo) {
+      const asc = (ordenActual.campo === campo) ? !ordenActual.asc : true;
+      ordenActual = { campo, asc };
+
+      return lista.sort((a, b) => {
+        let valA = (a[campo] ?? '').toString().toLowerCase();
+        let valB = (b[campo] ?? '').toString().toLowerCase();
+
+        if (!isNaN(valA) && !isNaN(valB)) {
+          valA = parseFloat(valA);
+          valB = parseFloat(valB);
+        }
+
+        return asc ? (valA > valB ? 1 : valA < valB ? -1 : 0) : (valA < valB ? 1 : valA > valB ? -1 : 0);
+      });
+    }
+
+    function mostrarFiltrados(filtro = '') {
+      tabla.innerHTML = '';
+      let sociosFiltrados = socios.filter(s =>
+        (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtro.toLowerCase())
+      );
+
+      if (ordenActual.campo) {
+        sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
+      }
+
+      sociosFiltrados.forEach(s => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${s.numero}</td>
+          <td>${s.dni}</td>
+          <td>${s.nombre}</td>
+          <td>${s.apellido}</td>
+          <td>${s.subcategoria ?? ''}</td>
+          <td>${s.telefono ?? '—'}</td>
+          <td>${s.nacimiento ?? ''}</td>
+          <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
+          <td>${s.fecha_ingreso ?? ''}</td>
+          <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
+          <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
+          <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
+          <td class="p-1">
+            <div class="d-flex justify-content-center gap-1">
+              <button class="btn btn-sm btn-outline-light btn-editar px-2 py-1" data-id="${s.numero}">✏️</button>
+              <button class="btn btn-sm btn-outline-warning btn-eliminar px-2 py-1" data-id="${s.numero}">🗑️</button>
+            </div>
+          </td>
+        `;
+        tabla.appendChild(fila);
+      });
+    }
+
+    mostrarFiltrados();
+    buscador.addEventListener('input', e => mostrarFiltrados(e.target.value));
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const campo = th.dataset.sort;
+        ordenActual.campo = campo;
+        mostrarFiltrados(buscador.value);
+      });
+    });
+  } catch (error) {
+    alert('❌ Error al cargar socios: ' + error.message);
+  }
+}
+
   document.addEventListener('DOMContentLoaded', () => {
     // Aquí va todo tu código JS de manejo de socios
     cargarSocios();
