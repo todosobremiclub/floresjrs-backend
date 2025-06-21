@@ -17,6 +17,16 @@
 <body>
 <div class="container mt-4">
   <h2 class="mb-4 text-center">📋 Gestión de Pagos</h2>
+
+  <!-- 👉 Sección de monto editable -->
+  <div class="mb-4">
+    <label for="monto" class="form-label">💰 Monto de cuota actual</label>
+    <div class="input-group">
+      <input type="number" id="monto" class="form-control" />
+      <button class="btn btn-warning" id="btnGuardarMonto">Guardar</button>
+    </div>
+  </div>
+
   <div class="d-flex justify-content-between mb-3">
     <button class="btn btn-success" id="btnNuevoPago">+ Registrar Pago</button>
     <button class="btn btn-secondary" onclick="window.location.href='index.html'">← Volver</button>
@@ -63,5 +73,60 @@
 </div>
 
 <script src="pagos.js"></script>
+
+<!-- Script para manejar el monto actual -->
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const inputMonto = document.getElementById('monto');
+  const btnGuardarMonto = document.getElementById('btnGuardarMonto');
+
+  // 👉 Leer monto actual del backend
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch('/pagos/monto', {
+      headers: {
+        Authorization: token
+      }
+    });
+
+    if (!res.ok) throw new Error('No se pudo obtener el monto');
+
+    const data = await res.json();
+    inputMonto.value = data.monto;
+  } catch (err) {
+    alert('❌ Error al obtener monto actual');
+  }
+
+  // 👉 Guardar nuevo monto al hacer clic
+  btnGuardarMonto.addEventListener('click', async () => {
+    const nuevoMonto = parseFloat(inputMonto.value);
+
+    if (isNaN(nuevoMonto) || nuevoMonto <= 0) {
+      alert('❌ Ingresá un monto válido');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/pagos/monto', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token
+        },
+        body: JSON.stringify({ monto: nuevoMonto })
+      });
+
+      if (!res.ok) throw new Error();
+
+      alert('✅ Monto actualizado correctamente');
+    } catch {
+      alert('❌ Error al actualizar el monto');
+    }
+  });
+});
+</script>
+
 </body>
 </html>
+
