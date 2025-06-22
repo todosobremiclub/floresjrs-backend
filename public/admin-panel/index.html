@@ -63,10 +63,41 @@
       font-size: 0.9rem;
       padding: 0 12px;
     }
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1050;
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.show {
+    transform: translateX(0);
+  }
+  .toggle-btn {
+    display: block;
+  }
+  .main-content {
+    margin-left: 0 !important;
+    padding: 1rem;
+  }
+}
+
   </style>
 </head>
 <body>
-  <div class="sidebar">
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <div class="sidebar" id="sidebar">
     <h4>Menú</h4>
     <a href="index.html" class="btn btn-outline-light">🏠 Home</a>
     <a href="pagos.html" class="btn btn-outline-light">💰 Pagos</a>
@@ -121,11 +152,20 @@
       window.location.href = '/admin-panel/login.html';
     }
 
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('show');
+}
+
     function fetchConToken(url, opciones = {}) {
       opciones.headers = opciones.headers || {};
       opciones.headers['Authorization'] = `Bearer ${token}`;
       return fetch(url, opciones);
     }
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('show');
+}
+
 
     async function cargarSocios() {
       try {
