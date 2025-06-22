@@ -53,26 +53,12 @@
   </div>
 
   <script>
-    // Si ya hay un token válido, redirigir directamente al panel
+    // Si ya hay token, redirigir directo
     const token = localStorage.getItem('token');
     if (token) {
-      fetch('/admin/verificar-token', {
-        method: 'GET',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      })
-      .then(res => {
-        if (res.ok) {
-          window.location.href = '/admin-panel/index.html';
-        }
-      })
-      .catch(() => {
-        // Si falla, no hacemos nada, permite login manual
-      });
+      window.location.href = '/admin-panel/index.html';
     }
 
-    // Login manual
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const usuario = document.getElementById('usuario').value;
@@ -87,7 +73,7 @@
 
         const data = await res.json();
 
-        if (res.ok) {
+        if (res.ok && data.token) {
           localStorage.setItem('token', data.token);
           window.location.href = '/admin-panel/index.html';
         } else {
@@ -100,4 +86,5 @@
   </script>
 </body>
 </html>
+
 
