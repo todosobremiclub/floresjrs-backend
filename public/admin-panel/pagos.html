@@ -200,7 +200,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const socio_id = parseInt(opcion.dataset.numero);
     const fecha_pago = inputFecha.value;
-    const monto = parseFloat(inputMonto.value);
+    const monto = 0; // ya no se define desde el frontend, se calcula en backend si hace falta
+
     try {
       const res = await fetchConToken('/pagos', {
         method: 'POST',
