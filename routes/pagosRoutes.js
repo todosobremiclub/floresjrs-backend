@@ -83,5 +83,21 @@ router.get('/', verificarToken, async (req, res) => {
   }
 });
 
+// 👉 Eliminar pago por ID
+router.delete('/:id', verificarToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const resultado = await db.query('DELETE FROM pagos WHERE id = $1', [id]);
+    if (resultado.rowCount === 0) {
+      return res.status(404).json({ error: 'Pago no encontrado' });
+    }
+    res.json({ mensaje: 'Pago eliminado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al eliminar pago:', err);
+    res.status(500).json({ error: 'Error al eliminar pago' });
+  }
+});
+
+
 module.exports = router;
 

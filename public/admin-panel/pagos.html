@@ -229,7 +229,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           <td>${p.nombre}</td>
           <td>${p.fecha_pago}</td>
           <td>$${parseFloat(p.monto).toFixed(2)}</td>
-          <td><button class="btn btn-sm btn-danger btn-eliminar-pago" data-id="${p.id}">🗑️</button></td>
+          <td>
+  <button class="btn btn-sm btn-outline-primary btn-eliminar-pago p-1 px-2" data-id="${p.id}" title="Eliminar">
+    🗑️
+  </button>
+</td>
+
         `;
         tablaPagos.appendChild(row);
       });
