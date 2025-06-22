@@ -5,7 +5,7 @@ const verificarToken = require('../middlewares/verificarToken');
 const { getMonto, setMonto } = require('../config/montoCuota');
 
 // 👉 Obtener monto actual
-outer.get('/monto', verificarToken, async (req, res) => {
+router.get('/monto', verificarToken, async (req, res) => {
   const monto = await getMonto();
   res.json({ monto });
 });
