@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     inputFecha.valueAsDate = new Date();
     modal.show();
   });
-  formPago.addEventListener('submit', async (e) => {
+    formPago.addEventListener('submit', async (e) => {
     e.preventDefault();
     const opcion = [...document.querySelectorAll('#listaSocios option')]
       .find(opt => opt.value === inputBusqueda.value);
@@ -200,11 +200,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const socio_id = parseInt(opcion.dataset.numero);
     const fecha_pago = inputFecha.value;
+
     try {
-  const res = await fetchConToken('/pagos', {
-    method: 'POST',
-    body: JSON.stringify({ socio_id, fecha_pago })
-  });
+      const res = await fetchConToken('/pagos', {
+        method: 'POST',
+        body: JSON.stringify({ socio_id, fecha_pago })
+      });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -215,6 +216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert(err.message || '❌ Error al registrar el pago');
     }
   });
+
   async function cargarPagos() {
     try {
       const res = await fetchConToken('/pagos');
@@ -227,6 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <td>${p.nombre}</td>
           <td>${p.fecha_pago}</td>
           <td>$${parseFloat(p.monto).toFixed(2)}</td>
+          <td><button class="btn btn-sm btn-danger btn-eliminar-pago" data-id="${p.id}">🗑️</button></td>
         `;
         tablaPagos.appendChild(row);
       });
@@ -234,11 +237,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('❌ Error al cargar pagos');
     }
   }
+
+  document.body.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-eliminar-pago')) {
+      const id = e.target.dataset.id;
+      if (confirm('¿Estás seguro que querés eliminar este pago?')) {
+        try {
+          const res = await fetchConToken(`/pagos/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error();
+          alert('✅ Pago eliminado');
+          cargarPagos();
+        } catch {
+          alert('❌ Error al eliminar el pago');
+        }
+      }
+    }
+  });
+
   cargarPagos();
 });
 </script>
 </body>
 </html>
-
-
 
