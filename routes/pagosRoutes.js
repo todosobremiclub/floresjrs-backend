@@ -5,18 +5,19 @@ const verificarToken = require('../middlewares/verificarToken');
 const { getMonto, setMonto } = require('../config/montoCuota');
 
 // 👉 Obtener monto actual
-router.get('/monto', verificarToken, (req, res) => {
-  res.json({ monto: getMonto() });
+outer.get('/monto', verificarToken, async (req, res) => {
+  const monto = await getMonto();
+  res.json({ monto });
 });
 
 // 👉 Actualizar monto
-router.post('/monto', verificarToken, (req, res) => {
+router.post('/monto', verificarToken, async (req, res) => {
   const { monto } = req.body;
   if (typeof monto !== 'number' || monto <= 0) {
     return res.status(400).json({ error: 'Monto inválido' });
   }
 
-  setMonto(monto);
+  await setMonto(monto);
   res.json({ mensaje: 'Monto actualizado correctamente' });
 });
 
@@ -64,3 +65,4 @@ router.get('/', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
+
