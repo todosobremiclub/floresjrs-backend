@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Configuración - Flores Jrs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      background-color: #004aad;
+      color: white;
+      margin: 0;
+    }
+    .sidebar {
+      width: 200px;
+      background-color: #002f6c;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      z-index: 1040;
+    }
+    .main-content {
+      margin-left: 200px;
+      padding: 2rem;
+    }
+    .logo {
+      height: 50px;
+    }
+    .btn-yellow {
+      background-color: #ffd500;
+      color: black;
+      font-weight: bold;
+    }
+    .table td, .table th {
+      vertical-align: middle;
+    }
+    @media (max-width: 767px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <h4>Menú</h4>
+  <a href="index.html" class="btn btn-outline-light">🏠 Home</a>
+  <a href="pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+  <a href="#" class="btn btn-outline-light">📢 Novedades</a>
+  <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
+  <a href="configuracion.html" class="btn btn-light fw-bold">⚙️ Configuración</a>
+  <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
+</div>
+<div class="main-content">
+  <div class="text-center mb-4">
+    <img src="flores_jrs_logo.png" class="logo mb-2" alt="Escudo">
+    <h2 class="text-warning m-0">Configuración del Sistema</h2>
+  </div>
+
+  <div class="mb-4">
+    <label for="montoCuota" class="form-label">Monto de cuota actual</label>
+    <div class="input-group">
+      <span class="input-group-text">$</span>
+      <input type="number" id="montoCuota" class="form-control" placeholder="Ej: 5000" />
+      <button class="btn btn-yellow" id="guardarMonto">Guardar</button>
+    </div>
+  </div>
+
+  <hr class="border-light">
+
+  <div class="mb-3">
+    <label for="nuevaCategoria" class="form-label">Agregar nueva categoría</label>
+    <div class="input-group">
+      <input type="text" id="nuevaCategoria" class="form-control" placeholder="Ej: Juvenil, Senior" />
+      <button class="btn btn-success" id="agregarCategoria">Agregar</button>
+    </div>
+  </div>
+
+  <table class="table table-bordered text-white bg-white text-dark">
+    <thead class="table-primary">
+      <tr><th>Categorías existentes</th><th style="width: 100px">Acciones</th></tr>
+    </thead>
+    <tbody id="tablaCategorias"></tbody>
+  </table>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) window.location.href = 'login.html';
+function logout() {
+  localStorage.removeItem('token');
+  window.location.href = 'login.html';
+}
+function fetchConToken(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token,
+      ...options.headers,
+    },
+  });
+}
+
+// Lógica base (faltan rutas reales de backend)
+document.addEventListener('DOMContentLoaded', () => {
+  const montoInput = document.getElementById('montoCuota');
+  const btnGuardar = document.getElementById('guardarMonto');
+  const nuevaCategoriaInput = document.getElementById('nuevaCategoria');
+  const btnAgregar = document.getElementById('agregarCategoria');
+  const tablaCategorias = document.getElementById('tablaCategorias');
+
+  function cargarMonto() {
+    fetchConToken('/pagos/monto')
+      .then(res => res.json())
+      .then(data => montoInput.value = data.monto)
+      .catch(() => alert('Error al cargar el monto actual'));
+  }
+
+  function cargarCategorias() {
+    fetchConToken('/config/categorias')
+      .then(res => res.json())
+      .then(data => {
+        tablaCategorias.innerHTML = '';
+        data.forEach(cat => {
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td>${cat}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="eliminarCategoria('${cat}')">Eliminar</button></td>
+          `;
+          tablaCategorias.appendChild(fila);
+        });
+      });
+  }
+
+  btnGuardar.addEventListener('click', () => {
+    const monto = parseFloat(montoInput.value);
+    if (isNaN(monto) || monto <= 0) return alert('Ingresá un monto válido');
+
+    fetchConToken('/pagos/monto', {
+      method: 'POST',
+      body: JSON.stringify({ monto })
+    })
+    .then(res => res.ok ? alert('Monto actualizado') : alert('Error al guardar'));
+  });
+
+  btnAgregar.addEventListener('click', () => {
+    const categoria = nuevaCategoriaInput.value.trim();
+    if (!categoria) return alert('Ingresá una categoría');
+
+    fetchConToken('/config/categorias', {
+      method: 'POST',
+      body: JSON.stringify({ categoria })
+    }).then(res => {
+      if (res.ok) {
+        nuevaCategoriaInput.value = '';
+        cargarCategorias();
+      } else alert('Error al guardar categoría');
+    });
+  });
+
+  window.eliminarCategoria = (categoria) => {
+    if (!confirm(`¿Eliminar la categoría "${categoria}"?`)) return;
+    fetchConToken(`/config/categorias`, {
+      method: 'DELETE',
+      body: JSON.stringify({ categoria })
+    }).then(res => {
+      if (res.ok) cargarCategorias();
+      else alert('No se pudo eliminar la categoría');
+    });
+  };
+
+  cargarMonto();
+  cargarCategorias();
+});
+</script>
+</body>
+</html>
