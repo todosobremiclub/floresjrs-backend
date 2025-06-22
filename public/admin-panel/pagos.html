@@ -50,10 +50,12 @@
     h2.text-warning {
       font-size: 1.4rem;
     }
+    .logo {
+      height: 50px;
+    }
   </style>
 </head>
 <body>
-<!-- Menú lateral -->
 <div class="sidebar">
   <h4>Menú</h4>
   <a href="index.html" class="btn btn-outline-light">🏠 Home</a>
@@ -63,10 +65,10 @@
   <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
 </div>
 
-<!-- Contenido principal -->
 <div class="main-content">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-warning">📋 Gestión de Pagos</h2>
+  <div class="d-flex align-items-center mb-4">
+    <img src="flores_jrs_logo.png" alt="Escudo" class="logo me-3" />
+    <h2 class="text-warning m-0">Gestión de Pagos</h2>
   </div>
 
   <div class="mb-4">
@@ -94,7 +96,6 @@
   </table>
 </div>
 
-<!-- Modal nuevo pago -->
 <div class="modal fade" id="modalNuevoPago" tabindex="-1">
   <div class="modal-dialog">
     <form class="modal-content" id="formPago">
@@ -255,6 +256,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 </script>
 </body>
 </html>
-
 
 
