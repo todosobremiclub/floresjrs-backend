@@ -23,6 +23,8 @@
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      z-index: 1040;
+      transition: transform 0.3s ease;
     }
     .sidebar h4 {
       color: white;
@@ -35,6 +37,7 @@
     .main-content {
       margin-left: 200px;
       padding: 2rem;
+      transition: margin-left 0.3s ease;
     }
     .table td, .table th {
       vertical-align: middle;
@@ -53,10 +56,37 @@
     .logo {
       height: 50px;
     }
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1050;
+      display: none;
+    }
+    @media (max-width: 767px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      .toggle-btn {
+        display: block;
+      }
+      .main-content {
+        margin-left: 0 !important;
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-<div class="sidebar">
+<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar" id="sidebar">
   <h4>Menú</h4>
   <a href="index.html" class="btn btn-outline-light">🏠 Home</a>
   <a href="pagos.html" class="btn btn-outline-light">💰 Pagos</a>
@@ -64,13 +94,11 @@
   <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
   <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
 </div>
-
 <div class="main-content">
-  <div class="d-flex align-items-center mb-4">
-    <img src="flores_jrs_logo.png" alt="Escudo" class="logo me-3" />
+  <div class="text-center mb-4 mt-2 mt-md-0">
+    <img src="flores_jrs_logo.png" alt="Escudo" class="logo mb-2" />
     <h2 class="text-warning m-0">Gestión de Pagos</h2>
   </div>
-
   <div class="mb-4">
     <label for="monto" class="form-label">💰 Monto de cuota actual</label>
     <div class="input-group">
@@ -78,11 +106,9 @@
       <button class="btn btn-yellow" id="btnGuardarMonto">Guardar</button>
     </div>
   </div>
-
   <div class="d-flex justify-content-between mb-3">
     <button class="btn btn-success" id="btnNuevoPago">+ Registrar Pago</button>
   </div>
-
   <table class="table table-bordered text-white bg-white text-dark">
     <thead class="table-primary">
       <tr>
@@ -95,7 +121,7 @@
     <tbody id="tablaPagos"></tbody>
   </table>
 </div>
-
+<!-- Modal -->
 <div class="modal fade" id="modalNuevoPago" tabindex="-1">
   <div class="modal-dialog">
     <form class="modal-content" id="formPago">
@@ -121,16 +147,16 @@
     </form>
   </div>
 </div>
-
 <script>
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'login.html';
-
 function logout() {
   localStorage.removeItem('token');
   window.location.href = 'login.html';
 }
-
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('show');
+}
 function fetchConToken(url, options = {}) {
   return fetch(url, {
     ...options,
@@ -141,7 +167,6 @@ function fetchConToken(url, options = {}) {
     },
   });
 }
-
 document.addEventListener('DOMContentLoaded', async () => {
   const inputMonto = document.getElementById('monto');
   const btnGuardarMonto = document.getElementById('btnGuardarMonto');
@@ -152,7 +177,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const formPago = document.getElementById('formPago');
   const tablaPagos = document.getElementById('tablaPagos');
   const listaSocios = document.getElementById('listaSocios');
-
   try {
     const res = await fetchConToken('/pagos/monto');
     const data = await res.json();
@@ -160,11 +184,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch {
     alert('❌ Error al obtener monto actual');
   }
-
   btnGuardarMonto.addEventListener('click', async () => {
     const nuevoMonto = parseFloat(inputMonto.value);
     if (isNaN(nuevoMonto) || nuevoMonto <= 0) return alert('❌ Ingresá un monto válido');
-
     try {
       const res = await fetchConToken('/pagos/monto', {
         method: 'POST',
@@ -176,15 +198,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('❌ Error al actualizar el monto');
     }
   });
-
   btnNuevoPago.addEventListener('click', async () => {
     listaSocios.innerHTML = '';
     inputBusqueda.value = '';
-
     try {
       const res = await fetchConToken('/socio');
       const socios = await res.json();
-
       socios.forEach(s => {
         const opt = document.createElement('option');
         opt.value = `${s.numero} - ${s.nombre} ${s.apellido} (${s.dni})`;
@@ -195,32 +214,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('❌ Error al cargar socios');
       return;
     }
-
     inputFecha.valueAsDate = new Date();
     modal.show();
   });
-
   formPago.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const opcion = [...document.querySelectorAll('#listaSocios option')]
       .find(opt => opt.value === inputBusqueda.value);
-
     if (!opcion) {
       alert('❌ Socio inválido');
       return;
     }
-
     const socio_id = parseInt(opcion.dataset.numero);
     const fecha_pago = inputFecha.value;
     const monto = parseFloat(inputMonto.value);
-
     try {
       const res = await fetchConToken('/pagos', {
         method: 'POST',
         body: JSON.stringify({ socio_id, fecha_pago, monto })
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       alert('✅ Pago registrado correctamente');
@@ -230,7 +242,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert(err.message || '❌ Error al registrar el pago');
     }
   });
-
   async function cargarPagos() {
     try {
       const res = await fetchConToken('/pagos');
@@ -250,11 +261,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('❌ Error al cargar pagos');
     }
   }
-
   cargarPagos();
 });
 </script>
 </body>
 </html>
+
 
 
