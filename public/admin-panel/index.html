@@ -196,14 +196,14 @@ async function cargarSocios() {
     function mostrarFiltrados(filtro = '') {
       tabla.innerHTML = '';
       let sociosFiltrados = socios.filter(s =>
-        (\`\${s.nombre} \${s.apellido} \${s.dni}\`.toLowerCase()).includes(filtro.toLowerCase())
+        (\`${s.nombre} ${s.apellido} ${s.dni}\`.toLowerCase()).includes(filtro.toLowerCase())
       );
 
       if (ordenActual.campo) sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
 
       sociosFiltrados.forEach(s => {
   const fila = document.createElement('tr');
-  fila.innerHTML = `
+ fila.innerHTML = `
   <td>${s.numero}</td>
   <td>${s.dni}</td>
   <td>${s.nombre}</td>
@@ -215,7 +215,7 @@ async function cargarSocios() {
   <td>${s.fecha_ingreso ?? ''}</td>
   <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
   <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
-  <td>${s.foto_url ? '<img src="' + s.foto_url + '" width="30" style="border-radius:4px"/>' : 'Sin foto'}</td>
+  <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
   <td>
     <div class="d-flex justify-content-center gap-1">
       <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
@@ -223,6 +223,7 @@ async function cargarSocios() {
     </div>
   </td>
 `;
+
 
   tabla.appendChild(fila);
 
@@ -262,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.classList.contains('btn-editar')) {
       const id = e.target.dataset.id;
       try {
-        const res = await fetchConToken(\`/socio/\${id}\`);
+        const res = await fetchConToken(\`/socio/${id}\`);
         const socio = await res.json();
 
         document.getElementById('numero_socio').value = socio.numero;
@@ -288,8 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const id = e.target.dataset.id;
       if (confirm('¿Eliminar este socio?')) {
         try {
-          const res = await fetchConToken(\`/socio/\${id}\`, { method: 'DELETE' });
+          const res = await fetchConToken(\`/socio/${id}\`, { method: 'DELETE' });
           if (!res.ok) throw new Error();
+
+
           await cargarSocios();
         } catch {
           alert('❌ No se pudo eliminar el socio');
@@ -305,14 +308,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const valor = e.target.checked;
 
       try {
-        const res = await fetchConToken(\`/socio/\${id}\`, {
+        const res = await fetchConToken(\`/socio/${id}\`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ [campo]: valor })
         });
         if (!res.ok) throw new Error();
       } catch {
-        alert(\`❌ No se pudo actualizar el estado de \${campo}\`);
+        alert(\`❌ No se pudo actualizar el estado de ${campo}\`);
       }
     }
   });
@@ -334,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const res = await fetchConToken(id ? \`/socio/\${id}\` : '/socio', {
+      const res = await fetchConToken(id ? \`/socio/${id}\` : '/socio', {
         method: id ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -353,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('foto', fotoInput.files[0]);
 
-        const upload = await fetchConToken(\`/socio/\${socioId}/foto\`, {
+        const upload = await fetchConToken(\`/socio/${socioId}/foto\`, {
           method: 'POST',
           body: formData,
         });
