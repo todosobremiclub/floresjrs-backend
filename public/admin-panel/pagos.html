@@ -100,13 +100,7 @@
     <img src="flores_jrs_logo.png" alt="Escudo" class="logo mb-2" />
     <h2 class="text-warning m-0">Gestión de Pagos</h2>
   </div>
-  <div class="mb-4">
-    <label for="monto" class="form-label">💰 Monto de cuota actual</label>
-    <div class="input-group">
-      <input type="number" id="monto" class="form-control" />
-      <button class="btn btn-yellow" id="btnGuardarMonto">Guardar</button>
-    </div>
-  </div>
+
   <div class="d-flex justify-content-between mb-3">
     <button class="btn btn-success" id="btnNuevoPago">+ Registrar Pago</button>
   </div>
@@ -169,8 +163,6 @@ function fetchConToken(url, options = {}) {
   });
 }
 document.addEventListener('DOMContentLoaded', async () => {
-  const inputMonto = document.getElementById('monto');
-  const btnGuardarMonto = document.getElementById('btnGuardarMonto');
   const btnNuevoPago = document.getElementById('btnNuevoPago');
   const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
   const inputFecha = document.getElementById('fecha_pago');
@@ -179,26 +171,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tablaPagos = document.getElementById('tablaPagos');
   const listaSocios = document.getElementById('listaSocios');
   try {
-    const res = await fetchConToken('/pagos/monto');
-    const data = await res.json();
-    inputMonto.value = data.monto;
+    
   } catch {
     alert('❌ Error al obtener monto actual');
   }
-  btnGuardarMonto.addEventListener('click', async () => {
-    const nuevoMonto = parseFloat(inputMonto.value);
-    if (isNaN(nuevoMonto) || nuevoMonto <= 0) return alert('❌ Ingresá un monto válido');
-    try {
-      const res = await fetchConToken('/pagos/monto', {
-        method: 'POST',
-        body: JSON.stringify({ monto: nuevoMonto })
-      });
-      if (!res.ok) throw new Error();
-      alert('✅ Monto actualizado correctamente');
-    } catch {
-      alert('❌ Error al actualizar el monto');
-    }
-  });
+  
+     });
   btnNuevoPago.addEventListener('click', async () => {
     listaSocios.innerHTML = '';
     inputBusqueda.value = '';
