@@ -6,9 +6,15 @@ const { getMonto, setMonto } = require('../config/montoCuota');
 
 // 👉 Obtener monto actual
 router.get('/monto', verificarToken, async (req, res) => {
-  const monto = await getMonto();
-  res.json({ monto });
+  try {
+    const monto = await getMonto();
+    res.json({ monto });
+  } catch (err) {
+    console.error('❌ Error al obtener monto:', err);
+    res.status(500).json({ error: 'Error al obtener monto' });
+  }
 });
+
 
 // 👉 Actualizar monto
 router.post('/monto', verificarToken, async (req, res) => {
