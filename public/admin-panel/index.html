@@ -204,25 +204,26 @@ async function cargarSocios() {
       sociosFiltrados.forEach(s => {
   const fila = document.createElement('tr');
   fila.innerHTML = `
-    <td>${s.numero}</td>
-    <td>${s.dni}</td>
-    <td>${s.nombre}</td>
-    <td>${s.apellido}</td>
-    <td>${s.categoria}</td>
-    <td>${s.telefono ?? '—'}</td>
-    <td>${s.nacimiento ?? ''}</td>
-    <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
-    <td>${s.fecha_ingreso ?? ''}</td>
-    <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
-    <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
-    <td>${s.foto_url ? `<img src='${s.foto_url}' width='30' style='border-radius:4px'/>` : 'Sin foto'}</td>
-    <td>
-      <div class="d-flex justify-content-center gap-1">
-        <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
-        <button class="btn btn-sm btn-outline-warning btn-eliminar" data-id="${s.numero}">🗑️</button>
-      </div>
-    </td>
-  `;
+  <td>${s.numero}</td>
+  <td>${s.dni}</td>
+  <td>${s.nombre}</td>
+  <td>${s.apellido}</td>
+  <td>${s.categoria}</td>
+  <td>${s.telefono ?? '—'}</td>
+  <td>${s.nacimiento ?? ''}</td>
+  <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
+  <td>${s.fecha_ingreso ?? ''}</td>
+  <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
+  <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
+  <td>${s.foto_url ? '<img src="' + s.foto_url + '" width="30" style="border-radius:4px"/>' : 'Sin foto'}</td>
+  <td>
+    <div class="d-flex justify-content-center gap-1">
+      <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
+      <button class="btn btn-sm btn-outline-warning btn-eliminar" data-id="${s.numero}">🗑️</button>
+    </div>
+  </td>
+`;
+
   tabla.appendChild(fila);
 
       });
