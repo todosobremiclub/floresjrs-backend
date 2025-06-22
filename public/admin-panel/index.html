@@ -166,7 +166,7 @@ function logout() {
 
 function fetchConToken(url, opciones = {}) {
   opciones.headers = opciones.headers || {};
-  opciones.headers['Authorization'] = \`Bearer \${token}`;
+  opciones.headers['Authorization'] = `Bearer ${token}`;
   return fetch(url, opciones);
 }
 
