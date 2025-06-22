@@ -200,13 +200,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const socio_id = parseInt(opcion.dataset.numero);
     const fecha_pago = inputFecha.value;
-    const monto = 0; // ya no se define desde el frontend, se calcula en backend si hace falta
-
     try {
-      const res = await fetchConToken('/pagos', {
-        method: 'POST',
-        body: JSON.stringify({ socio_id, fecha_pago, monto })
-      });
+  const res = await fetchConToken('/pagos', {
+    method: 'POST',
+    body: JSON.stringify({ socio_id, fecha_pago })
+  });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       alert('✅ Pago registrado correctamente');
