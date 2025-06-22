@@ -112,49 +112,6 @@
     </div>
   </div>
 
-<!-- Modal, scripts y lógica serán añadidos en la siguiente parte si excede el límite -->
-
-<!-- Modal Nuevo Socio -->
-<div class="modal fade" id="modalNuevoSocio" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form class="modal-content" id="formNuevoSocio">
-      <div class="modal-header">
-        <h5 class="modal-title">Socio</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <input class="form-control mb-2" placeholder="Número de socio" id="numero_socio" required />
-        <input class="form-control mb-2" placeholder="DNI" id="dni" required />
-        <input class="form-control mb-2" placeholder="Nombre" id="nombre" required />
-        <input class="form-control mb-2" placeholder="Apellido" id="apellido" required />
-        <input class="form-control mb-2" placeholder="Subcategoría" id="subcategoria" />
-        <input class="form-control mb-2" placeholder="Teléfono" id="telefono" />
-        <div class="mb-2">
-          <label for="fecha_nacimiento" class="form-label text-dark">Fecha de Nacimiento</label>
-          <input class="form-control" type="date" id="fecha_nacimiento" required />
-        </div>
-        <div class="mb-2">
-          <label for="fecha_ingreso" class="form-label text-dark">Fecha de Ingreso</label>
-          <input class="form-control" type="date" id="fecha_ingreso" required />
-        </div>
-        <div class="form-check mb-2">
-          <input class="form-check-input" type="checkbox" id="activo" />
-          <label class="form-check-label text-dark" for="activo">Activo</label>
-        </div>
-        <div class="form-check mb-2">
-          <input class="form-check-input" type="checkbox" id="becado" />
-          <label class="form-check-label text-dark" for="becado">Becado</label>
-        </div>
-        <input class="form-control mb-2" type="file" id="foto" accept="image/*" />
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-yellow">Guardar</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <script>
 const token = localStorage.getItem('token');
 if (!token) window.location.href = '/admin-panel/login.html';
@@ -169,6 +126,12 @@ function fetchConToken(url, opciones = {}) {
   opciones.headers['Authorization'] = `Bearer ${token}`;
   return fetch(url, opciones);
 }
+
+// tu script de lógica JavaScript sigue aquí...
+</script>
+</body>
+</html>
+
 
 async function cargarSocios() {
   try {
