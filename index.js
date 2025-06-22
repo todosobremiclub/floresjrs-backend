@@ -27,7 +27,7 @@ app.use('/socio', socioRoutes);            // Rutas protegidas
 app.use('/api/admin', adminRoutes);        // Login admin
 app.use('/pagos', pagosRoutes);            // 👉 NUEVA ruta para pagos
 app.use('/api/monto', montoRoutes); // 👉 para obtener y actualizar el monto
-
+app.use('/config/categorias', require('./routes/categoriasRoutes'));
 
 // 👉 Redirección raíz
 app.get('/', (req, res) => {

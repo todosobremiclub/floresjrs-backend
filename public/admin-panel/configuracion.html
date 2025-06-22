@@ -40,6 +40,13 @@
     .table td, .table th {
       vertical-align: middle;
     }
+    details summary {
+      cursor: pointer;
+      font-weight: bold;
+    }
+    details ul {
+      padding-left: 1rem;
+    }
     @media (max-width: 767px) {
       .sidebar {
         position: relative;
@@ -66,14 +73,15 @@
   <a href="configuracion.html" class="btn btn-light fw-bold">⚙️ Configuración</a>
   <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
 </div>
+
 <div class="main-content">
   <div class="text-center mb-4">
-    <img src="flores_jrs_logo.png" class="logo mb-2" alt="Escudo">
+    <img src="flores_jrs_logo.png" class="logo mb-2" alt="Escudo" />
     <h2 class="text-warning m-0">Configuración del Sistema</h2>
   </div>
 
   <div class="mb-4">
-    <label for="montoCuota" class="form-label">Monto de cuota actual</label>
+    <label for="montoCuota" class="form-label">💰 Monto de cuota actual</label>
     <div class="input-group">
       <span class="input-group-text">$</span>
       <input type="number" id="montoCuota" class="form-control" placeholder="Ej: 5000" />
@@ -81,31 +89,31 @@
     </div>
   </div>
 
-  <hr class="border-light">
+  <hr class="border-light" />
 
-  <div class="mb-3">
-    <label for="nuevaCategoria" class="form-label">Agregar nueva categoría</label>
-    <div class="input-group">
-      <input type="text" id="nuevaCategoria" class="form-control" placeholder="Ej: Juvenil, Senior" />
-      <button class="btn btn-success" id="agregarCategoria">Agregar</button>
-    </div>
+  <div class="mb-4">
+    <h5 class="text-white">🏷️ Categorías deportivas</h5>
+    <details class="mb-3">
+      <summary class="text-light">Ver categorías existentes</summary>
+      <ul id="listaCategorias" class="list-group list-group-flush bg-transparent mt-2"></ul>
+    </details>
+
+    <form id="formCategoria" class="d-flex gap-2">
+      <input type="text" id="nuevaCategoria" class="form-control" placeholder="Nueva categoría" required />
+      <button type="submit" class="btn btn-yellow">Agregar</button>
+    </form>
   </div>
-
-  <table class="table table-bordered text-white bg-white text-dark">
-    <thead class="table-primary">
-      <tr><th>Categorías existentes</th><th style="width: 100px">Acciones</th></tr>
-    </thead>
-    <tbody id="tablaCategorias"></tbody>
-  </table>
 </div>
 
 <script>
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'login.html';
+
 function logout() {
   localStorage.removeItem('token');
   window.location.href = 'login.html';
 }
+
 function fetchConToken(url, options = {}) {
   return fetch(url, {
     ...options,
@@ -117,77 +125,71 @@ function fetchConToken(url, options = {}) {
   });
 }
 
-// Lógica base (faltan rutas reales de backend)
 document.addEventListener('DOMContentLoaded', () => {
   const montoInput = document.getElementById('montoCuota');
   const btnGuardar = document.getElementById('guardarMonto');
-  const nuevaCategoriaInput = document.getElementById('nuevaCategoria');
-  const btnAgregar = document.getElementById('agregarCategoria');
-  const tablaCategorias = document.getElementById('tablaCategorias');
+  const listaCategorias = document.getElementById('listaCategorias');
+  const formCategoria = document.getElementById('formCategoria');
+  const inputCategoria = document.getElementById('nuevaCategoria');
 
-  function cargarMonto() {
-    fetchConToken('/pagos/monto')
-      .then(res => res.json())
-      .then(data => montoInput.value = data.monto)
-      .catch(() => alert('Error al cargar el monto actual'));
-  }
+  // Cargar monto actual
+  fetchConToken('/pagos/monto')
+    .then(res => res.json())
+    .then(data => montoInput.value = data.monto)
+    .catch(() => alert('Error al cargar el monto actual'));
 
-  function cargarCategorias() {
-    fetchConToken('/config/categorias')
-      .then(res => res.json())
-      .then(data => {
-        tablaCategorias.innerHTML = '';
-        data.forEach(cat => {
-          const fila = document.createElement('tr');
-          fila.innerHTML = `
-            <td>${cat}</td>
-            <td><button class="btn btn-sm btn-danger" onclick="eliminarCategoria('${cat}')">Eliminar</button></td>
-          `;
-          tablaCategorias.appendChild(fila);
-        });
-      });
-  }
-
+  // Guardar nuevo monto
   btnGuardar.addEventListener('click', () => {
     const monto = parseFloat(montoInput.value);
     if (isNaN(monto) || monto <= 0) return alert('Ingresá un monto válido');
-
     fetchConToken('/pagos/monto', {
       method: 'POST',
       body: JSON.stringify({ monto })
-    })
-    .then(res => res.ok ? alert('Monto actualizado') : alert('Error al guardar'));
-  });
-
-  btnAgregar.addEventListener('click', () => {
-    const categoria = nuevaCategoriaInput.value.trim();
-    if (!categoria) return alert('Ingresá una categoría');
-
-    fetchConToken('/config/categorias', {
-      method: 'POST',
-      body: JSON.stringify({ categoria })
     }).then(res => {
-      if (res.ok) {
-        nuevaCategoriaInput.value = '';
-        cargarCategorias();
-      } else alert('Error al guardar categoría');
+      if (res.ok) alert('✅ Monto actualizado');
+      else alert('❌ Error al guardar el monto');
     });
   });
 
-  window.eliminarCategoria = (categoria) => {
-    if (!confirm(`¿Eliminar la categoría "${categoria}"?`)) return;
-    fetchConToken(`/config/categorias`, {
-      method: 'DELETE',
-      body: JSON.stringify({ categoria })
-    }).then(res => {
-      if (res.ok) cargarCategorias();
-      else alert('No se pudo eliminar la categoría');
-    });
-  };
+  // Cargar categorías
+  async function cargarCategorias() {
+    try {
+      const res = await fetchConToken('/config/categorias');
+      const categorias = await res.json();
+      listaCategorias.innerHTML = '';
+      categorias.forEach(cat => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item bg-transparent text-white border-0 ps-2';
+        li.textContent = cat.nombre;
+        listaCategorias.appendChild(li);
+      });
+    } catch {
+      alert('❌ Error al cargar categorías');
+    }
+  }
 
-  cargarMonto();
+  // Agregar nueva categoría
+  formCategoria.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nombre = inputCategoria.value.trim();
+    if (!nombre) return;
+
+    try {
+      const res = await fetchConToken('/config/categorias', {
+        method: 'POST',
+        body: JSON.stringify({ nombre })
+      });
+      if (!res.ok) throw new Error();
+      inputCategoria.value = '';
+      cargarCategorias();
+    } catch {
+      alert('❌ Error al guardar categoría');
+    }
+  });
+
   cargarCategorias();
 });
 </script>
 </body>
 </html>
+
