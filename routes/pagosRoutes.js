@@ -31,15 +31,28 @@ router.post('/monto', verificarToken, async (req, res) => {
 router.post('/', verificarToken, async (req, res) => {
   const { socio_id, fecha_pago, monto } = req.body;
 
-  if (!socio_id || !fecha_pago || !monto || isNaN(monto)) {
-    return res.status(400).json({ error: 'Datos incompletos' });
+if (!socio_id || !fecha_pago) {
+  return res.status(400).json({ error: 'Datos incompletos' });
+}
+
+let montoFinal = monto;
+if (!montoFinal || isNaN(montoFinal)) {
+  // Si no viene monto, lo tomamos de la configuración
+  try {
+    const resultado = await db.query(`SELECT valor FROM configuracion WHERE clave = 'monto_cuota'`);
+    montoFinal = parseFloat(resultado.rows[0]?.valor || '0');
+  } catch (err) {
+    console.error('❌ Error al obtener monto de cuota desde configuración', err);
+    return res.status(500).json({ error: 'Error al obtener monto de cuota' });
   }
+}
+
 
   try {
     await db.query(
       `INSERT INTO pagos (socio_id, fecha_pago, monto, observaciones)
        VALUES ($1, $2, $3, $4)`,
-      [socio_id, fecha_pago, monto, 'admin']
+      [socio_id, fecha_pago, montoFinal, 'admin']
     );
     res.status(201).json({ mensaje: 'Pago registrado correctamente' });
   } catch (err) {
