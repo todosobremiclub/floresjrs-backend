@@ -1,211 +1,200 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Novedades - Flores Jrs</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor de Novedades - Flores Jrs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
-    body { background-color: #004aad; color: white; margin: 0; }
-    .sidebar {
-      width: 200px; background-color: #002f6c; height: 100vh;
-      position: fixed; top: 0; left: 0; padding: 1rem;
-      display: flex; flex-direction: column; gap: 1.5rem;
-      z-index: 1040; transition: transform 0.3s ease;
-    }
-    .sidebar h4 { color: white; }
-    .sidebar button, .sidebar a { text-align: left; width: 100%; }
-    .main-content { margin-left: 200px; padding: 2rem; transition: margin-left 0.3s ease; }
-    .btn-yellow { background-color: #ffd500; color: black; font-weight: bold; }
-    .logo { height: 50px; }
-    .toggle-btn {
-      background: none; border: none; color: white; font-size: 1.5rem;
-      position: fixed; top: 10px; left: 10px; z-index: 1050; display: none;
-    }
-    @media (max-width: 767px) {
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.show { transform: translateX(0); }
-      .toggle-btn { display: block; }
-      .main-content { margin-left: 0 !important; padding: 1rem; }
-    }
+    body { background-color: #f0f2f5; }
+    .header { background-color: #002f6c; color: white; padding: 1rem; display: flex; align-items: center; justify-content: space-between; }
+    .header h1 { font-size: 1.5rem; margin: 0; }
+    .container { max-width: 900px; margin: 2rem auto; }
+    .card-title { font-weight: bold; color: #004aad; }
+    .form-section { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+    .table-wrapper { margin-top: 2rem; }
+    .table img { max-height: 60px; }
+    .modal-title { font-weight: bold; }
   </style>
 </head>
 <body>
-<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-<div class="sidebar" id="sidebar">
-  <h4>Menú</h4>
-  <a href="/admin-panel/index.html" class="btn btn-outline-light">🏠 Home</a>
-  <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
-  <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
-  <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
-  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
-  <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
-</div>
-
-<div class="main-content">
-  <div class="text-center mb-4">
-    <img src="flores_jrs_logo.png" alt="Escudo" class="logo mb-2" />
-    <h2 class="text-warning m-0">Gestión de Novedades</h2>
+  <div class="header">
+    <h1>📢 Novedades - Flores Jrs</h1>
+    <button class="btn btn-outline-light" onclick="logout()">Cerrar sesión</button>
   </div>
-  <form id="formNovedad" enctype="multipart/form-data" class="bg-white text-dark p-3 rounded mb-4">
-    <div class="mb-3">
-      <label for="imagen" class="form-label">Imagen (opcional)</label>
-      <input type="file" class="form-control" id="imagen" accept="image/*" />
-      <img id="preview" src="" alt="" class="img-fluid mt-2" style="max-height: 150px; display: none;" />
+  <div class="container">
+    <div class="form-section">
+      <h4 class="card-title mb-3">Publicar nueva novedad</h4>
+      <form id="formNovedad" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Título</label>
+          <input type="text" class="form-control" id="titulo" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Texto</label>
+          <textarea class="form-control" id="texto" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Imagen (opcional)</label>
+          <input type="file" class="form-control" id="imagen" accept="image/*">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Destino</label>
+          <select class="form-select" id="destino">
+            <option value="todos">Todos los socios</option>
+            <option value="categoria">Solo por categoría</option>
+            <option value="categoria_anio">Categoría + Año</option>
+          </select>
+        </div>
+        <div class="mb-3" id="categoriaContainer" style="display: none;">
+          <label class="form-label">Categoría</label>
+          <select class="form-select" id="categoria"></select>
+        </div>
+        <div class="mb-3" id="anioContainer" style="display: none;">
+          <label class="form-label">Año de nacimiento</label>
+          <input type="number" class="form-control" id="anio_nacimiento">
+        </div>
+        <button type="submit" class="btn btn-primary">Publicar</button>
+      </form>
     </div>
 
-<div class="mb-3">
-  <label for="titulo" class="form-label">Título</label>
-  <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Título de la novedad" required>
-</div>
+    <div class="table-wrapper">
+      <h4 class="card-title mb-3">Novedades publicadas</h4>
+      <table class="table table-hover bg-white rounded shadow">
+        <thead class="table-light">
+          <tr>
+            <th>Imagen</th>
+            <th>Título</th>
+            <th>Texto</th>
+            <th>Fecha</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tablaNovedades"></tbody>
+      </table>
+    </div>
+  </div>
 
-    <div class="mb-3">
-      <label for="texto" class="form-label">Texto de la novedad</label>
-      <textarea class="form-control" id="texto" rows="3" required></textarea>
-    </div>
-    <div class="mb-3">
-      <label class="form-label">Destino</label>
-      <select class="form-select" id="destino">
-        <option value="todos">Todos los socios</option>
-        <option value="categoria">Solo por categoría</option>
-        <option value="categoria_anio">Categoría + Año de nacimiento</option>
-      </select>
-    </div>
-    <div id="filtrosAdicionales" style="display: none;">
-      <div class="mb-3">
-        <label for="categoria" class="form-label">Categoría</label>
-        <select class="form-select" id="categoria"></select>
+  <!-- Modal de Edición -->
+  <div class="modal fade" id="modalEditar" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar novedad</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit_id">
+          <div class="mb-3">
+            <label class="form-label">Título</label>
+            <input type="text" class="form-control" id="edit_titulo">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Texto</label>
+            <textarea class="form-control" id="edit_texto"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="guardarCambios()">Guardar cambios</button>
+        </div>
       </div>
-      <div class="mb-3" id="anioNacContainer" style="display: none;">
-        <label for="anio_nacimiento" class="form-label">Año de nacimiento</label>
-        <input type="number" class="form-control" id="anio_nacimiento" min="1900" max="2100" />
-      </div>
     </div>
-    <button type="submit" class="btn btn-success">📤 Publicar novedad</button>
-  </form>
-  <h5 class="text-white">Novedades publicadas</h5>
-  <table class="table table-bordered bg-white text-dark">
-    <thead class="table-primary">
-      <tr>
-        <th>Imagen</th>
-        <th>Texto</th>
-        <th>Destino</th>
-        <th>Fecha</th>
-      </tr>
-    </thead>
-    <tbody id="tablaNovedades"></tbody>
-  </table>
-</div>
+  </div>
+
 <script>
 const token = localStorage.getItem('token');
-if (!token) window.location.href = 'login.html';
+if (!token) location.href = 'login.html';
 function logout() {
   localStorage.removeItem('token');
-  window.location.href = 'login.html';
+  location.href = 'login.html';
 }
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('show');
-}
-function fetchConToken(url, options = {}) {
+function fetchConToken(url, opciones = {}) {
   return fetch(url, {
-    ...options,
-    headers: {
-      Authorization: 'Bearer ' + token,
-      ...options.headers,
-    },
+    ...opciones,
+    headers: { 'Authorization': 'Bearer ' + token, ...opciones.headers },
   });
 }
 document.addEventListener('DOMContentLoaded', () => {
-  const destino = document.getElementById('destino');
-  const filtrosAdicionales = document.getElementById('filtrosAdicionales');
-  const categoriaSelect = document.getElementById('categoria');
-  const anioNacContainer = document.getElementById('anioNacContainer');
-  const preview = document.getElementById('preview');
-  destino.addEventListener('change', () => {
-    const val = destino.value;
-    filtrosAdicionales.style.display = val !== 'todos' ? 'block' : 'none';
-    anioNacContainer.style.display = val === 'categoria_anio' ? 'block' : 'none';
+  document.getElementById('destino').addEventListener('change', e => {
+    document.getElementById('categoriaContainer').style.display = e.target.value !== 'todos' ? 'block' : 'none';
+    document.getElementById('anioContainer').style.display = e.target.value === 'categoria_anio' ? 'block' : 'none';
   });
-  document.getElementById('imagen').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return preview.style.display = 'none';
-    const reader = new FileReader();
-    reader.onload = e => {
-      preview.src = e.target.result;
-      preview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  });
+
   document.getElementById('formNovedad').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const texto = document.getElementById('texto').value.trim();
-    const destino = document.getElementById('destino').value;
-    const categoria = categoriaSelect.value || null;
-    const anio_nacimiento = document.getElementById('anio_nacimiento').value || null;
-    const imagen = document.getElementById('imagen').files[0];
     const formData = new FormData();
-const titulo = document.getElementById('titulo').value;
-formData.append('titulo', titulo);
+    formData.append('titulo', document.getElementById('titulo').value);
+    formData.append('texto', document.getElementById('texto').value);
+    formData.append('destino', document.getElementById('destino').value);
+    if (document.getElementById('categoria').value)
+      formData.append('categoria', document.getElementById('categoria').value);
+    if (document.getElementById('anio_nacimiento').value)
+      formData.append('anio_nacimiento', document.getElementById('anio_nacimiento').value);
+    if (document.getElementById('imagen').files[0])
+      formData.append('imagen', document.getElementById('imagen').files[0]);
 
-    formData.append('texto', texto);
-    formData.append('destino', destino);
-    if (categoria) formData.append('categoria', categoria);
-    if (anio_nacimiento) formData.append('anio_nacimiento', anio_nacimiento);
-    if (imagen) formData.append('imagen', imagen);
-    try {
-      const res = await fetchConToken('/novedades', {
-        method: 'POST', body: formData
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      alert('✅ Novedad publicada');
-      cargarNovedades();
-    } catch (err) {
-      alert(err.message || '❌ Error al publicar novedad');
-    }
+    const res = await fetchConToken('/novedades', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (!res.ok) return alert(data.error);
+    alert('✅ Publicada');
+    document.getElementById('formNovedad').reset();
+    cargar();
   });
-  async function cargarCategorias() {
-    try {
-      const res = await fetchConToken('/config/categorias');
-      const data = await res.json();
-      categoriaSelect.innerHTML = '';
-      data.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat.nombre;
-        option.textContent = cat.nombre;
-        categoriaSelect.appendChild(option);
-      });
-    } catch {
-      categoriaSelect.innerHTML = '<option value="">(error)</option>';
-    }
-  }
-  async function cargarNovedades() {
-    try {
-      const res = await fetchConToken('/novedades');
-      const novedades = await res.json();
-      const tabla = document.getElementById('tablaNovedades');
-      tabla.innerHTML = '';
-      novedades.forEach(n => {
-        const tr = document.createElement('tr');
-       tr.innerHTML = `
-  <td>${n.imagen_url ? `<img src="${n.imagen_url}" style="max-height: 80px;" />` : '—'}</td>
-  <td><strong>${n.titulo || '(Sin título)'}</strong><br>${n.texto}</td>
-  <td>${n.destino === 'todos' ? 'Todos los socios' :
-    n.destino === 'categoria' ? `Categoría: ${n.categoria}` :
-    `Categoría: ${n.categoria}, Año: ${n.anio_nacimiento}`}</td>
-  <td>${new Date(n.fecha).toLocaleString()}</td>
-`;
 
-        tabla.appendChild(tr);
-      });
-    } catch {
-      alert('❌ Error al cargar novedades');
-    }
-  }
-  cargarCategorias();
-  cargarNovedades();
+  cargar();
 });
+
+async function cargar() {
+  const res = await fetchConToken('/novedades');
+  const novedades = await res.json();
+  const tabla = document.getElementById('tablaNovedades');
+  tabla.innerHTML = '';
+  novedades.forEach(n => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${n.imagen_url ? `<img src="${n.imagen_url}">` : '—'}</td>
+      <td>${n.titulo}</td>
+      <td>${n.texto}</td>
+      <td>${new Date(n.fecha).toLocaleDateString()}</td>
+      <td>
+        <button class="btn btn-sm btn-warning me-1" onclick="editar(${n.id}, '${n.titulo}', '${n.texto.replace(/'/g, '\\'')}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="eliminar(${n.id})">🗑️</button>
+      </td>`;
+    tabla.appendChild(tr);
+  });
+}
+
+function editar(id, titulo, texto) {
+  document.getElementById('edit_id').value = id;
+  document.getElementById('edit_titulo').value = titulo;
+  document.getElementById('edit_texto').value = texto;
+  new bootstrap.Modal(document.getElementById('modalEditar')).show();
+}
+
+async function guardarCambios() {
+  const id = document.getElementById('edit_id').value;
+  const titulo = document.getElementById('edit_titulo').value;
+  const texto = document.getElementById('edit_texto').value;
+  const res = await fetchConToken('/novedades/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ titulo, texto })
+  });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
+  cargar();
+}
+
+async function eliminar(id) {
+  if (!confirm('¿Eliminar esta novedad?')) return;
+  const res = await fetchConToken('/novedades/' + id, { method: 'DELETE' });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  cargar();
+}
 </script>
 </body>
 </html>
