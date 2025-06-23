@@ -6,94 +6,129 @@
   <title>Gestión de Socios - Flores Jrs</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <style>
-    body {
-      background-color: #004aad;
-      color: white;
-      margin: 0;
-    }
-    .sidebar {
-      width: 200px;
-      background-color: #002f6c;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-    .sidebar h4 {
-      color: white;
-    }
-    .sidebar button,
-    .sidebar a {
-      text-align: left;
-      width: 100%;
-    }
-    .main-content {
-      margin-left: 200px;
-      padding: 2rem;
-    }
-    .table td, .table th {
-      vertical-align: middle;
-    }
-    .btn-yellow {
-      background-color: #ffd500;
-      color: black;
-      font-weight: bold;
-      font-size: 0.9rem;
-      padding: 6px 12px;
-      line-height: 1;
-    }
-    .logo {
-      height: 50px;
-    }
-    h2.text-warning {
-      font-size: 1.4rem;
-    }
-    #buscador {
-      height: 36px;
-      font-size: 0.9rem;
-      padding: 0.25rem 0.75rem;
-    }
-    #btnAbrirFormulario {
-      height: 36px;
-      font-size: 0.9rem;
-      padding: 0 12px;
-    }
+ <style>
+  body {
+    background-color: #004aad;
+    color: white;
+    margin: 0;
+  }
 
-.toggle-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  z-index: 1050;
-  display: none;
-}
-
-@media (max-width: 767px) {
   .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-  .sidebar.show {
-    transform: translateX(0);
-  }
-  .toggle-btn {
-    display: block;
-  }
-  .main-content {
-    margin-left: 0 !important;
+    width: 200px;
+    background-color: #002f6c;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    z-index: 1040;
   }
-}
 
-  </style>
+  .sidebar h4 {
+    color: white;
+  }
+
+  .sidebar button,
+  .sidebar a {
+    text-align: left;
+    width: 100%;
+  }
+
+  .main-content {
+    margin-left: 200px;
+    padding: 2rem;
+  }
+
+  .table {
+    table-layout: auto;
+  }
+
+  .table td, .table th {
+    vertical-align: middle;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  .table td:nth-last-child(-n+3),
+  .table th:nth-last-child(-n+3) {
+    text-align: center;
+  }
+
+  .btn-yellow {
+    background-color: #ffd500;
+    color: black;
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    line-height: 1;
+  }
+
+  .logo {
+    height: 50px;
+  }
+
+  h2.text-warning {
+    font-size: 1.4rem;
+  }
+
+  #buscador {
+    height: 36px;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  #btnAbrirFormulario {
+    height: 36px;
+    font-size: 0.9rem;
+    padding: 0 12px;
+  }
+
+  .toggle-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1050;
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.show {
+      transform: translateX(0);
+    }
+
+    .toggle-btn {
+      display: block;
+    }
+
+    .main-content {
+      margin-left: 0 !important;
+      padding: 1rem;
+    }
+
+    .table td, .table th {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.4rem;
+    }
+
+    .btn-yellow {
+      font-size: 0.8rem;
+    }
+  }
+</style>
+
 </head>
 <body>
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
