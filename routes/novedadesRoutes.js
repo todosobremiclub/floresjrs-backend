@@ -9,7 +9,8 @@ const subirAImgur = require('../utils/subirAImgur');
 // POST /novedades → publicar novedad con texto, imagen y filtros de destino
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
-    const { texto, destino, categoria, anio_nacimiento } = req.body;
+    const { titulo, texto, destino, categoria, anio_nacimiento } = req.body;
+
     if (!texto || !destino) {
       return res.status(400).json({ error: 'Faltan datos obligatorios' });
     }
@@ -21,9 +22,10 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
     }
 
     await db.query(`
-      INSERT INTO novedades (texto, imagen_url, destino, categoria, anio_nacimiento)
-      VALUES ($1, $2, $3, $4, $5)
-    `, [texto, imagen_url, destino, categoria || null, anio_nacimiento || null]);
+  INSERT INTO novedades (titulo, texto, imagen_url, destino, categoria, anio_nacimiento)
+  VALUES ($1, $2, $3, $4, $5, $6)
+`, [titulo, texto, imagen_url, destino, categoria || null, anio_nacimiento || null]);
+
 
     res.json({ mensaje: 'Novedad publicada' });
   } catch (err) {
@@ -38,6 +40,7 @@ router.get('/', verificarToken, async (req, res) => {
     const resultado = await db.query(`
       SELECT 
         id,
+        titulo,
         texto,
         imagen_url,
         destino,
