@@ -94,9 +94,22 @@
   <div class="mb-4">
     <h5 class="text-white">🏷️ Categorías deportivas</h5>
     <details class="mb-3">
-      <summary class="text-light">Ver categorías existentes</summary>
-      <ul id="listaCategorias" class="list-group list-group-flush bg-transparent mt-2"></ul>
-    </details>
+  <summary class="text-light">Ver categorías existentes</summary>
+  <div class="table-responsive mt-2">
+    <table class="table table-sm table-bordered table-dark table-striped">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th style="width:40px">💾</th>
+          <th style="width:40px">🗑️</th>
+        </tr>
+      </thead>
+      <tbody id="tablaCategorias"></tbody>
+    </table>
+  </div>
+</details>
+
+
 
     <form id="formCategoria" class="d-flex gap-2">
       <input type="text" id="nuevaCategoria" class="form-control" placeholder="Nueva categoría" required />
@@ -125,10 +138,35 @@ function fetchConToken(url, options = {}) {
   });
 }
 
+async function cargarCategorias() {
+  try {
+    const res = await fetchConToken('/config/categorias');
+    const categorias = await res.json();
+    const tabla = document.getElementById('tablaCategorias');
+    tabla.innerHTML = '';
+    categorias.forEach(cat => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>
+          <input type="text" class="form-control form-control-sm" value="${cat.nombre}" data-original="${cat.nombre}" data-id="${cat.id}" />
+        </td>
+        <td>
+          <button class="btn btn-sm btn-success btn-guardar" data-id="${cat.id}">💾</button>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-danger btn-eliminar" data-id="${cat.id}">🗑️</button>
+        </td>
+      `;
+      tabla.appendChild(fila);
+    });
+  } catch {
+    alert('❌ Error al cargar categorías');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const montoInput = document.getElementById('montoCuota');
   const btnGuardar = document.getElementById('guardarMonto');
-  const listaCategorias = document.getElementById('listaCategorias');
   const formCategoria = document.getElementById('formCategoria');
   const inputCategoria = document.getElementById('nuevaCategoria');
 
@@ -151,23 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Cargar categorías
-  async function cargarCategorias() {
-    try {
-      const res = await fetchConToken('/config/categorias');
-      const categorias = await res.json();
-      listaCategorias.innerHTML = '';
-      categorias.forEach(cat => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item bg-transparent text-white border-0 ps-2';
-        li.textContent = cat.nombre;
-        listaCategorias.appendChild(li);
-      });
-    } catch {
-      alert('❌ Error al cargar categorías');
-    }
-  }
-
   // Agregar nueva categoría
   formCategoria.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -188,6 +209,46 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   cargarCategorias();
+});
+
+// Edición y eliminación
+// Agregar eventos para botones de editar/eliminar
+document.body.addEventListener('click', async (e) => {
+  const id = e.target.dataset.id;
+  if (!id) return;
+
+  if (e.target.classList.contains('btn-guardar')) {
+    const input = document.querySelector(`input[data-id="${id}"]`);
+    const nuevoNombre = input.value.trim();
+    if (!nuevoNombre || nuevoNombre === input.dataset.original) return;
+
+    try {
+      const res = await fetchConToken('/config/categorias', {
+        method: 'PUT',
+        body: JSON.stringify({ id, nombre: nuevoNombre })
+      });
+      if (!res.ok) throw new Error();
+      alert('✅ Categoría actualizada');
+      cargarCategorias();
+    } catch {
+      alert('❌ No se pudo actualizar la categoría');
+    }
+  }
+
+  if (e.target.classList.contains('btn-eliminar')) {
+    if (!confirm('¿Eliminar esta categoría?')) return;
+    try {
+      const res = await fetchConToken('/config/categorias', {
+        method: 'DELETE',
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) throw new Error();
+      alert('✅ Categoría eliminada');
+      cargarCategorias();
+    } catch {
+      alert('❌ No se pudo eliminar la categoría');
+    }
+  }
 });
 </script>
 </body>
