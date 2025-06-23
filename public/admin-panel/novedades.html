@@ -167,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!res.ok) return alert(data.error);
     alert('✅ Publicada');
     document.getElementById('formNovedad').reset();
+    cargarCategorias();
+
     cargar();
   });
 
@@ -224,6 +226,24 @@ async function eliminar(id) {
   if (!res.ok) return alert(data.error);
   cargar();
 }
+
+async function cargarCategorias() {
+  try {
+    const res = await fetchConToken('/config/categorias');
+    const data = await res.json();
+    const categoriaSelect = document.getElementById('categoria');
+    categoriaSelect.innerHTML = '';
+    data.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat.nombre;
+      option.textContent = cat.nombre;
+      categoriaSelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error('❌ Error al cargar categorías:', err);
+  }
+}
+
 </script>
 </body>
 </html>
