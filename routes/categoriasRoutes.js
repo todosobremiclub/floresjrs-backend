@@ -44,7 +44,7 @@ router.delete('/', verificarToken, async (req, res) => {
 
 // PUT - Actualizar nombre de categoría por ID
 router.put('/:id', verificarToken, async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   const { nombre } = req.body;
   if (!nombre) return res.status(400).json({ error: 'Falta el nuevo nombre' });
 
@@ -58,4 +58,5 @@ router.put('/:id', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
+
 
