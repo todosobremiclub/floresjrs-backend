@@ -6,8 +6,8 @@ const verificarToken = require('../middlewares/verificarToken');
 // GET - Obtener todas las categorías
 router.get('/', verificarToken, async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM categorias ORDER BY nombre');
-    res.json(result.rows);
+    const resultado = await db.query('SELECT id, nombre FROM categorias ORDER BY nombre');
+    res.json(resultado.rows);
   } catch (err) {
     console.error('❌ Error al obtener categorías:', err);
     res.status(500).json({ error: 'Error al obtener categorías' });
@@ -17,24 +17,24 @@ router.get('/', verificarToken, async (req, res) => {
 // POST - Agregar nueva categoría
 router.post('/', verificarToken, async (req, res) => {
   const { nombre } = req.body;
-  if (!nombre) return res.status(400).json({ error: 'Nombre requerido' });
+  if (!nombre) return res.status(400).json({ error: 'Falta el nombre' });
 
   try {
     await db.query('INSERT INTO categorias (nombre) VALUES ($1)', [nombre]);
-    res.status(201).json({ mensaje: 'Categoría agregada correctamente' });
+    res.status(201).json({ mensaje: 'Categoría guardada' });
   } catch (err) {
-    console.error('❌ Error al agregar categoría:', err);
-    res.status(500).json({ error: 'Error al agregar categoría' });
+    console.error('❌ Error al guardar categoría:', err);
+    res.status(500).json({ error: 'Error al guardar categoría' });
   }
 });
 
-// DELETE - Eliminar una categoría
+// DELETE - Eliminar categoría por ID
 router.delete('/', verificarToken, async (req, res) => {
-  const { nombre } = req.body;
-  if (!nombre) return res.status(400).json({ error: 'Nombre requerido' });
+  const { id } = req.body;
+  if (!id) return res.status(400).json({ error: 'Falta el ID' });
 
   try {
-    await db.query('DELETE FROM categorias WHERE nombre = $1', [nombre]);
+    await db.query('DELETE FROM categorias WHERE id = $1', [id]);
     res.json({ mensaje: 'Categoría eliminada' });
   } catch (err) {
     console.error('❌ Error al eliminar categoría:', err);
@@ -42,4 +42,20 @@ router.delete('/', verificarToken, async (req, res) => {
   }
 });
 
+// PUT - Actualizar nombre de categoría por ID
+router.put('/:id', verificarToken, async (req, res) => {
+  const id = req.params.id;
+  const { nombre } = req.body;
+  if (!nombre) return res.status(400).json({ error: 'Falta el nuevo nombre' });
+
+  try {
+    await db.query('UPDATE categorias SET nombre = $1 WHERE id = $2', [nombre, id]);
+    res.json({ mensaje: 'Categoría actualizada' });
+  } catch (err) {
+    console.error('❌ Error al actualizar categoría:', err);
+    res.status(500).json({ error: 'Error al actualizar categoría' });
+  }
+});
+
 module.exports = router;
+
