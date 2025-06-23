@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Novedades - Flores Jrs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body { background-color: #004aad; color: white; margin: 0; }
+    .sidebar {
+      width: 200px; background-color: #002f6c; height: 100vh;
+      position: fixed; top: 0; left: 0; padding: 1rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+      z-index: 1040; transition: transform 0.3s ease;
+    }
+    .sidebar h4 { color: white; }
+    .sidebar button, .sidebar a { text-align: left; width: 100%; }
+    .main-content { margin-left: 200px; padding: 2rem; transition: margin-left 0.3s ease; }
+    .btn-yellow { background-color: #ffd500; color: black; font-weight: bold; }
+    .logo { height: 50px; }
+    .toggle-btn {
+      background: none; border: none; color: white; font-size: 1.5rem;
+      position: fixed; top: 10px; left: 10px; z-index: 1050; display: none;
+    }
+    @media (max-width: 767px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.show { transform: translateX(0); }
+      .toggle-btn { display: block; }
+      .main-content { margin-left: 0 !important; padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar" id="sidebar">
+  <h4>Menú</h4>
+  <a href="index.html" class="btn btn-outline-light">🏠 Home</a>
+  <a href="pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+  <a href="novedades.html" class="btn btn-outline-light">📢 Novedades</a>
+  <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
+  <a href="configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+  <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
+</div>
+<div class="main-content">
+  <div class="text-center mb-4">
+    <img src="flores_jrs_logo.png" alt="Escudo" class="logo mb-2" />
+    <h2 class="text-warning m-0">Gestión de Novedades</h2>
+  </div>
+  <form id="formNovedad" enctype="multipart/form-data" class="bg-white text-dark p-3 rounded mb-4">
+    <div class="mb-3">
+      <label for="imagen" class="form-label">Imagen (opcional)</label>
+      <input type="file" class="form-control" id="imagen" accept="image/*" />
+      <img id="preview" src="" alt="" class="img-fluid mt-2" style="max-height: 150px; display: none;" />
+    </div>
+    <div class="mb-3">
+      <label for="texto" class="form-label">Texto de la novedad</label>
+      <textarea class="form-control" id="texto" rows="3" required></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Destino</label>
+      <select class="form-select" id="destino">
+        <option value="todos">Todos los socios</option>
+        <option value="categoria">Solo por categoría</option>
+        <option value="categoria_anio">Categoría + Año de nacimiento</option>
+      </select>
+    </div>
+    <div id="filtrosAdicionales" style="display: none;">
+      <div class="mb-3">
+        <label for="categoria" class="form-label">Categoría</label>
+        <select class="form-select" id="categoria"></select>
+      </div>
+      <div class="mb-3" id="anioNacContainer" style="display: none;">
+        <label for="anio_nacimiento" class="form-label">Año de nacimiento</label>
+        <input type="number" class="form-control" id="anio_nacimiento" min="1900" max="2100" />
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success">📤 Publicar novedad</button>
+  </form>
+  <h5 class="text-white">Novedades publicadas</h5>
+  <table class="table table-bordered bg-white text-dark">
+    <thead class="table-primary">
+      <tr>
+        <th>Imagen</th>
+        <th>Texto</th>
+        <th>Destino</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody id="tablaNovedades"></tbody>
+  </table>
+</div>
+<script>
+const token = localStorage.getItem('token');
+if (!token) window.location.href = 'login.html';
+function logout() {
+  localStorage.removeItem('token');
+  window.location.href = 'login.html';
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('show');
+}
+function fetchConToken(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      Authorization: 'Bearer ' + token,
+      ...options.headers,
+    },
+  });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const destino = document.getElementById('destino');
+  const filtrosAdicionales = document.getElementById('filtrosAdicionales');
+  const categoriaSelect = document.getElementById('categoria');
+  const anioNacContainer = document.getElementById('anioNacContainer');
+  const preview = document.getElementById('preview');
+  destino.addEventListener('change', () => {
+    const val = destino.value;
+    filtrosAdicionales.style.display = val !== 'todos' ? 'block' : 'none';
+    anioNacContainer.style.display = val === 'categoria_anio' ? 'block' : 'none';
+  });
+  document.getElementById('imagen').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return preview.style.display = 'none';
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('formNovedad').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const texto = document.getElementById('texto').value.trim();
+    const destino = document.getElementById('destino').value;
+    const categoria = categoriaSelect.value || null;
+    const anio_nacimiento = document.getElementById('anio_nacimiento').value || null;
+    const imagen = document.getElementById('imagen').files[0];
+    const formData = new FormData();
+    formData.append('texto', texto);
+    formData.append('destino', destino);
+    if (categoria) formData.append('categoria', categoria);
+    if (anio_nacimiento) formData.append('anio_nacimiento', anio_nacimiento);
+    if (imagen) formData.append('imagen', imagen);
+    try {
+      const res = await fetchConToken('/novedades', {
+        method: 'POST', body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      alert('✅ Novedad publicada');
+      cargarNovedades();
+    } catch (err) {
+      alert(err.message || '❌ Error al publicar novedad');
+    }
+  });
+  async function cargarCategorias() {
+    try {
+      const res = await fetchConToken('/categorias');
+      const data = await res.json();
+      categoriaSelect.innerHTML = '';
+      data.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.nombre;
+        option.textContent = cat.nombre;
+        categoriaSelect.appendChild(option);
+      });
+    } catch {
+      categoriaSelect.innerHTML = '<option value="">(error)</option>';
+    }
+  }
+  async function cargarNovedades() {
+    try {
+      const res = await fetchConToken('/novedades');
+      const novedades = await res.json();
+      const tabla = document.getElementById('tablaNovedades');
+      tabla.innerHTML = '';
+      novedades.forEach(n => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${n.imagen_url ? `<img src="${n.imagen_url}" style="max-height: 80px;" />` : '—'}</td>
+          <td>${n.texto}</td>
+          <td>${n.destino === 'todos' ? 'Todos los socios' :
+            n.destino === 'categoria' ? `Categoría: ${n.categoria}` :
+            `Categoría: ${n.categoria}, Año: ${n.anio_nacimiento}`}</td>
+          <td>${new Date(n.fecha).toLocaleString()}</td>
+        `;
+        tabla.appendChild(tr);
+      });
+    } catch {
+      alert('❌ Error al cargar novedades');
+    }
+  }
+  cargarCategorias();
+  cargarNovedades();
+});
+</script>
+</body>
+</html>
+
