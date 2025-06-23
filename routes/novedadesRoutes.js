@@ -59,18 +59,19 @@ router.get('/', verificarToken, async (req, res) => {
 // PUT /novedades/:id → editar novedad
 router.put('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
-  const { titulo, texto, destino, categoria, anio_nacimiento } = req.body;
+  const { titulo, texto } = req.body;
+
+  if (!titulo || !texto) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
 
   try {
     await db.query(`
       UPDATE novedades
       SET titulo = $1,
-          texto = $2,
-          destino = $3,
-          categoria = $4,
-          anio_nacimiento = $5
-      WHERE id = $6
-    `, [titulo, texto, destino, categoria || null, anio_nacimiento || null, id]);
+          texto = $2
+      WHERE id = $3
+    `, [titulo, texto, id]);
 
     res.json({ mensaje: 'Novedad actualizada correctamente' });
   } catch (err) {
