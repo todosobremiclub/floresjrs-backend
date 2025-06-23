@@ -7,137 +7,39 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
-    body {
-      background-color: #004aad;
-      color: white;
-      margin: 0;
-    }
-
-    .sidebar {
-      width: 200px;
-      background-color: #002f6c;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      z-index: 1040;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar h4 {
-      color: white;
-    }
-
-    .sidebar button,
-    .sidebar a {
-      text-align: left;
-      width: 100%;
-    }
-
-    .main-content {
-      margin-left: 200px;
-      padding: 2rem;
-      transition: margin-left 0.3s ease;
-    }
-
-    .table td,
-    .table th {
-      vertical-align: middle;
-    }
-
-    .tabla-pagos td,
-    .tabla-pagos th {
-      font-size: 0.85rem;
-      padding: 0.3rem 0.5rem;
-      vertical-align: middle;
-      white-space: nowrap;
-    }
-
-    .btn-yellow {
-      background-color: #ffd500;
-      color: black;
-      font-weight: bold;
-      font-size: 0.9rem;
-      padding: 6px 12px;
-      line-height: 1;
-    }
-
-    .btn-eliminar {
-      background: none;
-      border: none;
-      color: #007bff;
-      font-size: 1.1rem;
-      padding: 4px;
-      cursor: pointer;
-    }
-
-    h2.text-warning {
-      font-size: 1.4rem;
-    }
-
-    .logo {
-      height: 50px;
-    }
-
-    .toggle-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 1050;
-      display: none;
-    }
-
+    body { background-color: #004aad; color: white; margin: 0; }
+    .sidebar { width: 200px; background-color: #002f6c; height: 100vh; position: fixed; top: 0; left: 0; padding: 1rem; display: flex; flex-direction: column; gap: 1.5rem; z-index: 1040; transition: transform 0.3s ease; }
+    .sidebar h4 { color: white; }
+    .sidebar button, .sidebar a { text-align: left; width: 100%; }
+    .main-content { margin-left: 200px; padding: 2rem; transition: margin-left 0.3s ease; }
+    .table td, .table th { vertical-align: middle; }
+    .tabla-pagos td, .tabla-pagos th { font-size: 0.85rem; padding: 0.3rem 0.5rem; vertical-align: middle; white-space: nowrap; }
+    .btn-yellow { background-color: #ffd500; color: black; font-weight: bold; font-size: 0.9rem; padding: 6px 12px; line-height: 1; }
+    .btn-eliminar { background: none; border: none; color: #007bff; font-size: 1.1rem; padding: 4px; cursor: pointer; }
+    h2.text-warning { font-size: 1.4rem; }
+    .logo { height: 50px; }
+    .toggle-btn { background: none; border: none; color: white; font-size: 1.5rem; position: fixed; top: 10px; left: 10px; z-index: 1050; display: none; }
     @media (max-width: 767px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-
-      .sidebar.show {
-        transform: translateX(0);
-      }
-
-      .toggle-btn {
-        display: block;
-      }
-
-      .main-content {
-        margin-left: 0 !important;
-        padding: 1rem;
-      }
-
-      .tabla-pagos td,
-      .tabla-pagos th {
-        font-size: 0.78rem;
-        padding: 0.25rem 0.4rem;
-      }
-
-      .btn-eliminar {
-        font-size: 1rem;
-      }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.show { transform: translateX(0); }
+      .toggle-btn { display: block; }
+      .main-content { margin-left: 0 !important; padding: 1rem; }
+      .tabla-pagos td, .tabla-pagos th { font-size: 0.78rem; padding: 0.25rem 0.4rem; }
+      .btn-eliminar { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
- <div class="sidebar" id="sidebar">
-  <h4>Menú</h4>
-  <a href="/admin-panel/index.html" class="btn btn-outline-light">🏠 Home</a>
-  <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
-  <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
-  <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
-  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
-  <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
-</div>
-
-
+  <div class="sidebar" id="sidebar">
+    <h4>Menú</h4>
+    <a href="/admin-panel/index.html" class="btn btn-outline-light">🏠 Home</a>
+    <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+    <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
+    <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
+    <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+    <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
+  </div>
 
   <div class="main-content">
     <div class="text-center mb-4 mt-2 mt-md-0">
@@ -147,6 +49,10 @@
 
     <div class="d-flex justify-content-between mb-3">
       <button class="btn btn-success" id="btnNuevoPago">+ Registrar Pago</button>
+    </div>
+
+    <div class="mb-3">
+      <input type="text" id="buscadorPagos" class="form-control" placeholder="Buscar por apellido o DNI" />
     </div>
 
     <table class="table table-bordered tabla-pagos text-white bg-white text-dark">
@@ -222,6 +128,7 @@
       const formPago = document.getElementById('formPago');
       const tablaPagos = document.getElementById('tablaPagos');
       const listaSocios = document.getElementById('listaSocios');
+      const buscadorPagos = document.getElementById('buscadorPagos');
 
       btnNuevoPago.addEventListener('click', async () => {
         listaSocios.innerHTML = '';
@@ -264,6 +171,13 @@
         } catch (err) {
           alert(err.message || '❌ Error al registrar el pago');
         }
+      });
+
+      buscadorPagos.addEventListener('input', () => {
+        const filtro = buscadorPagos.value.toLowerCase();
+        document.querySelectorAll('#tablaPagos tr').forEach(fila => {
+          fila.style.display = fila.textContent.toLowerCase().includes(filtro) ? '' : 'none';
+        });
       });
 
       async function cargarPagos() {
@@ -310,5 +224,6 @@
   </script>
 </body>
 </html>
+
 
 
