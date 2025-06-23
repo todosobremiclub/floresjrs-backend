@@ -265,7 +265,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    res.json(resultado.rows[0]);
+    // ✅ Este formato es el que espera Flutter
+    res.json({
+      socio: resultado.rows[0],
+      token: 'socio_token_falso'
+    });
   } catch (err) {
     console.error('❌ Error en /socio/login:', err.message);
     res.status(500).json({ error: 'Error interno del servidor' });
