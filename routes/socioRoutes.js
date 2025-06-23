@@ -266,10 +266,20 @@ router.post('/login', async (req, res) => {
     }
 
     // ✅ Este formato es el que espera Flutter
-    res.json({
-      socio: resultado.rows[0],
-      token: 'socio_token_falso'
-    });
+    const jwt = require('jsonwebtoken');
+const claveSecreta = process.env.JWT_SECRET;
+
+const token = jwt.sign(
+  { numero: resultado.rows[0].numero, dni: resultado.rows[0].dni },
+  claveSecreta,
+  { expiresIn: '7d' }
+);
+
+res.json({
+  socio: resultado.rows[0],
+  token
+});
+
   } catch (err) {
     console.error('❌ Error en /socio/login:', err.message);
     res.status(500).json({ error: 'Error interno del servidor' });
