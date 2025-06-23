@@ -104,6 +104,10 @@
   </div>
 
 <script>
+function escapeHTML(text) {
+  return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 const token = localStorage.getItem('token');
 if (!token) location.href = 'login.html';
 function logout() {
@@ -154,14 +158,15 @@ async function cargar() {
   novedades.forEach(n => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${n.imagen_url ? `<img src="${n.imagen_url}">` : '—'}</td>
-      <td>${n.titulo}</td>
-      <td>${n.texto}</td>
-      <td>${new Date(n.fecha).toLocaleDateString()}</td>
-      <td>
-        <button class="btn btn-sm btn-warning me-1" onclick="editar(${n.id}, '${n.titulo}', '${n.texto.replace(/'/g, '\\'')}')">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="eliminar(${n.id})">🗑️</button>
-      </td>`;
+  <td>${n.imagen_url ? `<img src="${n.imagen_url}">` : '—'}</td>
+  <td>${n.titulo}</td>
+  <td>${n.texto}</td>
+  <td>${new Date(n.fecha).toLocaleDateString()}</td>
+  <td>
+    <button class="btn btn-sm btn-warning me-1" onclick="editar(${n.id}, '${escapeHTML(n.titulo)}', '${escapeHTML(n.texto)}')">✏️</button>
+    <button class="btn btn-sm btn-danger" onclick="eliminar(${n.id})">🗑️</button>
+  </td>`;
+
     tabla.appendChild(tr);
   });
 }
