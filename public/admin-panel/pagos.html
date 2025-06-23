@@ -79,7 +79,7 @@
         </div>
         <div class="modal-body text-black">
           <div class="mb-3">
-            <label for="buscadorSocio" class="form-label">Buscar socio por DNI o Apellido</label>
+            <label for="buscadorSocio" class="form-label">Buscar socio por Apellido</label>
             <input class="form-control" list="listaSocios" id="buscadorSocio" required />
             <datalist id="listaSocios"></datalist>
           </div>
@@ -138,7 +138,7 @@
           const socios = await res.json();
           socios.forEach(s => {
             const opt = document.createElement('option');
-            opt.value = `${s.numero} - ${s.nombre} ${s.apellido} (${s.dni})`;
+            opt.value = `${s.numero} - ${s.nombre} ${s.apellido}`;
             opt.dataset.numero = s.numero;
             listaSocios.appendChild(opt);
           });
