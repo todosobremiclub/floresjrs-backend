@@ -30,7 +30,7 @@ app.use('/api/admin', adminRoutes);             // Login admin
 app.use('/pagos', pagosRoutes);                 // Pagos de socios
 app.use('/api/monto', montoRoutes);             // Monto de cuota
 app.use('/config/categorias', categoriasRoutes);// Categorías deportivas
-app.use('/novedades', novedadesRoutes);         // ✅ Rutas de novedades
+app.use('/novedades', require('./routes/novedadesRoutes'));         // ✅ Rutas de novedades
 
 // 👉 Redirección raíz
 app.get('/', (req, res) => {
