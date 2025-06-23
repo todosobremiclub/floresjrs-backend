@@ -260,13 +260,15 @@ async function cargarCategoriasEnSelect() {
       const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
       const form = document.getElementById('formNuevoSocio');
 
-      document.getElementById('btnAbrirFormulario').addEventListener('click', () => {
-        form.reset();
-        delete form.dataset.editing;
-        document.getElementById('activo').checked = true;
-        document.getElementById('becado').checked = false;
-        modal.show();
-      });
+      document.getElementById('btnAbrirFormulario').addEventListener('click', async () => {
+  form.reset();
+  await cargarCategoriasEnSelect();
+  delete form.dataset.editing;
+  document.getElementById('activo').checked = true;
+  document.getElementById('becado').checked = false;
+  modal.show();
+});
+
 
       document.body.addEventListener('click', async (e) => {
         if (e.target.classList.contains('btn-editar')) {
@@ -286,6 +288,7 @@ async function cargarCategoriasEnSelect() {
             document.getElementById('becado').checked = socio.becado;
             delete form.dataset.foto;
             form.dataset.editing = id;
+            await cargarCategoriasEnSelect();
             modal.show();
           } catch {
             alert('❌ Error al obtener socio');
