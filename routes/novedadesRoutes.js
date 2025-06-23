@@ -6,7 +6,7 @@ const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
 const subirAImgur = require('../utils/subirAImgur');
 
-// POST /novedades → publicar novedad con texto, imagen, y filtros de destino
+// POST /novedades → publicar novedad con texto, imagen y filtros de destino
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
     const { texto, destino, categoria, anio_nacimiento } = req.body;
@@ -55,4 +55,5 @@ router.get('/', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
+
 
