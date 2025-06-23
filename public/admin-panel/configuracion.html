@@ -223,7 +223,7 @@ document.body.addEventListener('click', async (e) => {
     if (!nuevoNombre || nuevoNombre === input.dataset.original) return;
 
     try {
-      const res = await fetchConToken('/config/categorias', {
+      const res = await fetchConToken('/config/categorias/${id}', {
         method: 'PUT',
         body: JSON.stringify({ id, nombre: nuevoNombre })
       });
