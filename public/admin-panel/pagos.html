@@ -167,33 +167,84 @@
     return Array.from(mesesSeleccionados);
   }
 
-function toggleDetalle(numeroSocio) {
-  const div = document.getElementById(`detalle-${numeroSocio}`);
-  div.style.display = div.style.display === 'none' ? 'block' : 'none';
-}
-
-async function eliminarMesPagado(id, numeroSocio) {
-  if (!confirm('¿Eliminar este mes pagado?')) return;
-
-  try {
-    const res = await fetch(`/pagos/mensuales/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': 'Bearer ' + localStorage.getItem('token')
-      }
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error al eliminar mes');
-
-    alert('✅ Mes eliminado correctamente');
-    cargarPagos();
-  } catch (err) {
-    console.error('❌', err);
-    alert('❌ Error al eliminar mes');
+  function toggleDetalle(numeroSocio) {
+    const div = document.getElementById(`detalle-${numeroSocio}`);
+    div.style.display = div.style.display === 'none' ? 'block' : 'none';
   }
-}
 
+  async function eliminarMesPagado(id, numeroSocio) {
+    if (!confirm('¿Eliminar este mes pagado?')) return;
+
+    try {
+      const res = await fetch(`/pagos/mensuales/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al eliminar mes');
+
+      alert('✅ Mes eliminado correctamente');
+      cargarPagos();
+    } catch (err) {
+      console.error('❌', err);
+      alert('❌ Error al eliminar mes');
+    }
+  }
+
+  async function cargarPagos() {
+    try {
+      const res = await fetch('/pagos/mensuales', {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      });
+      const data = await res.json();
+      const tbody = document.getElementById('tablaPagos');
+      tbody.innerHTML = '';
+
+      data.forEach(socio => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${socio.numero}</td>
+          <td>${socio.nombre} ${socio.apellido}</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="toggleDetalle(${socio.numero})">
+              Ver detalles
+            </button>
+            <div id="detalle-${socio.numero}" style="display:none;" class="mt-2">
+              <table class="table table-sm table-bordered mt-2">
+                <thead>
+                  <tr>
+                    <th>Año</th>
+                    <th>Mes</th>
+                    <th>Fecha Pago</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${socio.pagos.map(p => `
+                    <tr>
+                      <td>${p.anio}</td>
+                      <td>${p.mes}</td>
+                      <td>${p.fecha_pago}</td>
+                      <td>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarMesPagado(${p.id}, ${socio.numero})">🗑️</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error('❌ Error al cargar pagos:', err);
+      alert('Error al cargar pagos');
+    }
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     renderizarMeses();
@@ -203,7 +254,6 @@ async function eliminarMesPagado(id, numeroSocio) {
     const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
     const formPago = document.getElementById('formPago');
     const inputFecha = document.getElementById('fecha_pago');
-    const tablaPagos = document.getElementById('tablaPagos');
     const btnNuevoPago = document.getElementById('btnNuevoPago');
 
     btnNuevoPago.addEventListener('click', async () => {
@@ -224,6 +274,8 @@ async function eliminarMesPagado(id, numeroSocio) {
         alert('❌ Error al cargar socios');
       }
       inputFecha.valueAsDate = new Date();
+      mesesSeleccionados.clear();
+      renderizarMeses();
       modal.show();
     });
 
@@ -263,62 +315,10 @@ async function eliminarMesPagado(id, numeroSocio) {
       }
     });
 
-    async function cargarPagos() {
-  try {
-    const res = await fetch('/pagos/mensuales', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    });
-    const data = await res.json();
-    const tbody = document.getElementById('tablaPagos');
-    tbody.innerHTML = '';
-
-    data.forEach(socio => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${socio.numero}</td>
-        <td>${socio.nombre} ${socio.apellido}</td>
-        <td>
-          <button class="btn btn-sm btn-primary" onclick="toggleDetalle(${socio.numero})">
-            Ver detalles
-          </button>
-          <div id="detalle-${socio.numero}" style="display:none;" class="mt-2">
-            <table class="table table-sm table-bordered mt-2">
-              <thead>
-                <tr>
-                  <th>Año</th>
-                  <th>Mes</th>
-                  <th>Fecha Pago</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${socio.pagos.map(p => `
-                  <tr>
-                    <td>${p.anio}</td>
-                    <td>${p.mes}</td>
-                    <td>${p.fecha_pago}</td>
-                    <td>
-                      <button class="btn btn-danger btn-sm" onclick="eliminarMesPagado(${p.id}, ${socio.numero})">🗑️</button>
-                    </td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    console.error('❌ Error al cargar pagos:', err);
-    alert('Error al cargar pagos');
-  }
-}
-
-
-   
+    cargarPagos();
   });
 </script>
+
 
 </body>
 </html>
