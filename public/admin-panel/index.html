@@ -254,19 +254,6 @@ function toggleSidebar() {
    let sociosOriginales = [];
 let ordenActual = { campo: null, asc: true };
 
-async function cargarSocios() {
-  try {
-    const res = await fetchConToken('/socio/');
-    const socios = await res.json();
-    sociosOriginales = socios;
-    ordenActual = { campo: null, asc: true };
-
-    poblarFiltros(socios);
-    mostrarFiltrados();
-  } catch (err) {
-    alert('❌ Error al cargar socios: ' + err.message);
-  }
-}
 
 function poblarFiltros(socios) {
   const selectCategoria = document.getElementById('filtro-categoria');
@@ -349,15 +336,7 @@ function mostrarFiltrados(filtroTexto = '') {
   });
 }
 
-        mostrarFiltrados();
-        buscador.addEventListener('input', e => mostrarFiltrados(e.target.value));
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-          th.addEventListener('click', () => {
-            const campo = th.dataset.sort;
-            ordenActual.campo = campo;
-            mostrarFiltrados(buscador.value);
-          });
-        });
+     
       } catch (err) {
         alert('❌ Error al cargar socios: ' + err.message);
       }
