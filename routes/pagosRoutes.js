@@ -180,6 +180,50 @@ router.delete('/mensuales/:id', verificarToken, async (req, res) => {
   }
 });
 
+// 👉 Obtener pagos mensuales agrupados por socio
+router.get('/mensuales', verificarToken, async (req, res) => {
+  try {
+    const resultado = await db.query(`
+      SELECT 
+        s.numero_socio AS socio_numero,
+        s.nombre,
+        s.apellido,
+        pm.anio,
+        pm.mes,
+        TO_CHAR(pm.fecha_pago, 'YYYY-MM-DD') AS fecha_pago,
+        pm.id
+      FROM pagos_mensuales pm
+      JOIN socios s ON s.numero_socio = pm.socio_numero
+      ORDER BY s.numero_socio, pm.anio, pm.mes
+    `);
+
+    const agrupados = {};
+
+    resultado.rows.forEach(row => {
+      const id = row.socio_numero;
+      if (!agrupados[id]) {
+        agrupados[id] = {
+          numero: id,
+          nombre: row.nombre,
+          apellido: row.apellido,
+          pagos: []
+        };
+      }
+
+      agrupados[id].pagos.push({
+        id: row.id,
+        anio: row.anio,
+        mes: row.mes.toString().padStart(2, '0'),
+        fecha_pago: row.fecha_pago
+      });
+    });
+
+    res.json(Object.values(agrupados));
+  } catch (err) {
+    console.error('❌ Error al obtener pagos mensuales agrupados:', err);
+    res.status(500).json({ error: 'Error al obtener pagos mensuales' });
+  }
+});
 
 module.exports = router;
 	
