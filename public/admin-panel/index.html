@@ -336,19 +336,20 @@ function mostrarFiltrados(filtroTexto = '') {
   });
 }
 
-        mostrarFiltrados();
-        	strarFiltrados(e.target.value));
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-          th.addEventListener('click', () => {
-            const campo = th.dataset.sort;
-            ordenActual.campo = campo;
-            mostrarFiltrados(buscador.value);
-          });
-        });
-      } catch (err) {
-        alert('❌ Error al cargar socios: ' + err.message);
-      }
-    }
+   async function cargarSocios() {
+  try {
+    const res = await fetchConToken('/socio/');
+    const socios = await res.json();
+    sociosOriginales = socios;
+    ordenActual = { campo: null, asc: true };
+
+    poblarFiltros(socios);
+    mostrarFiltrados();
+  } catch (err) {
+    alert('❌ Error al cargar socios: ' + err.message);
+  }
+}
+
 
 async function cargarCategoriasEnSelect() {
   try {
