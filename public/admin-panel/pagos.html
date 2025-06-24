@@ -158,7 +158,6 @@
   }
 
 function toggleMes(idMes) {
-  if (mesesPagados.has(idMes)) return; // si ya está pagado, no se puede cambiar
   if (mesesSeleccionados.has(idMes)) {
     mesesSeleccionados.delete(idMes);
   } else {
@@ -327,6 +326,7 @@ function renderizarMeses() {
   });
 
   document.getElementById('anioSeleccionado').textContent = anioActual;
+}
 }
 
 // CSS extra sugerido para mostrar tilde
