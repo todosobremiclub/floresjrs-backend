@@ -171,7 +171,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     renderizarMeses();
 
-    const btnGuardarMeses = document.getElementById('btnGuardarMeses');
     const inputBusqueda = document.getElementById('buscadorSocio');
     const listaSocios = document.getElementById('listaSocios');
     const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
@@ -195,24 +194,26 @@
           listaSocios.appendChild(opt);
         });
       } catch {
-        alert('❌ Error al cargar socios');	
+        alert('❌ Error al cargar socios');
       }
       inputFecha.valueAsDate = new Date();
       modal.show();
     });
 
-    btnGuardarMeses.addEventListener('click', async () => {
-      	options].find(opt => opt.value === inputBusqueda.value);
-      if (!opcion) {
-        alert('❌ Socio inválido');
-        return;
-      }
+    formPago.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
+      if (!opcion) return alert('❌ Socio inválido');
+
       const numeroSocio = parseInt(opcion.dataset.numero);
       const meses = obtenerMesesPagados();
+
       if (meses.length === 0) {
         alert('⚠️ Seleccioná al menos un mes a registrar');
         return;
       }
+
       try {
         const res = await fetch('/pagos/mensuales', {
           method: 'POST',
@@ -222,53 +223,18 @@
           },
           body: JSON.stringify({ numeroSocio, meses })
         });
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al registrar meses');
-        alert('✅ Meses registrados correctamente');
+
+        alert('✅ Pago registrado correctamente');
         modal.hide();
         cargarPagos();
       } catch (err) {
         console.error('❌', err);
-        alert('Error al guardar meses');
+        alert(err.message || '❌ Error al registrar el pago');
       }
     });
-
-    formPago.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
-  if (!opcion) return alert('❌ Socio inválido');
-
-  const numeroSocio = parseInt(opcion.dataset.numero);
-  const meses = obtenerMesesPagados();
-
-  if (meses.length === 0) {
-    alert('⚠️ Seleccioná al menos un mes a registrar');
-    return;
-  }
-
-  try {
-    const res = await fetch('/pagos/mensuales', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('token')
-      },
-      body: JSON.stringify({ numeroSocio, meses })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error al registrar meses');
-
-    alert('✅ Pago registrado correctamente');
-    modal.hide();
-    cargarPagos();
-  } catch (err) {
-    console.error('❌', err);
-    alert(err.message || '❌ Error al registrar el pago');
-  }
-});
-
 
     async function cargarPagos() {
       try {
@@ -321,6 +287,7 @@
     cargarPagos();
   });
 </script>
+
 </body>
 </html>
 
