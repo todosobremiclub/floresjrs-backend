@@ -127,94 +127,175 @@
   </style>
 
   <script>
-    let anioActual = new Date().getFullYear();
-    let mesesSeleccionados = new Set();
+  let anioActual = new Date().getFullYear();
+  let mesesSeleccionados = new Set();
 
-    const nombresMeses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const nombresMeses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-    function renderizarMeses() {
-      const contenedor = document.querySelector('#selector-anio-meses .row');
-      contenedor.innerHTML = '';
+  function renderizarMeses() {
+    const contenedor = document.querySelector('#selector-anio-meses .row');
+    contenedor.innerHTML = '';
 
-      nombresMeses.forEach((mes, i) => {
-        const idMes = `${anioActual}-${(i + 1).toString().padStart(2, '0')}`;
-        const div = document.createElement('div');
-        div.className = 'col';
-        div.innerHTML = `
-          <div class="mes-cuadro ${mesesSeleccionados.has(idMes) ? 'seleccionado' : ''}" onclick="toggleMes('${idMes}')">
-            ${mes}
-          </div>
-        `;
-        contenedor.appendChild(div);
-      });
+    nombresMeses.forEach((mes, i) => {
+      const idMes = `${anioActual}-${(i + 1).toString().padStart(2, '0')}`;
+      const div = document.createElement('div');
+      div.className = 'col';
+      div.innerHTML = `
+        <div class="mes-cuadro ${mesesSeleccionados.has(idMes) ? 'seleccionado' : ''}" onclick="toggleMes('${idMes}')">
+          ${mes}
+        </div>
+      `;
+      contenedor.appendChild(div);
+    });
 
-      document.getElementById('anioSeleccionado').textContent = anioActual;
+    document.getElementById('anioSeleccionado').textContent = anioActual;
+  }
+
+  function cambiarAnio(direccion) {
+    anioActual += direccion;
+    renderizarMeses();
+  }
+
+  function toggleMes(idMes) {
+    if (mesesSeleccionados.has(idMes)) {
+      mesesSeleccionados.delete(idMes);
+    } else {
+      mesesSeleccionados.add(idMes);
     }
+    renderizarMeses();
+  }
 
-    function cambiarAnio(direccion) {
-      anioActual += direccion;
-      renderizarMeses();
-    }
+  function obtenerMesesPagados() {
+    return Array.from(mesesSeleccionados); // Ej: ["2025-06", "2025-07"]
+  }
 
-    function toggleMes(idMes) {
-      if (mesesSeleccionados.has(idMes)) {
-        mesesSeleccionados.delete(idMes);
-      } else {
-        mesesSeleccionados.add(idMes);
+  document.addEventListener('DOMContentLoaded', () => {
+    renderizarMeses();
+
+    const btnGuardarMeses = document.getElementById('btnGuardarMeses');
+    const inputBusqueda = document.getElementById('buscadorSocio');
+    const listaSocios = document.getElementById('listaSocios');
+    const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
+    const formPago = document.getElementById('formPago');
+    const inputFecha = document.getElementById('fecha_pago');
+    const tablaPagos = document.getElementById('tablaPagos');
+
+    btnGuardarMeses.addEventListener('click', async () => {
+      const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
+      if (!opcion) {
+        alert('❌ Socio inválido');
+        return;
       }
-      renderizarMeses();
+
+      const numeroSocio = parseInt(opcion.dataset.numero);
+      const meses = obtenerMesesPagados();
+
+      if (meses.length === 0) {
+        alert('⚠️ Seleccioná al menos un mes a registrar');
+        return;
+      }
+
+      try {
+        const res = await fetch('/pagos/mensuales', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: JSON.stringify({ numeroSocio, meses })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Error al registrar meses');
+
+        alert('✅ Meses registrados correctamente');
+        modal.hide();
+        cargarPagos();
+      } catch (err) {
+        console.error('❌', err);
+        alert('Error al guardar meses');
+      }
+    });
+
+    formPago.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
+      if (!opcion) return alert('❌ Socio inválido');
+
+      const socio_id = parseInt(opcion.dataset.numero);
+      const fecha_pago = inputFecha.value;
+
+      try {
+        const res = await fetch('/pagos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: JSON.stringify({ socio_id, fecha_pago })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        alert('✅ Pago registrado correctamente');
+        modal.hide();
+        cargarPagos();
+      } catch (err) {
+        alert(err.message || '❌ Error al registrar el pago');
+      }
+    });
+
+    async function cargarPagos() {
+      try {
+        const res = await fetch('/pagos', {
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        });
+        const pagos = await res.json();
+        tablaPagos.innerHTML = '';
+        pagos.forEach(p => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${p.socio_id}</td>
+            <td>${p.nombre}</td>
+            <td>${p.fecha_pago}</td>
+            <td>$${parseFloat(p.monto).toFixed(2)}</td>
+            <td>
+              <button class="btn-eliminar" data-id="${p.id}" title="Eliminar">🗑️</button>
+            </td>
+          `;
+          tablaPagos.appendChild(row);
+        });
+      } catch {
+        alert('❌ Error al cargar pagos');
+      }
     }
 
-    function obtenerMesesPagados() {
-      return Array.from(mesesSeleccionados); // Ej: ["2025-06", "2025-07"]
-    }
+    document.body.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('btn-eliminar')) {
+        const id = e.target.dataset.id;
+        if (confirm('¿Estás seguro que querés eliminar este pago?')) {
+          try {
+            const res = await fetch(`/pagos/${id}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              }
+            });
+            if (!res.ok) throw new Error();
+            alert('✅ Pago eliminado');
+            cargarPagos();
+          } catch {
+            alert('❌ Error al eliminar el pago');
+          }
+        }
+      }
+    });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      renderizarMeses();
-
-  const btnGuardarMeses = document.getElementById('btnGuardarMeses');
-  const inputBusqueda = document.getElementById('buscadorSocio');
-  const listaSocios = document.getElementById('listaSocios');
-  const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
-
-  btnGuardarMeses.addEventListener('click', async () => {
-    const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
-    if (!opcion) {
-      alert('❌ Socio inválido');
-      return;
-    }
-
-    const numeroSocio = parseInt(opcion.dataset.numero);
-    const meses = obtenerMesesPagados();
-
-    if (meses.length === 0) {
-      alert('⚠️ Seleccioná al menos un mes a registrar');
-      return;
-    }
-
-    try {
-      const res = await fetch('/pagos/mensuales', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
-        },
-        body: JSON.stringify({ numeroSocio, meses })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || 'Error al registrar meses');
-
-      alert('✅ Meses registrados correctamente');
-      modal.hide();
-    } catch (err) {
-      console.error('❌', err);
-      alert('Error al guardar meses');
-    }
+    cargarPagos();
   });
-
-  </script>
+</script>
 </body>
 </html>
 
