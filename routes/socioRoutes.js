@@ -5,7 +5,8 @@ const multer = require('multer');
 const upload = multer();
 const { v4: uuidv4 } = require('uuid');
 const verificarToken = require('../middlewares/verificarToken');
-const subirAImgur = require('../utils/subirAImgur');
+const subirAFirebase = require('../utils/subirAFirebase');
+
 
 
 
@@ -230,7 +231,8 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
   }
 
   try {
-    const imagenUrl = await subirAImgur(req.file.buffer);
+    const imagenUrl = await subirAFirebase(req.file.buffer, req.file.originalname);
+
 
     await db.query(
       'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
