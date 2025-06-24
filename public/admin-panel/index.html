@@ -320,17 +320,18 @@ function mostrarFiltrados(filtroTexto = '') {
   const filtroEstado = document.getElementById('filtro-estado-pago').value;
 
 
-  let sociosFiltrados = sociosOriginales.filter(s => {
-    const coincideTexto = (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtroTexto.toLowerCase());
-    const coincideCategoria = !filtroCategoria || s.categoria === filtroCategoria;
-    const coincideAnio = !filtroAnio || s.nacimiento?.startsWith(filtroAnio);
-    return coincideTexto && coincideCategoria && coincideAnio && coincideEstado;
-    const coincideEstado =
+ let sociosFiltrados = sociosOriginales.filter(s => {
+  const coincideTexto = (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtroTexto.toLowerCase());
+  const coincideCategoria = !filtroCategoria || s.categoria === filtroCategoria;
+  const coincideAnio = !filtroAnio || s.nacimiento?.startsWith(filtroAnio);
+  const coincideEstado =
     !filtroEstado ||
     (filtroEstado === 'al-dia' && s.alDia) ||
     (filtroEstado === 'en-mora' && !s.alDia);
 
-  });
+  return coincideTexto && coincideCategoria && coincideAnio && coincideEstado;
+});
+
 
   if (ordenActual.campo) sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
 
