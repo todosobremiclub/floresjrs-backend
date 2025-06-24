@@ -4,7 +4,6 @@ const multer = require('multer');
 const upload = multer(); // sin almacenamiento local, recibimos buffer
 const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
-const subirAImgur = require('../utils/subirAImgur');
 
 // POST /novedades → publicar novedad con texto, imagen y filtros de destino
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
@@ -17,8 +16,7 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
 
     let imagen_url = null;
     if (req.file) {
-      const subida = await subirAImgur(req.file.buffer);
-      imagen_url = subida.url;
+            imagen_url = subida.url;
     }
 
     await db.query(`
