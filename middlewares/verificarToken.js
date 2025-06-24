@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ error: 'Token no proporcionado' });
   }
 
-  const token = authHeader.split(' ')[1]; // quita "Bearer "
+  const token = authHeader; // usamos directamente el valor sin 'Bearer'
   if (!token) {
     return res.status(401).json({ error: 'Token inválido' });
   }
