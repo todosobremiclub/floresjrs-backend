@@ -203,6 +203,7 @@
   <table class="table table-striped table-bordered text-center bg-white tabla-socios">
     <thead class="table-primary">
       <tr>
+        <th>Pago</th>
         <th style="cursor:pointer" data-sort="numero">Nº Socio</th>
         <th style="cursor:pointer" data-sort="dni">DNI</th>
         <th>Nombre</th>
@@ -311,29 +312,56 @@ function mostrarFiltrados(filtroTexto = '') {
   if (ordenActual.campo) sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
 
   sociosFiltrados.forEach(s => {
-    const fila = document.createElement('tr');
-    fila.innerHTML = `
-      <td>${s.numero}</td>
-      <td>${s.dni}</td>
-      <td>${s.nombre}</td>
-      <td>${s.apellido}</td>
-      <td>${s.categoria}</td>
-      <td>${s.telefono ?? '—'}</td>
-      <td>${s.nacimiento ?? ''}</td>
-      <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
-      <td>${s.fecha_ingreso ?? ''}</td>
-      <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
-      <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
-      <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
-      <td>
-        <div class="d-flex justify-content-center gap-1">
-          <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
-          <button class="btn btn-sm btn-outline-warning btn-eliminar" data-id="${s.numero}">🗑️</button>
-        </div>
-      </td>
-    `;
-    tabla.appendChild(fila);
-  });
+  const fila = document.createElement('tr');
+
+  // 👉 CELDA ESTADO DE PAGO
+  const pagoCell = document.createElement('td');
+  const indicador = document.createElement('span');
+  indicador.style.display = 'inline-block';
+  indicador.style.width = '18px';
+  indicador.style.height = '18px';
+  indicador.style.borderRadius = '50%';
+  indicador.style.margin = '0 auto';
+  indicador.title = 'Estado de cuota';
+
+  const pagos = s.pagos ?? [];
+  const becado = s.becado;
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mes = hoy.getMonth() + 1;
+  const formato = (a, m) => `${a}-${String(m).padStart(2, '0')}`;
+  const mesActual = formato(anio, mes);
+  const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
+  const alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
+  indicador.style.backgroundColor = alDia ? 'limegreen' : 'red';
+  pagoCell.appendChild(indicador);
+  fila.appendChild(pagoCell);
+
+  // 👉 RESTO DE CELDAS
+  fila.innerHTML += `
+    <td>${s.numero}</td>
+    <td>${s.dni}</td>
+    <td>${s.nombre}</td>
+    <td>${s.apellido}</td>
+    <td>${s.categoria}</td>
+    <td>${s.telefono ?? '—'}</td>
+    <td>${s.nacimiento ?? ''}</td>
+    <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
+    <td>${s.fecha_ingreso ?? ''}</td>
+    <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
+    <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
+    <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
+    <td>
+      <div class="d-flex justify-content-center gap-1">
+        <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
+        <button class="btn btn-sm btn-outline-warning btn-eliminar" data-id="${s.numero}">🗑️</button>
+      </div>
+    </td>
+  `;
+
+  tabla.appendChild(fila);
+});
+
 }
 
    async function cargarSocios() {
