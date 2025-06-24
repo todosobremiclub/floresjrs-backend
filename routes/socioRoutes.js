@@ -12,31 +12,38 @@ const subirAImgur = require('../utils/subirAImgur');
 
 console.log("✅ socioRoutes.js se está ejecutando");
 
-// GET /socio → obtener todos los socios (protegido)
+// GET /socio → obtener todos los socios con pagos mensuales (protegido)
 router.get('/', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(
       `SELECT 
-         numero_socio AS numero,
-         dni,
-         nombre,
-         apellido,
-         subcategoria AS categoria,
-         telefono,
-         TO_CHAR(fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
-         TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
-         foto_url,
-         activo,
-         becado
-       FROM socios
-       ORDER BY numero_socio ASC`
+         s.numero_socio AS numero,
+         s.dni,
+         s.nombre,
+         s.apellido,
+         s.subcategoria AS categoria,
+         s.telefono,
+         TO_CHAR(s.fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
+         TO_CHAR(s.fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
+         s.foto_url,
+         s.activo,
+         s.becado,
+         COALESCE(ARRAY_AGG(
+           TO_CHAR(pm.anio, 'FM0000') || '-' || TO_CHAR(pm.mes, 'FM00')
+         ) FILTER (WHERE pm.id IS NOT NULL), '{}') AS pagos
+       FROM socios s
+       LEFT JOIN pagos_mensuales pm ON s.numero_socio = pm.socio_numero
+       GROUP BY s.numero_socio, s.dni, s.nombre, s.apellido, s.subcategoria, s.telefono, s.fecha_nacimiento, s.fecha_ingreso, s.foto_url, s.activo, s.becado
+       ORDER BY s.numero_socio ASC`
     );
+
     res.json(resultado.rows);
   } catch (err) {
     console.error('❌ Error al listar socios:', err);
     res.status(500).json({ error: 'Error al obtener socios' });
   }
 });
+;
 
 // GET /socio/:id → obtener socio por número (protegido)
 router.get('/:id', verificarToken, async (req, res) => {
