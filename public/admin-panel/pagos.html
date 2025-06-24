@@ -132,7 +132,7 @@
 
   const nombresMeses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-  function renderizarMeses() {
+  function 	 {
     const contenedor = document.querySelector('#selector-anio-meses .row');
     contenedor.innerHTML = '';
 
@@ -171,6 +171,31 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     renderizarMeses();
+
+const btnNuevoPago = document.getElementById('btnNuevoPago');
+
+btnNuevoPago.addEventListener('click', async () => {
+  listaSocios.innerHTML = '';
+  inputBusqueda.value = '';
+  try {
+    const res = await fetch('/socio', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const socios = await res.json();
+    socios.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = `${s.numero} - ${s.nombre} ${s.apellido}`;
+      opt.dataset.numero = s.numero;
+      listaSocios.appendChild(opt);
+    });
+  } catch {
+    alert('❌ Error al cargar socios');
+  }
+
+  inputFecha.valueAsDate = new Date();
+  modal.show();
+});
+
 
     const btnGuardarMeses = document.getElementById('btnGuardarMeses');
     const inputBusqueda = document.getElementById('buscadorSocio');
