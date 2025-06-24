@@ -15,7 +15,6 @@ router.get('/monto', verificarToken, async (req, res) => {
   }
 });
 
-
 // 👉 Actualizar monto
 router.post('/monto', verificarToken, async (req, res) => {
   const { monto } = req.body;
@@ -27,26 +26,24 @@ router.post('/monto', verificarToken, async (req, res) => {
   res.json({ mensaje: 'Monto actualizado correctamente' });
 });
 
-// 👉 Registrar nuevo pago
+// 👉 Registrar nuevo pago general (tabla pagos)
 router.post('/', verificarToken, async (req, res) => {
   const { socio_id, fecha_pago, monto } = req.body;
 
-if (!socio_id || !fecha_pago) {
-  return res.status(400).json({ error: 'Datos incompletos' });
-}
-
-let montoFinal = monto;
-if (!montoFinal || isNaN(montoFinal)) {
-  // Si no viene monto, lo tomamos de la configuración
-  try {
-    const resultado = await db.query(`SELECT valor FROM configuracion WHERE clave = 'monto_cuota'`);
-    montoFinal = parseFloat(resultado.rows[0]?.valor || '0');
-  } catch (err) {
-    console.error('❌ Error al obtener monto de cuota desde configuración', err);
-    return res.status(500).json({ error: 'Error al obtener monto de cuota' });
+  if (!socio_id || !fecha_pago) {
+    return res.status(400).json({ error: 'Datos incompletos' });
   }
-}
 
+  let montoFinal = monto;
+  if (!montoFinal || isNaN(montoFinal)) {
+    try {
+      const resultado = await db.query(`SELECT valor FROM configuracion WHERE clave = 'monto_cuota'`);
+      montoFinal = parseFloat(resultado.rows[0]?.valor || '0');
+    } catch (err) {
+      console.error('❌ Error al obtener monto de cuota desde configuración', err);
+      return res.status(500).json({ error: 'Error al obtener monto de cuota' });
+    }
+  }
 
   try {
     await db.query(
@@ -61,7 +58,37 @@ if (!montoFinal || isNaN(montoFinal)) {
   }
 });
 
-// 👉 Obtener todos los pagos (con nombre del socio)
+// 👉 Registrar pagos mensuales (tabla pagos_mensuales)
+router.post('/mensuales', verificarToken, async (req, res) => {
+  const { numeroSocio, meses } = req.body;
+
+  if (!numeroSocio || !Array.isArray(meses) || meses.length === 0) {
+    return res.status(400).json({ error: 'Datos inválidos' });
+  }
+
+  try {
+    const values = meses.flatMap(m => {
+      const [anio, mes] = m.split('-');
+      return [numeroSocio, parseInt(anio), parseInt(mes)];
+    });
+
+    const placeholders = meses.map((_, i) => `($${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3}, CURRENT_DATE)`).join(', ');
+
+    const query = `
+      INSERT INTO pagos_mensuales (socio_numero, anio, mes, fecha_pago)
+      VALUES ${placeholders}
+    `;
+
+    await db.query(query, values);
+
+    res.json({ mensaje: 'Meses registrados correctamente' });
+  } catch (error) {
+    console.error('❌ Error al registrar pagos mensuales:', error);
+    res.status(500).json({ error: 'Error al registrar pagos mensuales' });
+  }
+});
+
+// 👉 Obtener todos los pagos (de la tabla pagos)
 router.get('/', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(
@@ -75,7 +102,6 @@ router.get('/', verificarToken, async (req, res) => {
        JOIN socios s ON s.numero_socio = p.socio_id
        ORDER BY p.fecha_pago DESC`
     );
-
     res.json(resultado.rows);
   } catch (err) {
     console.error('❌ Error al obtener pagos:', err);
@@ -83,7 +109,7 @@ router.get('/', verificarToken, async (req, res) => {
   }
 });
 
-// 👉 Eliminar pago por ID
+// 👉 Eliminar pago
 router.delete('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   try {
@@ -98,6 +124,7 @@ router.delete('/:id', verificarToken, async (req, res) => {
   }
 });
 
-
 module.exports = router;
+
+
 
