@@ -83,147 +83,141 @@
             <input class="form-control" list="listaSocios" id="buscadorSocio" required />
             <datalist id="listaSocios"></datalist>
           </div>
+
           <div class="mb-3">
             <label for="fecha_pago" class="form-label">Fecha de Pago</label>
             <input type="date" id="fecha_pago" class="form-control" required />
           </div>
+
+          <!-- Selector de Meses -->
+          <div id="selector-anio-meses" class="text-center my-3">
+            <div class="d-flex justify-content-center align-items-center mb-2">
+              <button type="button" class="btn btn-sm btn-light me-2" onclick="cambiarAnio(-1)">‹</button>
+              <h5 id="anioSeleccionado" class="m-0">2025</h5>
+              <button type="button" class="btn btn-sm btn-light ms-2" onclick="cambiarAnio(1)">›</button>
+            </div>
+            <div class="row row-cols-4 g-2"></div>
+          </div>
         </div>
+
         <div class="modal-footer">
           <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" type="button" id="btnGuardarMeses">Guardar Meses Pagados</button>
           <button class="btn btn-success" type="submit">Guardar Pago</button>
         </div>
       </form>
     </div>
   </div>
 
+  <style>
+    .mes-cuadro {
+      padding: 10px;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+      font-weight: bold;
+      color: #004aad;
+    }
+    .mes-cuadro.seleccionado {
+      background-color: #004aad;
+      color: white;
+    }
+  </style>
+
   <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'login.html';
+    let anioActual = new Date().getFullYear();
+    let mesesSeleccionados = new Set();
 
-    function logout() {
-      localStorage.removeItem('token');
-      window.location.href = 'login.html';
+    const nombresMeses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+    function renderizarMeses() {
+      const contenedor = document.querySelector('#selector-anio-meses .row');
+      contenedor.innerHTML = '';
+
+      nombresMeses.forEach((mes, i) => {
+        const idMes = `${anioActual}-${(i + 1).toString().padStart(2, '0')}`;
+        const div = document.createElement('div');
+        div.className = 'col';
+        div.innerHTML = `
+          <div class="mes-cuadro ${mesesSeleccionados.has(idMes) ? 'seleccionado' : ''}" onclick="toggleMes('${idMes}')">
+            ${mes}
+          </div>
+        `;
+        contenedor.appendChild(div);
+      });
+
+      document.getElementById('anioSeleccionado').textContent = anioActual;
     }
 
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('show');
+    function cambiarAnio(direccion) {
+      anioActual += direccion;
+      renderizarMeses();
     }
 
-    function fetchConToken(url, options = {}) {
-      return fetch(url, {
-        ...options,
+    function toggleMes(idMes) {
+      if (mesesSeleccionados.has(idMes)) {
+        mesesSeleccionados.delete(idMes);
+      } else {
+        mesesSeleccionados.add(idMes);
+      }
+      renderizarMeses();
+    }
+
+    function obtenerMesesPagados() {
+      return Array.from(mesesSeleccionados); // Ej: ["2025-06", "2025-07"]
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderizarMeses();
+
+  const btnGuardarMeses = document.getElementById('btnGuardarMeses');
+  const inputBusqueda = document.getElementById('buscadorSocio');
+  const listaSocios = document.getElementById('listaSocios');
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
+
+  btnGuardarMeses.addEventListener('click', async () => {
+    const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
+    if (!opcion) {
+      alert('❌ Socio inválido');
+      return;
+    }
+
+    const numeroSocio = parseInt(opcion.dataset.numero);
+    const meses = obtenerMesesPagados();
+
+    if (meses.length === 0) {
+      alert('⚠️ Seleccioná al menos un mes a registrar');
+      return;
+    }
+
+    try {
+      const res = await fetch('/pagos/mensuales', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + token,
-          ...options.headers,
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
         },
+        body: JSON.stringify({ numeroSocio, meses })
       });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Error al registrar meses');
+
+      alert('✅ Meses registrados correctamente');
+      modal.hide();
+    } catch (err) {
+      console.error('❌', err);
+      alert('Error al guardar meses');
     }
+  });
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const btnNuevoPago = document.getElementById('btnNuevoPago');
-      const modal = new bootstrap.Modal(document.getElementById('modalNuevoPago'));
-      const inputFecha = document.getElementById('fecha_pago');
-      const inputBusqueda = document.getElementById('buscadorSocio');
-      const formPago = document.getElementById('formPago');
-      const tablaPagos = document.getElementById('tablaPagos');
-      const listaSocios = document.getElementById('listaSocios');
-      const buscadorPagos = document.getElementById('buscadorPagos');
-
-      btnNuevoPago.addEventListener('click', async () => {
-        listaSocios.innerHTML = '';
-        inputBusqueda.value = '';
-        try {
-          const res = await fetchConToken('/socio');
-          const socios = await res.json();
-          socios.forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = `${s.numero} - ${s.nombre} ${s.apellido}`;
-            opt.dataset.numero = s.numero;
-            listaSocios.appendChild(opt);
-          });
-        } catch {
-          alert('❌ Error al cargar socios');
-          return;
-        }
-        inputFecha.valueAsDate = new Date();
-        modal.show();
-      });
-
-      formPago.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const opcion = [...document.querySelectorAll('#listaSocios option')].find(opt => opt.value === inputBusqueda.value);
-        if (!opcion) return alert('❌ Socio inválido');
-
-        const socio_id = parseInt(opcion.dataset.numero);
-        const fecha_pago = inputFecha.value;
-
-        try {
-          const res = await fetchConToken('/pagos', {
-            method: 'POST',
-            body: JSON.stringify({ socio_id, fecha_pago })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          alert('✅ Pago registrado correctamente');
-          modal.hide();
-          cargarPagos();
-        } catch (err) {
-          alert(err.message || '❌ Error al registrar el pago');
-        }
-      });
-
-      buscadorPagos.addEventListener('input', () => {
-        const filtro = buscadorPagos.value.toLowerCase();
-        document.querySelectorAll('#tablaPagos tr').forEach(fila => {
-          fila.style.display = fila.textContent.toLowerCase().includes(filtro) ? '' : 'none';
-        });
-      });
-
-      async function cargarPagos() {
-        try {
-          const res = await fetchConToken('/pagos');
-          const pagos = await res.json();
-          tablaPagos.innerHTML = '';
-          pagos.forEach(p => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${p.socio_id}</td>
-              <td>${p.nombre}</td>
-              <td>${p.fecha_pago}</td>
-              <td>$${parseFloat(p.monto).toFixed(2)}</td>
-              <td>
-                <button class="btn-eliminar" data-id="${p.id}" title="Eliminar">🗑️</button>
-              </td>
-            `;
-            tablaPagos.appendChild(row);
-          });
-        } catch {
-          alert('❌ Error al cargar pagos');
-        }
-      }
-
-      document.body.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('btn-eliminar')) {
-          const id = e.target.dataset.id;
-          if (confirm('¿Estás seguro que querés eliminar este pago?')) {
-            try {
-              const res = await fetchConToken(`/pagos/${id}`, { method: 'DELETE' });
-              if (!res.ok) throw new Error();
-              alert('✅ Pago eliminado');
-              cargarPagos();
-            } catch {
-              alert('❌ Error al eliminar el pago');
-            }
-          }
-        }
-      });
-
-      cargarPagos();
-    });
   </script>
 </body>
 </html>
+
 
 
 
