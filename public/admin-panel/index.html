@@ -336,7 +336,15 @@ function mostrarFiltrados(filtroTexto = '') {
   });
 }
 
-     
+        mostrarFiltrados();
+        	strarFiltrados(e.target.value));
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+          th.addEventListener('click', () => {
+            const campo = th.dataset.sort;
+            ordenActual.campo = campo;
+            mostrarFiltrados(buscador.value);
+          });
+        });
       } catch (err) {
         alert('❌ Error al cargar socios: ' + err.message);
       }
