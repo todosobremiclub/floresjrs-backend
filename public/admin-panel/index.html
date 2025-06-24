@@ -188,6 +188,17 @@
   <button class="btn btn-yellow" id="btnAbrirFormulario">Generar nuevo socio</button>
 </div>
 
+<div class="d-flex gap-3 mb-3">
+  <select id="filtro-categoria" class="form-select" style="width: 200px;">
+    <option value="">Todas las categorías</option>
+  </select>
+
+  <select id="filtro-anio" class="form-select" style="width: 200px;">
+    <option value="">Todos los años</option>
+  </select>
+</div>
+
+
 <div class="table-responsive">
   <table class="table table-striped table-bordered text-center bg-white tabla-socios">
     <thead class="table-primary">
@@ -214,6 +225,9 @@
   </div>
 
   <script>
+
+     const tabla = document.getElementById('tablaSocios');
+    const buscador = document.getElementById('buscador');
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/admin-panel/login.html';
 
@@ -237,61 +251,103 @@ function toggleSidebar() {
 }
 
 
-    async function cargarSocios() {
-      try {
-        const res = await fetchConToken('/socio/');
-        const socios = await res.json();
-        const tabla = document.getElementById('tablaSocios');
-        const buscador = document.getElementById('buscador');
-        let ordenActual = { campo: null, asc: true };
+   let sociosOriginales = [];
+let ordenActual = { campo: null, asc: true };
 
-        function ordenarSocios(lista, campo) {
-          const asc = (ordenActual.campo === campo) ? !ordenActual.asc : true;
-          ordenActual = { campo, asc };
-          return lista.sort((a, b) => {
-            let valA = (a[campo] ?? '').toString().toLowerCase();
-            let valB = (b[campo] ?? '').toString().toLowerCase();
-            if (!isNaN(valA) && !isNaN(valB)) {
-              valA = parseFloat(valA);
-              valB = parseFloat(valB);
-            }
-            return asc ? (valA > valB ? 1 : valA < valB ? -1 : 0) : (valA < valB ? 1 : valA > valB ? -1 : 0);
-          });
-        }
+async function cargarSocios() {
+  try {
+    const res = await fetchConToken('/socio/');
+    const socios = await res.json();
+    sociosOriginales = socios;
+    ordenActual = { campo: null, asc: true };
 
-        function mostrarFiltrados(filtro = '') {
-          tabla.innerHTML = '';
-          let sociosFiltrados = socios.filter(s =>
-            (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtro.toLowerCase())
-          );
+    poblarFiltros(socios);
+    mostrarFiltrados();
+  } catch (err) {
+    alert('❌ Error al cargar socios: ' + err.message);
+  }
+}
 
-          if (ordenActual.campo) sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
+function poblarFiltros(socios) {
+  const selectCategoria = document.getElementById('filtro-categoria');
+  const selectAnio = document.getElementById('filtro-anio');
 
-          sociosFiltrados.forEach(s => {
-            const fila = document.createElement('tr');
-            fila.innerHTML = `
-              <td>${s.numero}</td>
-              <td>${s.dni}</td>
-              <td>${s.nombre}</td>
-              <td>${s.apellido}</td>
-              <td>${s.categoria}</td>
-              <td>${s.telefono ?? '—'}</td>
-              <td>${s.nacimiento ?? ''}</td>
-              <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
-              <td>${s.fecha_ingreso ?? ''}</td>
-              <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
-              <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
-              <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
-              <td>
-                <div class="d-flex justify-content-center gap-1">
-                  <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
-                  <button class="btn btn-sm btn-outline-warning btn-eliminar" data-id="${s.numero}">🗑️</button>
-                </div>
-              </td>
-            `;
-            tabla.appendChild(fila);
-          });
-        }
+  selectCategoria.innerHTML = '<option value="">Todas las categorías</option>';
+  selectAnio.innerHTML = '<option value="">Todos los años</option>';
+
+  const categorias = [...new Set(socios.map(s => s.categoria).filter(Boolean))].sort();
+  const anios = [...new Set(socios.map(s => s.nacimiento?.substring(0, 4)).filter(Boolean))].sort();
+
+  categorias.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    selectCategoria.appendChild(opt);
+  });
+
+  anios.forEach(anio => {
+    const opt = document.createElement('option');
+    opt.value = anio;
+    opt.textContent = anio;
+    selectAnio.appendChild(opt);
+  });
+}
+
+function ordenarSocios(lista, campo) {
+  const asc = (ordenActual.campo === campo) ? !ordenActual.asc : true;
+  ordenActual = { campo, asc };
+  return lista.sort((a, b) => {
+    let valA = (a[campo] ?? '').toString().toLowerCase();
+    let valB = (b[campo] ?? '').toString().toLowerCase();
+    if (!isNaN(valA) && !isNaN(valB)) {
+      valA = parseFloat(valA);
+      valB = parseFloat(valB);
+    }
+    return asc ? (valA > valB ? 1 : valA < valB ? -1 : 0) : (valA < valB ? 1 : valA > valB ? -1 : 0);
+  });
+}
+
+function mostrarFiltrados(filtroTexto = '') {
+  const tabla = document.getElementById('tablaSocios');
+  tabla.innerHTML = '';
+
+  const filtroCategoria = document.getElementById('filtro-categoria').value;
+  const filtroAnio = document.getElementById('filtro-anio').value;
+
+  let sociosFiltrados = sociosOriginales.filter(s => {
+    const coincideTexto = (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtroTexto.toLowerCase());
+    const coincideCategoria = !filtroCategoria || s.categoria === filtroCategoria;
+    const coincideAnio = !filtroAnio || s.nacimiento?.startsWith(filtroAnio);
+    return coincideTexto && coincideCategoria && coincideAnio;
+  });
+
+  if (ordenActual.campo) sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
+
+  sociosFiltrados.forEach(s => {
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+      <td>${s.numero}</td>
+      <td>${s.dni}</td>
+      <td>${s.nombre}</td>
+      <td>${s.apellido}</td>
+      <td>${s.categoria}</td>
+      <td>${s.telefono ?? '—'}</td>
+      <td>${s.nacimiento ?? ''}</td>
+      <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
+      <td>${s.fecha_ingreso ?? ''}</td>
+      <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
+      <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
+      <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
+      <td>
+        <div class="d-flex justify-content-center gap-1">
+          <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
+          <button class="btn btn-sm btn-outline-warning btn-eliminar" data-id="${s.numero}">🗑️</button>
+        </div>
+      </td>
+    `;
+    tabla.appendChild(fila);
+  });
+}
 
         mostrarFiltrados();
         buscador.addEventListener('input', e => mostrarFiltrados(e.target.value));
@@ -326,131 +382,158 @@ async function cargarCategoriasEnSelect() {
 
 
     document.addEventListener('DOMContentLoaded', () => {
-      cargarSocios();
-      const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
-      const form = document.getElementById('formNuevoSocio');
+  cargarSocios();
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
+  const form = document.getElementById('formNuevoSocio');
 
-      document.getElementById('btnAbrirFormulario').addEventListener('click', async () => {
-  form.reset();
-  await cargarCategoriasEnSelect();
-  delete form.dataset.editing;
-  document.getElementById('activo').checked = true;
-  document.getElementById('becado').checked = false;
-  modal.show();
+  document.getElementById('btnAbrirFormulario').addEventListener('click', async () => {
+    form.reset();
+    await cargarCategoriasEnSelect();
+    delete form.dataset.editing;
+    document.getElementById('activo').checked = true;
+    document.getElementById('becado').checked = false;
+    modal.show();
+  });
+
+  // ✅ Filtros nuevos: categoría y año
+  document.getElementById('filtro-categoria').addEventListener('change', () => {
+    mostrarFiltrados(document.getElementById('buscador').value);
+  });
+
+  document.getElementById('filtro-anio').addEventListener('change', () => {
+    mostrarFiltrados(document.getElementById('buscador').value);
+  });
+
+  // Búsqueda por texto
+  document.getElementById('buscador').addEventListener('input', e => {
+    mostrarFiltrados(e.target.value);
+  });
+
+  // Ordenar por columnas
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const campo = th.dataset.sort;
+      ordenActual.campo = campo;
+      mostrarFiltrados(document.getElementById('buscador').value);
+    });
+  });
+
+  // Editar socio
+  document.body.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('btn-editar')) {
+      const id = e.target.dataset.id;
+      try {
+        const res = await fetchConToken(`/socio/${id}`);
+        const socio = await res.json();
+        document.getElementById('numero_socio').value = socio.numero;
+        document.getElementById('dni').value = socio.dni;
+        document.getElementById('nombre').value = socio.nombre;
+        document.getElementById('apellido').value = socio.apellido;
+        document.getElementById('subcategoria').value = socio.categoria;
+        document.getElementById('telefono').value = socio.telefono ?? '';
+        document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(0, 10) ?? '';
+        document.getElementById('fecha_ingreso').value = socio.ingreso?.substring(0, 10) ?? '';
+        document.getElementById('activo').checked = socio.activo;
+        document.getElementById('becado').checked = socio.becado;
+        delete form.dataset.foto;
+        form.dataset.editing = id;
+        await cargarCategoriasEnSelect();
+        modal.show();
+      } catch {
+        alert('❌ Error al obtener socio');
+      }
+    }
+
+    // Eliminar socio
+    if (e.target.classList.contains('btn-eliminar')) {
+      const id = e.target.dataset.id;
+      if (confirm('¿Eliminar este socio?')) {
+        try {
+          const res = await fetchConToken(`/socio/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error();
+          await cargarSocios();
+        } catch {
+          alert('❌ No se pudo eliminar el socio');
+        }
+      }
+    }
+  });
+
+  // Cambios en switches de activo/becado
+  document.body.addEventListener('change', async (e) => {
+    if (e.target.classList.contains('check-activo') || e.target.classList.contains('check-becado')) {
+      const id = e.target.dataset.id;
+      const campo = e.target.classList.contains('check-activo') ? 'activo' : 'becado';
+      const valor = e.target.checked;
+      try {
+        const res = await fetchConToken(`/socio/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [campo]: valor })
+        });
+        if (!res.ok) throw new Error();
+      } catch {
+        alert(`❌ No se pudo actualizar el estado de ${campo}`);
+      }
+    }
+  });
+
+  // Guardar socio (alta o edición)
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = form.dataset.editing;
+    const data = {
+      numero_socio: document.getElementById('numero_socio').value,
+      dni: document.getElementById('dni').value,
+      nombre: document.getElementById('nombre').value,
+      apellido: document.getElementById('apellido').value,
+      subcategoria: document.getElementById('subcategoria').value,
+      telefono: document.getElementById('telefono').value,
+      fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
+      fecha_ingreso: document.getElementById('fecha_ingreso').value,
+      activo: document.getElementById('activo').checked,
+      becado: document.getElementById('becado').checked
+    };
+
+    try {
+      const res = await fetchConToken(id ? `/socio/${id}` : '/socio', {
+        method: id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Error al guardar socio');
+      }
+
+      const result = await res.json();
+      const socioId = id || result.numero;
+      const fotoInput = document.getElementById('foto');
+
+      if (fotoInput.files.length > 0) {
+        const formData = new FormData();
+        formData.append('foto', fotoInput.files[0]);
+
+        const upload = await fetchConToken(`/socio/${socioId}/foto`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!upload.ok) throw new Error('Error al subir imagen');
+      }
+
+      modal.hide();
+      await cargarSocios();
+      form.reset();
+      document.getElementById('foto').value = '';
+      delete form.dataset.editing;
+    } catch (err) {
+      alert('❌ Error al guardar socio: ' + err.message);
+    }
+  });
 });
 
-
-      document.body.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('btn-editar')) {
-          const id = e.target.dataset.id;
-          try {
-            const res = await fetchConToken(`/socio/${id}`);
-            const socio = await res.json();
-            document.getElementById('numero_socio').value = socio.numero;
-            document.getElementById('dni').value = socio.dni;
-            document.getElementById('nombre').value = socio.nombre;
-            document.getElementById('apellido').value = socio.apellido;
-            document.getElementById('subcategoria').value = socio.categoria;
-            document.getElementById('telefono').value = socio.telefono ?? '';
-            document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(0, 10) ?? '';
-            document.getElementById('fecha_ingreso').value = socio.ingreso?.substring(0, 10) ?? '';
-            document.getElementById('activo').checked = socio.activo;
-            document.getElementById('becado').checked = socio.becado;
-            delete form.dataset.foto;
-            form.dataset.editing = id;
-            await cargarCategoriasEnSelect();
-            modal.show();
-          } catch {
-            alert('❌ Error al obtener socio');
-          }
-        }
-
-        if (e.target.classList.contains('btn-eliminar')) {
-          const id = e.target.dataset.id;
-          if (confirm('¿Eliminar este socio?')) {
-            try {
-              const res = await fetchConToken(`/socio/${id}`, { method: 'DELETE' });
-              if (!res.ok) throw new Error();
-              await cargarSocios();
-            } catch {
-              alert('❌ No se pudo eliminar el socio');
-            }
-          }
-        }
-      });
-
-      document.body.addEventListener('change', async (e) => {
-        if (e.target.classList.contains('check-activo') || e.target.classList.contains('check-becado')) {
-          const id = e.target.dataset.id;
-          const campo = e.target.classList.contains('check-activo') ? 'activo' : 'becado';
-          const valor = e.target.checked;
-          try {
-            const res = await fetchConToken(`/socio/${id}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ [campo]: valor })
-            });
-            if (!res.ok) throw new Error();
-          } catch {
-            alert(`❌ No se pudo actualizar el estado de ${campo}`);
-          }
-        }
-      });
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = form.dataset.editing;
-        const data = {
-          numero_socio: document.getElementById('numero_socio').value,
-          dni: document.getElementById('dni').value,
-          nombre: document.getElementById('nombre').value,
-          apellido: document.getElementById('apellido').value,
-          subcategoria: document.getElementById('subcategoria').value,
-          telefono: document.getElementById('telefono').value,
-          fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
-          fecha_ingreso: document.getElementById('fecha_ingreso').value,
-          activo: document.getElementById('activo').checked,
-          becado: document.getElementById('becado').checked
-        };
-
-        try {
-          const res = await fetchConToken(id ? `/socio/${id}` : '/socio', {
-            method: id ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-          });
-
-          if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.error || 'Error al guardar socio');
-          }
-
-          const result = await res.json();
-          const socioId = id || result.numero;
-          const fotoInput = document.getElementById('foto');
-
-          if (fotoInput.files.length > 0) {
-            const formData = new FormData();
-            formData.append('foto', fotoInput.files[0]);
-
-            const upload = await fetchConToken(`/socio/${socioId}/foto`, {
-              method: 'POST',
-              body: formData,
-            });
-
-            if (!upload.ok) throw new Error('Error al subir imagen');
-          }
-
-          modal.hide();
-          await cargarSocios();
-          form.reset();
-          document.getElementById('foto').value = '';
-          delete form.dataset.editing;
-        } catch (err) {
-          alert('❌ Error al guardar socio: ' + err.message);
-        }
-      });
-    });
   </script>
 <div class="modal fade" id="modalNuevoSocio" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
