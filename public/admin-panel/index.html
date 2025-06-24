@@ -188,14 +188,21 @@
   <button class="btn btn-yellow" id="btnAbrirFormulario">Generar nuevo socio</button>
 </div>
 
-<div class="d-flex gap-3 mb-3">
-  <select id="filtro-categoria" class="form-select" style="width: 200px;">
+<div class="d-flex gap-2 mb-3">
+  <select id="filtro-categoria" class="form-select form-select-sm" style="width: 160px;">
     <option value="">Todas las categorías</option>
   </select>
 
-  <select id="filtro-anio" class="form-select" style="width: 200px;">
+  <select id="filtro-anio" class="form-select form-select-sm" style="width: 160px;">
     <option value="">Todos los años</option>
   </select>
+
+  <<select id="filtro-estado-pago" class="form-select form-select-sm" style="width: 160px;">
+    <option value="">Todos los estados</option>
+    <option value="al-dia">Al día</option>
+    <option value="en-mora">En mora</option>
+  </select>
+
 </div>
 
 
@@ -203,7 +210,7 @@
   <table class="table table-striped table-bordered text-center bg-white tabla-socios">
     <thead class="table-primary">
       <tr>
-        <th>Pago</th>
+        <th style="cursor:pointer" data-sort="estado_pago">Pago</th>
         <th style="cursor:pointer" data-sort="numero">Nº Socio</th>
         <th style="cursor:pointer" data-sort="dni">DNI</th>
         <th>Nombre</th>
@@ -284,7 +291,15 @@ function poblarFiltros(socios) {
 function ordenarSocios(lista, campo) {
   const asc = (ordenActual.campo === campo) ? !ordenActual.asc : true;
   ordenActual = { campo, asc };
+
   return lista.sort((a, b) => {
+    if (campo === 'estado_pago') {
+      // Al día: 1 — En mora: 0
+      const estadoA = a.alDia ? 1 : 0;
+      const estadoB = b.alDia ? 1 : 0;
+      return asc ? estadoA - estadoB : estadoB - estadoA;
+    }
+
     let valA = (a[campo] ?? '').toString().toLowerCase();
     let valB = (b[campo] ?? '').toString().toLowerCase();
     if (!isNaN(valA) && !isNaN(valB)) {
@@ -295,18 +310,26 @@ function ordenarSocios(lista, campo) {
   });
 }
 
+
 function mostrarFiltrados(filtroTexto = '') {
   const tabla = document.getElementById('tablaSocios');
   tabla.innerHTML = '';
 
   const filtroCategoria = document.getElementById('filtro-categoria').value;
   const filtroAnio = document.getElementById('filtro-anio').value;
+  const filtroEstado = document.getElementById('filtro-estado-pago').value;
+
 
   let sociosFiltrados = sociosOriginales.filter(s => {
     const coincideTexto = (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtroTexto.toLowerCase());
     const coincideCategoria = !filtroCategoria || s.categoria === filtroCategoria;
     const coincideAnio = !filtroAnio || s.nacimiento?.startsWith(filtroAnio);
-    return coincideTexto && coincideCategoria && coincideAnio;
+    return coincideTexto && coincideCategoria && coincideAnio && coincideEstado;
+    const coincideEstado =
+    !filtroEstado ||
+    (filtroEstado === 'al-dia' && s.alDia) ||
+    (filtroEstado === 'en-mora' && !s.alDia);
+
   });
 
   if (ordenActual.campo) sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
@@ -333,6 +356,7 @@ function mostrarFiltrados(filtroTexto = '') {
   const mesActual = formato(anio, mes);
   const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
   const alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
+  s.alDia = alDia; // 👉 lo guardamos para poder ordenar luego
   indicador.style.backgroundColor = alDia ? 'limegreen' : 'red';
   pagoCell.appendChild(indicador);
   fila.appendChild(pagoCell);
