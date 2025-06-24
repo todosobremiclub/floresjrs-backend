@@ -148,10 +148,7 @@
     contenedor.appendChild(div);
   });
 
-  document.getElementById('anioSeleccionado').textContent = anioActual;
-}
-
-
+  
     document.getElementById('anioSeleccionado').textContent = anioActual;
   }
 
@@ -160,14 +157,16 @@
     renderizarMeses();
   }
 
-  function toggleMes(idMes) {
-    if (mesesSeleccionados.has(idMes)) {
-      mesesSeleccionados.delete(idMes);
-    } else {
-      mesesSeleccionados.add(idMes);
-    }
-    renderizarMeses();
+function toggleMes(idMes) {
+  if (mesesPagados.has(idMes)) return; // si ya está pagado, no se puede cambiar
+  if (mesesSeleccionados.has(idMes)) {
+    mesesSeleccionados.delete(idMes);
+  } else {
+    mesesSeleccionados.add(idMes);
   }
+  renderizarMeses();
+}
+
 
   function obtenerMesesPagados() {
     return Array.from(mesesSeleccionados);
@@ -320,7 +319,7 @@ function renderizarMeses() {
 
     div.className = 'col';
     div.innerHTML = `
-      <div class="mes-cuadro ${estaSeleccionado ? 'pagado' : ''}" onclick="${estaSeleccionado ? '' : `toggleMes('${idMes}')`}">
+      <div class="mes-cuadro ${estaSeleccionado ? 'pagado' : ''}" onclick="toggleMes('${idMes}')" : `toggleMes('${idMes}')`}">
         ${mes} ${estaSeleccionado ? '✅' : ''}
       </div>
     `;
