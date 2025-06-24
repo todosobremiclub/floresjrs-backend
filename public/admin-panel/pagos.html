@@ -285,7 +285,7 @@ renderizarMeses();
   modal.show();
 });
 
-  / ✅ Escuchar cuando se selecciona un socio (solo una vez)
+  // ✅ Escuchar cuando se selecciona un socio (solo una vez)
 inputBusqueda.addEventListener('change', async () => {
   const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
   if (!opcion) return;
