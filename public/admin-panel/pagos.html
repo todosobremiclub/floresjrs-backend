@@ -281,31 +281,31 @@ btnNuevoPago.addEventListener('click', async () => {
   inputFecha.valueAsDate = new Date();
   mesesSeleccionados.clear();
 
-  // Escuchar cuando se selecciona un socio
-  inputBusqueda.addEventListener('change', async () => {
-    const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
-    if (!opcion) return;
-
-    const numeroSocio = parseInt(opcion.dataset.numero);
-
-    try {
-      const res = await fetch(`/pagos/mensuales/${numeroSocio}`, {
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-      });
-      const data = await res.json();
-      mesesSeleccionados.clear();
-      data.forEach(m => {
-        const idMes = `${m.anio}-${m.mes}`;
-        mesesSeleccionados.add(idMes);
-      });
-      renderizarMeses();
-    } catch (err) {
-      console.error('❌ Error al cargar meses pagados:', err);
-    }
-  });
-
-  renderizarMeses();
+renderizarMeses();
   modal.show();
+});
+
+  / ✅ Escuchar cuando se selecciona un socio (solo una vez)
+inputBusqueda.addEventListener('change', async () => {
+  const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
+  if (!opcion) return;
+
+  const numeroSocio = parseInt(opcion.dataset.numero);
+
+  try {
+    const res = await fetch(`/pagos/mensuales/${numeroSocio}`, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const data = await res.json();
+    mesesSeleccionados.clear();
+    data.forEach(m => {
+      const idMes = `${m.anio}-${m.mes}`;
+      mesesSeleccionados.add(idMes);
+    });
+    renderizarMeses();
+  } catch (err) {
+    console.error('❌ Error al cargar meses pagados:', err);
+  }
 });
 
 function renderizarMeses() {
@@ -314,12 +314,12 @@ function renderizarMeses() {
 
   nombresMeses.forEach((mes, i) => {
     const idMes = `${anioActual}-${(i + 1).toString().padStart(2, '0')}`;
-    const div = document.createElement('div');
     const estaSeleccionado = mesesSeleccionados.has(idMes);
 
+    const div = document.createElement('div');
     div.className = 'col';
     div.innerHTML = `
-      <div class="mes-cuadro ${estaSeleccionado ? 'pagado' : ''}" onclick="toggleMes('${idMes}')" : `toggleMes('${idMes}')`}">
+      <div class="mes-cuadro ${estaSeleccionado ? 'pagado' : ''}" onclick="toggleMes('${idMes}')">
         ${mes} ${estaSeleccionado ? '✅' : ''}
       </div>
     `;
@@ -341,47 +341,45 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
+formPago.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-    formPago.addEventListener('submit', async (e) => {
-      e.preventDefault();
+  const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
+  if (!opcion) return alert('❌ Socio inválido');
 
-      const opcion = [...listaSocios.options].find(opt => opt.value === inputBusqueda.value);
-      if (!opcion) return alert('❌ Socio inválido');
+  const numeroSocio = parseInt(opcion.dataset.numero);
+  const meses = obtenerMesesPagados();
 
-      const numeroSocio = parseInt(opcion.dataset.numero);
-      const meses = obtenerMesesPagados();
+  if (meses.length === 0) {
+    alert('⚠️ Seleccioná al menos un mes a registrar');
+    return;
+  }
 
-      if (meses.length === 0) {
-        alert('⚠️ Seleccioná al menos un mes a registrar');
-        return;
-      }
-
-      try {
-        const res = await fetch('/pagos/mensuales', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          },
-          body: JSON.stringify({ numeroSocio, meses })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al registrar meses');
-
-        alert('✅ Pago registrado correctamente');
-        modal.hide();
-        cargarPagos();
-      } catch (err) {
-        console.error('❌', err);
-        alert(err.message || '❌ Error al registrar el pago');
-      }
+  try {
+    const res = await fetch('/pagos/mensuales', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify({ numeroSocio, meses })
     });
 
-    cargarPagos();
-  });
-</script>
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al registrar meses');
 
+    alert('✅ Pago registrado correctamente');
+    modal.hide();
+    cargarPagos();
+  } catch (err) {
+    console.error('❌', err);
+    alert(err.message || '❌ Error al registrar el pago');
+  }
+});
+
+cargarPagos();
+});
+</script>
 
 </body>
 </html>
