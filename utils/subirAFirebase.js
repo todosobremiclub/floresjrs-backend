@@ -10,13 +10,14 @@ async function subirAFirebase(buffer, nombreOriginal) {
   const archivo = bucket.file(nombreArchivo);
 
   await archivo.save(buffer, {
+  metadata: {
+    contentType: mime.lookup(nombreOriginal) || 'application/octet-stream',
     metadata: {
-      contentType,
-      metadata: {
-        firebaseStorageDownloadTokens: uuidv4()
-      }
+      firebaseStorageDownloadTokens: uuidv4(),
     }
-  });
+  }
+});
+
 
   const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(nombreArchivo)}?alt=media`;
 
