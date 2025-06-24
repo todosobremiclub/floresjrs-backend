@@ -77,9 +77,12 @@
       <select class="form-select" id="categoria"></select>
     </div>
     <div class="mb-3" id="anioContainer" style="display: none;">
-      <label class="form-label">Año de nacimiento</label>
-      <input type="number" class="form-control" id="anio_nacimiento">
-    </div>
+  <label class="form-label">Año de nacimiento</label>
+  <select class="form-select" id="anio_nacimiento">
+    <option value="">Seleccionar año</option>
+  </select>
+</div>
+
     <button type="submit" class="btn btn-yellow">📤 Publicar novedad</button>
   </form>
 
@@ -145,16 +148,13 @@ function fetchConToken(url, opciones = {}) {
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('destino').addEventListener('change', e => {
-    document.getElementById('categoriaContainer').style.display = e.target.value !== 'todos' ? 'block' : 'none';
-    document.getElementById('anioContainer').style.display = e.target.value === 'categoria_anio' ? 'block' : 'none';
+    const valor = e.target.value;
+    document.getElementById('categoriaContainer').style.display = valor !== 'todos' ? 'block' : 'none';
+    document.getElementById('anioContainer').style.display = valor === 'categoria_anio' ? 'block' : 'none';
 
-  if (e.target.value === 'categoria' || e.target.value === 'categoria_anio') {
-    cargarCategorias();
-  }
-
+    if (valor === 'categoria' || valor === 'categoria_anio') cargarCategorias();
+    if (valor === 'categoria_anio') cargarAnios();
   });
-
-
 
   document.getElementById('formNovedad').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -174,8 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!res.ok) return alert(data.error);
     alert('✅ Publicada');
     document.getElementById('formNovedad').reset();
-    cargarCategorias();
-
     cargar();
   });
 
@@ -251,8 +249,22 @@ async function cargarCategorias() {
   }
 }
 
+async function cargarAnios() {
+  try {
+    const res = await fetchConToken('/config/anios');
+    const data = await res.json();
+    const anioSelect = document.getElementById('anio_nacimiento');
+    anioSelect.innerHTML = '<option value="">Seleccionar año</option>';
+    data.forEach(anio => {
+      const option = document.createElement('option');
+      option.value = anio;
+      option.textContent = anio;
+      anioSelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error('❌ Error al cargar años:', err);
+  }
+}
 </script>
 </body>
 </html>
-
-

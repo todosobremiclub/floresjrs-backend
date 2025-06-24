@@ -57,6 +57,22 @@ router.put('/:id', verificarToken, async (req, res) => {
   }
 });
 
+// GET - Obtener años únicos de nacimiento desde socios
+router.get('/anios', verificarToken, async (req, res) => {
+  try {
+    const resultado = await db.query(`
+      SELECT DISTINCT EXTRACT(YEAR FROM fecha_nacimiento)::INT AS anio
+      FROM socios
+      WHERE fecha_nacimiento IS NOT NULL
+      ORDER BY anio DESC
+    `);
+    res.json(resultado.rows.map(row => row.anio));
+  } catch (err) {
+    console.error('❌ Error al obtener años:', err);
+    res.status(500).json({ error: 'Error al obtener años' });
+  }
+});
+
 module.exports = router;
 
 
