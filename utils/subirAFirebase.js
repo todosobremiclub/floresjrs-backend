@@ -7,11 +7,18 @@ async function subirAFirebase(buffer, nombreOriginal) {
   const nombreArchivo = `${uuidv4()}-${nombreOriginal}`;
   const archivo = bucket.file(nombreArchivo);
 
+  // Detectar tipo MIME según extensión del archivo
+  const extension = nombreOriginal.toLowerCase().split('.').pop();
+  const contentType =
+    extension === 'png' ? 'image/png' :
+    extension === 'jpg' || extension === 'jpeg' ? 'image/jpeg' :
+    'application/octet-stream'; // fallback por si acaso
+
   await archivo.save(buffer, {
     metadata: {
-      contentType: 'image/jpeg', // Cambiar si subís PNG
+      contentType: contentType,
       metadata: {
-        firebaseStorageDownloadTokens: uuidv4(), // Token para generar URL pública
+        firebaseStorageDownloadTokens: uuidv4(), // token para URL pública
       }
     }
   });
