@@ -473,20 +473,22 @@ async function cargarCategoriasEnSelect() {
       try {
         const res = await fetchConToken(`/socio/${id}`);
         const socio = await res.json();
-        document.getElementById('numero_socio').value = socio.numero;
-        document.getElementById('dni').value = socio.dni;
-        document.getElementById('nombre').value = socio.nombre;
-        document.getElementById('apellido').value = socio.apellido;
-        document.getElementById('subcategoria').value = socio.categoria;
-        document.getElementById('telefono').value = socio.telefono ?? '';
-        document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(0, 10) ?? '';
-        document.getElementById('fecha_ingreso').value = socio.ingreso?.substring(0, 10) ?? '';
-        document.getElementById('activo').checked = socio.activo;
-        document.getElementById('becado').checked = socio.becado;
-        delete form.dataset.foto;
-        form.dataset.editing = id;
-        await cargarCategoriasEnSelect();
-        modal.show();
+await cargarCategoriasEnSelect(); // 👈 Primero cargamos las opciones
+
+document.getElementById('numero_socio').value = socio.numero;
+document.getElementById('dni').value = socio.dni;
+document.getElementById('nombre').value = socio.nombre;
+document.getElementById('apellido').value = socio.apellido;
+document.getElementById('subcategoria').value = socio.categoria; // 👈 Ahora sí va a funcionar
+document.getElementById('telefono').value = socio.telefono ?? '';
+document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(0, 10) ?? '';
+document.getElementById('fecha_ingreso').value = socio.ingreso?.substring(0, 10) ?? '';
+document.getElementById('activo').checked = socio.activo;
+document.getElementById('becado').checked = socio.becado;
+delete form.dataset.foto;
+form.dataset.editing = id;
+modal.show();
+
       } catch {
         alert('❌ Error al obtener socio');
       }
