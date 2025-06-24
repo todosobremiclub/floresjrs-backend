@@ -13,6 +13,7 @@
     "express-session": "^1.18.1",
     "firebase-admin": "^13.4.0",
     "jsonwebtoken": "^9.0.2",
+    "mime-types": "^3.0.1",
     "multer": "^2.0.1",
     "pg": "^8.7.3",
     "uuid": "^11.1.0"
