@@ -9,7 +9,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const pagosRoutes = require('./routes/pagosRoutes');
 const montoRoutes = require('./routes/montoRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
-const novedadesRoutes = require('./routes/novedadesRoutes'); // ✅ NUEVO
+const novedadesRoutes = require('./routes/novedadesRoutes');
+const reportesRoutes = require('./routes/reportesRoutes'); // ✅ NUEVO
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,12 +26,13 @@ app.use('/admin-panel', express.static(path.join(__dirname, 'public/admin-panel'
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 👉 Rutas API
-app.use('/socio', socioRoutes);                 // Rutas protegidas
-app.use('/api/admin', adminRoutes);             // Login admin
-app.use('/pagos', pagosRoutes);                 // Pagos de socios
-app.use('/api/monto', montoRoutes);             // Monto de cuota
-app.use('/config/categorias', categoriasRoutes);// Categorías deportivas
-app.use('/novedades', require('./routes/novedadesRoutes'));         // ✅ Rutas de novedades
+app.use('/socio', socioRoutes);                           // Rutas protegidas
+app.use('/api/admin', adminRoutes);                       // Login admin
+app.use('/pagos', pagosRoutes);                           // Pagos de socios
+app.use('/api/monto', montoRoutes);                       // Monto de cuota
+app.use('/config/categorias', categoriasRoutes);          // Categorías deportivas
+app.use('/novedades', novedadesRoutes);                   // Novedades
+app.use('/reportes', reportesRoutes);                     // ✅ Reportes con token
 
 // 👉 Redirección raíz
 app.get('/', (req, res) => {

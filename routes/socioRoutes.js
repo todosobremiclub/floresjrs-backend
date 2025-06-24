@@ -222,7 +222,7 @@ router.delete('/:id', verificarToken, async (req, res) => {
   }
 });
 
-// POST /socio/:id/foto → subir imagen a Imgur (protegido)
+// POST /socio/:id/foto → subir imagen  (protegido)
 router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res) => {
   const { id } = req.params;
 
@@ -233,7 +233,6 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
   try {
     const imagenUrl = await subirAFirebase(req.file.buffer, req.file.originalname);
 
-
     await db.query(
       'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
       [imagenUrl, id]
@@ -241,7 +240,7 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
 
     res.json({ mensaje: 'Foto subida correctamente', url: imagenUrl });
   } catch (err) {
-    console.error('❌ Error al subir a Imgur:', err.message);
+    console.error('❌ Error real al subir imagen:', err); // 👈 log completo
     res.status(500).json({ error: 'Error al subir imagen' });
   }
 });
