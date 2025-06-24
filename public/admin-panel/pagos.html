@@ -275,7 +275,26 @@
       }
       inputFecha.valueAsDate = new Date();
       mesesSeleccionados.clear();
-      renderizarMeses();
+
+if (listaSocios.options.length > 0) {
+  const opcion = listaSocios.options[0];
+  const numeroSocio = parseInt(opcion.dataset.numero);
+  
+  try {
+    const res = await fetch(`/pagos/mensuales/${numeroSocio}`, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const data = await res.json();
+    data.forEach(m => {
+      const idMes = `${m.anio}-${m.mes}`;
+      mesesSeleccionados.add(idMes);
+    });
+  } catch (err) {
+    console.error('❌ Error al cargar meses pagados:', err);
+  }
+}
+renderizarMeses();
+
       modal.show();
     });
 
