@@ -32,7 +32,7 @@
       background-color: white;
       padding: 1rem;
       border-radius: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       color: black;
     }
 
@@ -99,29 +99,43 @@
       <h2 class="text-warning m-0">Reportes - Flores Jrs</h2>
     </div>
 
-    <div class="chart-container">
-      <div class="chart-title">1. Socios al día vs En mora</div>
-      <canvas id="graficoAlDia"></canvas>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">1. Socios al día vs En mora</div>
+          <canvas id="graficoAlDia" height="200"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">2. Cantidad de socios por categoría</div>
+          <canvas id="graficoCategorias" height="200"></canvas>
+        </div>
+      </div>
     </div>
 
-    <div class="chart-container">
-      <div class="chart-title">2. Cantidad de socios por categoría</div>
-      <canvas id="graficoCategorias"></canvas>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">3. Estado de pago por categoría</div>
+          <canvas id="graficoEstadoPorCategoria" height="200"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">4. Socios con y sin foto cargada</div>
+          <canvas id="graficoFoto" height="200"></canvas>
+        </div>
+      </div>
     </div>
 
-    <div class="chart-container">
-      <div class="chart-title">3. Estado de pago por categoría</div>
-      <canvas id="graficoEstadoPorCategoria"></canvas>
-    </div>
-
-    <div class="chart-container">
-      <div class="chart-title">4. Socios con y sin foto cargada</div>
-      <canvas id="graficoFoto"></canvas>
-    </div>
-
-    <div class="chart-container">
-      <div class="chart-title">5. Socios activos e inactivos</div>
-      <canvas id="graficoActivo"></canvas>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="chart-container">
+          <div class="chart-title">5. Socios activos e inactivos</div>
+          <canvas id="graficoActivo" height="200"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -138,4 +152,5 @@
   </script>
 </body>
 </html>
+
 
