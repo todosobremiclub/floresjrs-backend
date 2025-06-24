@@ -56,17 +56,16 @@
     </div>
 
     <table class="table table-bordered tabla-pagos text-white bg-white text-dark">
-      <thead class="table-primary">
-        <tr>
-          <th>N° Socio</th>
-          <th>Nombre</th>
-          <th>Fecha de Pago</th>
-          <th>Monto</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody id="tablaPagos"></tbody>
-    </table>
+  <thead class="table-primary">
+    <tr>
+      <th>N° Socio</th>
+      <th>Nombre</th>
+      <th>Meses Abonados</th>
+    </tr>
+  </thead>
+  <tbody id="tablaPagos"></tbody>
+</table>
+
   </div>
 
   <!-- Modal -->
@@ -168,6 +167,34 @@
     return Array.from(mesesSeleccionados);
   }
 
+function toggleDetalle(numeroSocio) {
+  const div = document.getElementById(`detalle-${numeroSocio}`);
+  div.style.display = div.style.display === 'none' ? 'block' : 'none';
+}
+
+async function eliminarMesPagado(id, numeroSocio) {
+  if (!confirm('¿Eliminar este mes pagado?')) return;
+
+  try {
+    const res = await fetch(`/pagos/mensuales/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al eliminar mes');
+
+    alert('✅ Mes eliminado correctamente');
+    cargarPagos();
+  } catch (err) {
+    console.error('❌', err);
+    alert('❌ Error al eliminar mes');
+  }
+}
+
+
   document.addEventListener('DOMContentLoaded', () => {
     renderizarMeses();
 
@@ -237,54 +264,59 @@
     });
 
     async function cargarPagos() {
-      try {
-        const res = await fetch('/pagos', {
-          headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          }
-        });
-        const pagos = await res.json();
-        tablaPagos.innerHTML = '';
-        pagos.forEach(p => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${p.socio_id}</td>
-            <td>${p.nombre}</td>
-            <td>${p.fecha_pago}</td>
-            <td>$${parseFloat(p.monto).toFixed(2)}</td>
-            <td>
-              <button class="btn-eliminar" data-id="${p.id}" title="Eliminar">🗑️</button>
-            </td>
-          `;
-          tablaPagos.appendChild(row);
-        });
-      } catch {
-        alert('❌ Error al cargar pagos');
-      }
-    }
-
-    document.body.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('btn-eliminar')) {
-        const id = e.target.dataset.id;
-        if (confirm('¿Estás seguro que querés eliminar este pago?')) {
-          try {
-            const res = await fetch(`/pagos/${id}`, {
-              method: 'DELETE',
-              headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-              }
-            });
-            if (!res.ok) throw new Error();
-            alert('✅ Pago eliminado');
-            cargarPagos();
-          } catch {
-            alert('❌ Error al eliminar el pago');
-          }
-        }
-      }
+  try {
+    const res = await fetch('/pagos/mensuales', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     });
+    const data = await res.json();
+    const tbody = document.getElementById('tablaPagos');
+    tbody.innerHTML = '';
 
-    cargarPagos();
+    data.forEach(socio => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${socio.numero}</td>
+        <td>${socio.nombre} ${socio.apellido}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="toggleDetalle(${socio.numero})">
+            Ver detalles
+          </button>
+          <div id="detalle-${socio.numero}" style="display:none;" class="mt-2">
+            <table class="table table-sm table-bordered mt-2">
+              <thead>
+                <tr>
+                  <th>Año</th>
+                  <th>Mes</th>
+                  <th>Fecha Pago</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${socio.pagos.map(p => `
+                  <tr>
+                    <td>${p.anio}</td>
+                    <td>${p.mes}</td>
+                    <td>${p.fecha_pago}</td>
+                    <td>
+                      <button class="btn btn-danger btn-sm" onclick="eliminarMesPagado(${p.id}, ${socio.numero})">🗑️</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error('❌ Error al cargar pagos:', err);
+    alert('Error al cargar pagos');
+  }
+}
+
+
+   
   });
 </script>
 

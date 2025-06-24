@@ -58,7 +58,7 @@ router.post('/', verificarToken, async (req, res) => {
   }
 });
 
-// 👉 Registrar pagos mensuales (tabla pagos_mensuales)
+// 👉 Registrar pagos mensuales (evita duplicados)
 router.post('/mensuales', verificarToken, async (req, res) => {
   const { numeroSocio, meses } = req.body;
 
@@ -67,12 +67,27 @@ router.post('/mensuales', verificarToken, async (req, res) => {
   }
 
   try {
-    const values = meses.flatMap(m => {
+    const existentes = await db.query(
+      `SELECT anio, mes FROM pagos_mensuales WHERE socio_numero = $1`,
+      [numeroSocio]
+    );
+
+    const yaPagados = new Set(
+      existentes.rows.map(row => `${row.anio}-${row.mes.toString().padStart(2, '0')}`)
+    );
+
+    const nuevosMeses = meses.filter(m => !yaPagados.has(m));
+
+    if (nuevosMeses.length === 0) {
+      return res.status(200).json({ mensaje: 'No hay meses nuevos para registrar' });
+    }
+
+    const values = nuevosMeses.flatMap(m => {
       const [anio, mes] = m.split('-');
       return [numeroSocio, parseInt(anio), parseInt(mes)];
     });
 
-    const placeholders = meses.map((_, i) => `($${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3}, CURRENT_DATE)`).join(', ');
+    const placeholders = nuevosMeses.map((_, i) => `($${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3}, CURRENT_DATE)`).join(', ');
 
     const query = `
       INSERT INTO pagos_mensuales (socio_numero, anio, mes, fecha_pago)
@@ -88,7 +103,33 @@ router.post('/mensuales', verificarToken, async (req, res) => {
   }
 });
 
-// 👉 Obtener todos los pagos (de la tabla pagos)
+// 👉 Obtener meses abonados por un socio (incluye ID)
+router.get('/mensuales/:numeroSocio', verificarToken, async (req, res) => {
+  const { numeroSocio } = req.params;
+
+  try {
+    const resultado = await db.query(
+      `SELECT id, anio, mes
+       FROM pagos_mensuales
+       WHERE socio_numero = $1
+       ORDER BY anio, mes`,
+      [numeroSocio]
+    );
+
+    const mesesPagados = resultado.rows.map(row => ({
+      id: row.id,
+      anio: row.anio,
+      mes: row.mes.toString().padStart(2, '0')
+    }));
+
+    res.json(mesesPagados);
+  } catch (err) {
+    console.error('❌ Error al obtener meses abonados:', err);
+    res.status(500).json({ error: 'Error al obtener meses abonados' });
+  }
+});
+
+// 👉 Obtener todos los pagos (tabla pagos)
 router.get('/', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(
@@ -124,7 +165,21 @@ router.delete('/:id', verificarToken, async (req, res) => {
   }
 });
 
+// 👉 Eliminar un mes abonado (pagos_mensuales)
+router.delete('/mensuales/:id', verificarToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const resultado = await db.query('DELETE FROM pagos_mensuales WHERE id = $1', [id]);
+    if (resultado.rowCount === 0) {
+      return res.status(404).json({ error: 'Mes no encontrado' });
+    }
+    res.json({ mensaje: 'Mes eliminado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al eliminar mes pagado:', err);
+    res.status(500).json({ error: 'Error al eliminar mes pagado' });
+  }
+});
+
+
 module.exports = router;
-
-
-
+	
