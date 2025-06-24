@@ -120,7 +120,7 @@
     }
     .mes-cuadro.seleccionado {
       background-color: #004aad;
-      color: white;
+      color: green;
     }
   </style>
 
@@ -131,20 +131,26 @@
   const nombresMeses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
   function renderizarMeses() {
-    const contenedor = document.querySelector('#selector-anio-meses .row');
-    contenedor.innerHTML = '';
+  const contenedor = document.querySelector('#selector-anio-meses .row');
+  contenedor.innerHTML = '';
 
-    nombresMeses.forEach((mes, i) => {
-      const idMes = `${anioActual}-${(i + 1).toString().padStart(2, '0')}`;
-      const div = document.createElement('div');
-      div.className = 'col';
-      div.innerHTML = `
-        <div class="mes-cuadro ${mesesSeleccionados.has(idMes) ? 'seleccionado' : ''}" onclick="toggleMes('${idMes}')">
-          ${mes}
-        </div>
-      `;
-      contenedor.appendChild(div);
-    });
+  nombresMeses.forEach((mes, i) => {
+    const idMes = `${anioActual}-${(i + 1).toString().padStart(2, '0')}`;
+    const estaSeleccionado = mesesSeleccionados.has(idMes);
+
+    const div = document.createElement('div');
+    div.className = 'col';
+    div.innerHTML = `
+      <div class="mes-cuadro ${estaSeleccionado ? 'pagado' : ''}" onclick="toggleMes('${idMes}')">
+        ${mes} ${estaSeleccionado ? '✅' : ''}
+      </div>
+    `;
+    contenedor.appendChild(div);
+  });
+
+  document.getElementById('anioSeleccionado').textContent = anioActual;
+}
+
 
     document.getElementById('anioSeleccionado').textContent = anioActual;
   }
