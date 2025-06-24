@@ -364,9 +364,15 @@ function mostrarFiltrados(filtroTexto = '') {
 
 }
 
-   async function cargarSocios() {
+async function cargarSocios() {
   try {
     const res = await fetchConToken('/socio/');
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Error al obtener socios');
+    }
+
     const socios = await res.json();
     sociosOriginales = socios;
     ordenActual = { campo: null, asc: true };
@@ -377,6 +383,7 @@ function mostrarFiltrados(filtroTexto = '') {
     alert('❌ Error al cargar socios: ' + err.message);
   }
 }
+
 
 
 async function cargarCategoriasEnSelect() {
