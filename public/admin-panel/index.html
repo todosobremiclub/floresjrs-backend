@@ -461,6 +461,11 @@ async function cargarCategoriasEnSelect() {
     mostrarFiltrados(document.getElementById('buscador').value);
   });
 
+document.getElementById('filtro-estado-pago').addEventListener('change', () => {
+  mostrarFiltrados(document.getElementById('buscador').value);
+});
+
+
   document.getElementById('filtro-anio').addEventListener('change', () => {
     mostrarFiltrados(document.getElementById('buscador').value);
   });
