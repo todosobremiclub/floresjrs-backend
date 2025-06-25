@@ -321,23 +321,49 @@ function mostrarFiltrados(filtroTexto = '') {
   const filtroAnio = document.getElementById('filtro-anio').value;
   const filtroEstado = document.getElementById('filtro-estado-pago').value;
 
+  // Calcular alDia para todos los socios antes de filtrar
+const hoy = new Date();
+const anio = hoy.getFullYear();
+const mes = hoy.getMonth() + 1;
+const formato = (a, m) => `${a}-${String(m).padStart(2, '0')}`;
+const mesActual = formato(anio, mes);
+const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
 
- let sociosFiltrados = sociosOriginales.filter(s => {
-  const coincideTexto = (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtroTexto.toLowerCase());
-  const coincideCategoria = !filtroCategoria || s.categoria === filtroCategoria;
-  const coincideAnio = !filtroAnio || s.nacimiento?.startsWith(filtroAnio);
-  const coincideEstado =
-    !filtroEstado ||
-    (filtroEstado === 'al-dia' && s.alDia) ||
-    (filtroEstado === 'en-mora' && !s.alDia);
-
-  return coincideTexto && coincideCategoria && coincideAnio && coincideEstado;
+sociosOriginales.forEach(s => {
+  const pagos = s.pagos ?? [];
+  const becado = s.becado;
+  s.alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
 });
 
 
+  // 👉 Primero calculamos alDia para cada socio
+  sociosOriginales.forEach(s => {
+    const pagos = s.pagos ?? [];
+    const becado = s.becado;
+    s.alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
+  });
+
+  // 👉 Luego filtramos
+  let sociosFiltrados = sociosOriginales.filter(s => {
+    const coincideTexto = (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtroTexto.toLowerCase());
+    const coincideCategoria = !filtroCategoria || s.categoria === filtroCategoria;
+    const coincideAnio = !filtroAnio || s.nacimiento?.startsWith(filtroAnio);
+    const coincideEstado =
+      !filtroEstado ||
+      (filtroEstado === 'al-dia' && s.alDia) ||
+      (filtroEstado === 'en-mora' && !s.alDia);
+
+    return coincideTexto && coincideCategoria && coincideAnio && coincideEstado;
+  });
+
   if (ordenActual.campo) sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
 
-  sociosFiltrados.forEach(s => {
+  // 👉 Renderizar tabla
+  sociosFiltrados.forEach(s => agregarFilaSocio(s));
+}
+
+
+  function agregarFilaSocio(s) {
   const fila = document.createElement('tr');
 
   // 👉 CELDA ESTADO DE PAGO
@@ -350,17 +376,7 @@ function mostrarFiltrados(filtroTexto = '') {
   indicador.style.margin = '0 auto';
   indicador.title = 'Estado de cuota';
 
-  const pagos = s.pagos ?? [];
-  const becado = s.becado;
-  const hoy = new Date();
-  const anio = hoy.getFullYear();
-  const mes = hoy.getMonth() + 1;
-  const formato = (a, m) => `${a}-${String(m).padStart(2, '0')}`;
-  const mesActual = formato(anio, mes);
-  const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
-  const alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
-  s.alDia = alDia; // 👉 lo guardamos para poder ordenar luego
-  indicador.style.backgroundColor = alDia ? 'limegreen' : 'red';
+  indicador.style.backgroundColor = s.alDia ? 'limegreen' : 'red';
   pagoCell.appendChild(indicador);
   fila.appendChild(pagoCell);
 
@@ -387,6 +403,8 @@ function mostrarFiltrados(filtroTexto = '') {
   `;
 
   tabla.appendChild(fila);
+}
+
 });
 
 }
