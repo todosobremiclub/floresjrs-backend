@@ -14,10 +14,11 @@ router.get('/recaudacion-mensual', verificarToken, async (req, res) => {
 
   try {
     const resultado = await db.query(`
-      SELECT SUM(monto) AS total
-      FROM pagos
-      WHERE mes = $1 AND anio = $2
-    `, [mes, anioActual]);
+  SELECT SUM(monto) AS total
+  FROM pagos
+  WHERE EXTRACT(MONTH FROM fecha_pago) = $1 AND EXTRACT(YEAR FROM fecha_pago) = EXTRACT(YEAR FROM CURRENT_DATE)
+`, [mes]);
+;
 
     const total = resultado.rows[0].total || 0;
     res.json({ total });
@@ -28,4 +29,3 @@ router.get('/recaudacion-mensual', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
-
