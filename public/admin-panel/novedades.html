@@ -258,20 +258,30 @@ async function cargarCategorias() {
 
 async function cargarAnios() {
   try {
-    const res = await fetchConToken('/config/anios');
-    const data = await res.json();
+    const res = await fetchConToken('/socio/');
+    const socios = await res.json();
+
+    const aniosUnicos = [...new Set(
+      socios
+        .map(s => s.nacimiento?.substring(0, 4))
+        .filter(Boolean)
+    )].sort((a, b) => b - a); // Orden descendente
+
     const anioSelect = document.getElementById('anio_nacimiento');
     anioSelect.innerHTML = '<option value="">Seleccionar año</option>';
-    data.forEach(anio => {
+
+    aniosUnicos.forEach(anio => {
       const option = document.createElement('option');
       option.value = anio;
       option.textContent = anio;
       anioSelect.appendChild(option);
     });
+
   } catch (err) {
     console.error('❌ Error al cargar años:', err);
   }
 }
+
 </script>
 </body>
 </html>
