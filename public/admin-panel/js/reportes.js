@@ -13,15 +13,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ✅ Función para enviar peticiones con token
   const fetchConToken = async (url, options = {}) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+      ...(options.headers || {})
+    };
+
     return fetch(url, {
       ...options,
-      headers: {
-        ...(options.headers || {}),
-        Authorization: token
-      }
+      headers
     });
   };
 
+  // ✅ Recaudación mensual
   const actualizarRecaudacion = async () => {
     try {
       const res = await fetchConToken(`/reportes/recaudacion-mensual?mes=${mesActual + 1}`);
@@ -36,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // ✅ Cambio de mes con flechas
   window.cambiarMes = (delta) => {
     mesActual += delta;
     if (mesActual < 0) mesActual = 0;
@@ -43,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarRecaudacion();
   };
 
+  // ✅ Primera carga
   actualizarRecaudacion();
 });
 
