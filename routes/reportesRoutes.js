@@ -7,18 +7,23 @@ const verificarToken = require('../middlewares/verificarToken');
 router.get('/estado-pago', verificarToken, async (req, res) => {
   try {
     const becados = await db.query(`SELECT COUNT(*) FROM socios WHERE becado = true`);
-    const pagos = await db.query(`SELECT DISTINCT numero_socio FROM pagos WHERE fecha >= NOW() - INTERVAL '31 days'`);
     const total = await db.query(`SELECT COUNT(*) FROM socios WHERE becado = false`);
+    const pagos = await db.query(`
+      SELECT COUNT(DISTINCT numero_socio) AS cantidad
+      FROM pagos
+      WHERE fecha >= CURRENT_DATE - INTERVAL '31 days'
+    `);
 
-    const alDia = pagos.rows.length + parseInt(becados.rows[0].count);
-    const enMora = parseInt(total.rows[0].count) - pagos.rows.length;
+    const alDia = parseInt(becados.rows[0].count) + parseInt(pagos.rows[0].cantidad);
+    const enMora = parseInt(total.rows[0].count) - parseInt(pagos.rows[0].cantidad);
 
     res.json({ alDia, enMora });
   } catch (err) {
-    console.error(err);
+    console.error('❌ Error en /estado-pago:', err);
     res.status(500).json({ error: 'Error al calcular estado de pago' });
   }
 });
+
 
 // 2. Cantidad de socios por categoría
 router.get('/por-categoria', verificarToken, async (req, res) => {
@@ -38,23 +43,28 @@ router.get('/estado-pago-por-categoria', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(`
       SELECT s.subcategoria AS categoria,
-        SUM(CASE WHEN p.fecha >= NOW() - INTERVAL '31 days' THEN 1 ELSE 0 END) AS al_dia,
-        SUM(CASE WHEN p.fecha < NOW() - INTERVAL '31 days' OR p.fecha IS NULL THEN 1 ELSE 0 END) AS en_mora
+        COUNT(DISTINCT CASE
+          WHEN p.fecha >= CURRENT_DATE - INTERVAL '31 days' THEN s.numero_socio
+        END) AS al_dia,
+        COUNT(DISTINCT CASE
+          WHEN (p.fecha < CURRENT_DATE - INTERVAL '31 days' OR p.fecha IS NULL) THEN s.numero_socio
+        END) AS en_mora
       FROM socios s
       LEFT JOIN (
-        SELECT DISTINCT ON (numero_socio) numero_socio, fecha
+        SELECT numero_socio, MAX(fecha) AS fecha
         FROM pagos
-        ORDER BY numero_socio, fecha DESC
+        GROUP BY numero_socio
       ) p ON s.numero_socio = p.numero_socio
       WHERE s.becado = false
       GROUP BY s.subcategoria
     `);
     res.json(resultado.rows);
   } catch (err) {
-    console.error(err);
+    console.error('❌ Error en /estado-pago-por-categoria:', err);
     res.status(500).json({ error: 'Error al calcular estado por categoría' });
   }
 });
+
 
 // 4. Foto cargada
 router.get('/con-foto', verificarToken, async (req, res) => {
