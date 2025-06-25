@@ -6,16 +6,24 @@ const verificarToken = require('../middlewares/verificarToken');
 // 1. Socios al día vs en mora
 router.get('/estado-pago', verificarToken, async (req, res) => {
   try {
-    const becados = await db.query(`SELECT COUNT(*) FROM socios WHERE becado = true`);
-    const pagos = await db.query(`
-      SELECT DISTINCT id_socio FROM pagos WHERE fecha >= NOW() - INTERVAL '31 days'
+    const resultado = await db.query(`
+      SELECT
+        COUNT(*) FILTER (
+          WHERE s.id IN (
+            SELECT p.id_socio FROM pagos p
+            WHERE p.fecha >= NOW() - INTERVAL '31 days'
+          )
+        ) AS al_dia,
+        COUNT(*) FILTER (
+          WHERE s.id NOT IN (
+            SELECT p.id_socio FROM pagos p
+            WHERE p.fecha >= NOW() - INTERVAL '31 days'
+          )
+        ) AS en_mora
+      FROM socios s
     `);
-    const total = await db.query(`SELECT COUNT(*) FROM socios WHERE becado = false`);
 
-    const alDia = pagos.rows.length + parseInt(becados.rows[0].count);
-    const enMora = parseInt(total.rows[0].count) - pagos.rows.length;
-
-    res.json({ alDia, enMora });
+    res.json(resultado.rows[0]);
   } catch (err) {
     console.error('❌ Error en /estado-pago:', err);
     res.status(500).json({ error: 'Error al calcular estado de pago' });
