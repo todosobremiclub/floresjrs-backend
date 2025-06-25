@@ -329,11 +329,6 @@ const formato = (a, m) => `${a}-${String(m).padStart(2, '0')}`;
 const mesActual = formato(anio, mes);
 const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
 
-sociosOriginales.forEach(s => {
-  const pagos = s.pagos ?? [];
-  const becado = s.becado;
-  s.alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
-});
 
 
   // 👉 Primero calculamos alDia para cada socio
@@ -403,11 +398,9 @@ sociosOriginales.forEach(s => {
   `;
 
   tabla.appendChild(fila);
-}
-
-});
 
 }
+
 
 async function cargarSocios() {
   try {
