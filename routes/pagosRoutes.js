@@ -26,6 +26,18 @@ router.post('/monto', verificarToken, async (req, res) => {
   res.json({ mensaje: 'Monto actualizado correctamente' });
 });
 
+// ⚠️ Ruta temporal para ver contenido de la tabla pagos
+router.get('/debug/ver-pagos', verificarToken, async (req, res) => {
+  try {
+    const resultado = await db.query('SELECT * FROM pagos ORDER BY id DESC LIMIT 20');
+    res.json(resultado.rows);
+  } catch (err) {
+    console.error('Error al consultar pagos:', err);
+    res.status(500).json({ error: 'Error al consultar pagos' });
+  }
+});
+
+
 // 👉 Registrar nuevo pago general (tabla pagos)
 router.post('/', verificarToken, async (req, res) => {
   const { socio_id, fecha_pago, monto } = req.body;
