@@ -188,6 +188,7 @@ router.get('/mensuales', verificarToken, async (req, res) => {
         s.numero_socio AS socio_numero,
         s.nombre,
         s.apellido,
+        s.dni,
         pm.anio,
         pm.mes,
         TO_CHAR(pm.fecha_pago, 'YYYY-MM-DD') AS fecha_pago,
@@ -206,6 +207,7 @@ router.get('/mensuales', verificarToken, async (req, res) => {
           numero: id,
           nombre: row.nombre,
           apellido: row.apellido,
+          dni: row.dni,
           pagos: []
         };
       }
