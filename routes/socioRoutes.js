@@ -253,21 +253,30 @@ router.post('/login', async (req, res) => {
 
   try {
     const resultado = await db.query(
-      `SELECT 
-         numero_socio AS numero,
-         dni,
-         CONCAT(nombre, ' ', apellido) AS nombre,
-         subcategoria AS categoria,
-         EXTRACT(YEAR FROM fecha_nacimiento)::text AS nacimiento,
-         TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
-         'Activo' AS estado,
-         foto_url AS "fotoUrl",
-         'Flores Jrs' AS club
-       FROM socios
-       WHERE numero_socio = $1 AND dni = $2
-       LIMIT 1`,
-      [numero, dni]
-    );
+  `SELECT 
+     s.numero_socio AS numero,
+     s.dni,
+     CONCAT(s.nombre, ' ', s.apellido) AS nombre,
+     s.subcategoria AS categoria,
+     EXTRACT(YEAR FROM s.fecha_nacimiento)::text AS nacimiento,
+     TO_CHAR(s.fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
+     s.foto_url AS "fotoUrl",
+     'Flores Jrs' AS club,
+     CASE
+       WHEN s.becado THEN 'Becado'
+       WHEN EXISTS (
+         SELECT 1 FROM pagos_mensuales pm
+         WHERE pm.socio_numero = s.numero_socio
+           AND (pm.anio, pm.mes) >= (EXTRACT(YEAR FROM CURRENT_DATE), EXTRACT(MONTH FROM CURRENT_DATE) - 1)
+       ) THEN 'Al día'
+       ELSE 'En mora'
+     END AS estado_pago
+   FROM socios s
+   WHERE s.numero_socio = $1 AND s.dni = $2
+   LIMIT 1`,
+  [numero, dni]
+);
+
 
     if (resultado.rows.length === 0) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
