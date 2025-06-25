@@ -387,13 +387,15 @@ cargarPagos();
 });
 
   document.getElementById('buscadorPagos').addEventListener('input', () => {
-    const texto = document.getElementById('buscadorPagos').value.toLowerCase();
-    const filtrados = todosLosSocios.filter(s =>
-      `${s.nombre} ${s.apellido}`.toLowerCase().includes(texto) ||
-      s.dni?.toString().includes(texto)
-    );
-    renderizarTabla(filtrados);
+  const texto = document.getElementById('buscadorPagos').value.toLowerCase();
+  const filtrados = todosLosSocios.filter(s => {
+    const nombreCompleto = `${s.nombre} ${s.apellido}`.toLowerCase();
+    const dniStr = s.dni ? s.dni.toString() : '';
+    return nombreCompleto.includes(texto) || dniStr.includes(texto);
   });
+  renderizarTabla(filtrados);
+});
+
 
 
 
