@@ -2,25 +2,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('token');
   if (!token) return (window.location.href = 'login.html');
 
-  const headers = { Authorization: token };
-
-  // Elementos HTML
   const recaudacionEl = document.getElementById('recaudacionMes');
   const mesEl = document.getElementById('mesActual');
 
-  // Mes actual
   const meses = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
   let mesActual = new Date().getMonth(); // 0 = Enero
 
-  // Función para actualizar recaudación
+  // ✅ Función para enviar peticiones con token
+  const fetchConToken = async (url, options = {}) => {
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: token
+      }
+    });
+  };
+
   const actualizarRecaudacion = async () => {
     try {
-      const res = await fetch(`/reportes/recaudacion-mensual?mes=${mesActual + 1}`, {
-        headers
-      });
+      const res = await fetchConToken(`/reportes/recaudacion-mensual?mes=${mesActual + 1}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al obtener recaudación');
 
@@ -32,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Cambiar mes con flechas
   window.cambiarMes = (delta) => {
     mesActual += delta;
     if (mesActual < 0) mesActual = 0;
@@ -40,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarRecaudacion();
   };
 
-  // Cargar al inicio
   actualizarRecaudacion();
 });
 
