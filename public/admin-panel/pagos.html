@@ -270,21 +270,46 @@ btnNuevoPago.addEventListener('click', async () => {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     });
     const socios = await res.json();
+
+    // Guardamos todos los socios temporalmente para búsquedas posteriores
+    window.sociosParaBusqueda = socios;
+
     socios.forEach(s => {
       const opt = document.createElement('option');
-      opt.value = `${s.numero} - ${s.nombre} ${s.apellido}`;
+      opt.value = `${s.numero} - ${s.nombre} ${s.apellido} - ${s.dni}`;
       opt.dataset.numero = s.numero;
       listaSocios.appendChild(opt);
     });
+
+    // Evento input para filtrar también por DNI
+    inputBusqueda.addEventListener('input', () => {
+      const texto = inputBusqueda.value.toLowerCase();
+      listaSocios.innerHTML = '';
+
+      window.sociosParaBusqueda.forEach(s => {
+        const nombreCompleto = `${s.numero} - ${s.nombre} ${s.apellido} - ${s.dni}`;
+        if (
+          nombreCompleto.toLowerCase().includes(texto) ||
+          s.dni.toString().includes(texto)
+        ) {
+          const opt = document.createElement('option');
+          opt.value = nombreCompleto;
+          opt.dataset.numero = s.numero;
+          listaSocios.appendChild(opt);
+        }
+      });
+    });
+
   } catch {
     alert('❌ Error al cargar socios');
   }
+
   inputFecha.valueAsDate = new Date();
   mesesSeleccionados.clear();
-
-renderizarMeses();
+  renderizarMeses();
   modal.show();
 });
+
 
   // ✅ Escuchar cuando se selecciona un socio (solo una vez)
 inputBusqueda.addEventListener('change', async () => {
