@@ -6,6 +6,8 @@ const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
 
 // POST /novedades → publicar novedad con texto, imagen y filtros de destino
+const subirImagen = require('../utils/subirAFirebase'); // 👈 AGREGAR ESTO ARRIBA
+
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
     const { titulo, texto, destino, categoria, anio_nacimiento } = req.body;
@@ -16,7 +18,8 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
 
     let imagen_url = null;
     if (req.file) {
-            imagen_url = subida.url;
+      const subida = await subirImagen(req.file.buffer, req.file.originalname); // 👈 SUBIDA REAL
+      imagen_url = subida.url;
     }
 
     await db.query(`
