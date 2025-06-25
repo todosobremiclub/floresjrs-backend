@@ -53,7 +53,9 @@
     <h2 class="text-warning m-0">Gestión de Novedades</h2>
   </div>
 
-  <form id="formNovedad" enctype="multipart/form-data" class="bg-white text-dark p-4 rounded mb-4">
+  <form id="formNovedad" enctype="multipart/form-data" class="bg-white text-dark p-4 rounded shadow-sm mx-auto" style="max-width: 700px;">
+  <h4 class="text-primary text-center mb-4">📝 Publicar una novedad</h4>
+
     <div class="mb-3">
       <label for="titulo" class="form-label">Título</label>
       <input type="text" class="form-control" id="titulo" required>
@@ -85,7 +87,10 @@
   </select>
 </div>
 
-    <button type="submit" class="btn btn-yellow">📤 Publicar novedad</button>
+    <button type="submit" class="btn btn-warning fw-bold w-100 mt-2">
+  📤 Publicar novedad
+</button>
+
   </form>
 
   <h5 class="text-white">Novedades publicadas</h5>
