@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const fetchConToken = async (endpoint) => {
     try {
       const res = await fetch(endpoint, {
-        headers: { Authorization: token }
+       headers: { Authorization: `Bearer ${token}` }
+
       });
 
       if (!res.ok) {
