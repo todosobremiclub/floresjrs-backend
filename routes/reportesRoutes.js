@@ -42,14 +42,16 @@ router.get('/estado-pago-por-categoria', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(`
       SELECT s.subcategoria AS categoria,
-        SUM(CASE WHEN p.fecha >= NOW() - INTERVAL '31 days' THEN 1 ELSE 0 END) AS al_dia,
-        SUM(CASE WHEN p.fecha < NOW() - INTERVAL '31 days' OR p.fecha IS NULL THEN 1 ELSE 0 END) AS en_mora
+        COUNT(*) FILTER (WHERE p.fecha >= NOW() - INTERVAL '31 days') AS al_dia,
+        COUNT(*) FILTER (WHERE p.fecha < NOW() - INTERVAL '31 days' OR p.fecha IS NULL) AS en_mora
       FROM socios s
-      LEFT JOIN (
-        SELECT DISTINCT ON (id_socio) id_socio, fecha
+      LEFT JOIN LATERAL (
+        SELECT fecha
         FROM pagos
-        ORDER BY id_socio, fecha DESC
-      ) p ON s.id = p.id_socio
+        WHERE id_socio = s.id
+        ORDER BY fecha DESC
+        LIMIT 1
+      ) p ON true
       WHERE s.becado = false
       GROUP BY s.subcategoria
     `);
