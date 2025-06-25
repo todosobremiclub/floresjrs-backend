@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fetchConToken = async (url, options = {}) => {
     const headers = {
       'Content-Type': 'application/json',
-      Authorization: token,
+      Authorization: `Bearer ${token}`,
       ...(options.headers || {})
     };
 
