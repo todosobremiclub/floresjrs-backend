@@ -171,7 +171,7 @@
   <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
   <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
   <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
-  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light"⚙️ Configuración</a>
   <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
   <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
 </div>
@@ -378,6 +378,9 @@ const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
   fila.appendChild(pagoCell);
 
   // 👉 RESTO DE CELDAS
+
+console.log('📷 Foto socio:', s.foto_url);
+
   fila.innerHTML += `
     <td>${s.numero}</td>
     <td>${s.dni}</td>
