@@ -68,17 +68,18 @@
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <h4>Menú</h4>
-    <a href="index.html">🏠 Home</a>
-    <a href="pagos.html">💰 Pagos</a>
-    <a href="novedades.html">📢 Novedades</a>
-    <a href="notificaciones.html">🔔 Notificaciones</a>
-    <a href="cumpleanios.html">🎂 Cumpleaños</a>
-    <a href="configuracion.html">⚙️ Configuración</a>
-    <a href="reportes.html">📊 Reportes</a>
-    <button onclick="cerrarSesion()">Cerrar sesión</button>
-  </div>
+ <div class="sidebar" id="sidebar">
+  <h4>Menú</h4>
+  <a href="/admin-panel/index.html" class="btn btn-outline-light">🏠 Home</a>
+  <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+  <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
+  <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
+  <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
+  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+  <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
+  <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
+</div>
+
 
   <div class="main-content">
     <h2 class="mb-4">🎉 Cumpleaños</h2>
