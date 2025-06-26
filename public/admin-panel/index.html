@@ -394,10 +394,13 @@ console.log('📷 Foto socio:', s.foto_url);
     <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
     <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
     <td>${
-  s.foto_url
-    ? `<img src="${typeof s.foto_url === 'string' ? s.foto_url : s.foto_url.url}" width="30" style="border-radius:4px"/>`
+  s.foto_url && typeof s.foto_url === 'string'
+    ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>`
+    : s.foto_url && typeof s.foto_url === 'object' && s.foto_url.url
+    ? `<img src="${s.foto_url.url}" width="30" style="border-radius:4px"/>`
     : 'Sin foto'
 }</td>
+
 
     <td>
       <div class="d-flex justify-content-center gap-1">
