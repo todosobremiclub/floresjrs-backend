@@ -11,6 +11,7 @@ const montoRoutes = require('./routes/montoRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
 const novedadesRoutes = require('./routes/novedadesRoutes');
 const reportesRoutes = require('./routes/reportesRoutes'); // ✅ NUEVO
+const cumpleañosRoutes = require('./routes/cumpleañosRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,6 +34,7 @@ app.use('/api/monto', montoRoutes);                       // Monto de cuota
 app.use('/config/categorias', categoriasRoutes);          // Categorías deportivas
 app.use('/novedades', novedadesRoutes);                   // Novedades
 app.use('/reportes', reportesRoutes);                     // ✅ Reportes con token
+app.use('/cumpleaños', cumpleañosRoutes);
 
 // 👉 Redirección raíz
 app.get('/', (req, res) => {
