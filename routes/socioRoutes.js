@@ -284,7 +284,12 @@ let alDia = false;
 
 if (pagos.rows.length > 0) {
   const { anio, mes } = pagos.rows[0];
-  ultimoPago = `${anio}-${mes.toString().padStart(2, '0')}`;
+
+  // 👉 Convertimos el número del mes a nombre
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
+                 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+  ultimoPago = `${meses[mes - 1]}-${anio}`;
 
   const hoy = new Date();
   const fechaPago = new Date(anio, mes - 1); // mes base 0
