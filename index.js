@@ -13,6 +13,8 @@ const novedadesRoutes = require('./routes/novedadesRoutes');
 const reportesRoutes = require('./routes/reportesRoutes'); // ✅ NUEVO
 const cumpleaniosRoutes = require('./routes/cumpleaniosRoutes');
 
+
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -35,6 +37,7 @@ app.use('/config/categorias', categoriasRoutes);          // Categorías deporti
 app.use('/novedades', novedadesRoutes);                   // Novedades
 app.use('/reportes', reportesRoutes);                     // ✅ Reportes con token
 app.use('/cumpleanios', cumpleaniosRoutes);
+
 
 // 👉 Redirección raíz
 app.get('/', (req, res) => {
