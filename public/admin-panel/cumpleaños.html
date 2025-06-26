@@ -32,7 +32,7 @@ fetch('/cumpleanios', {
   // ✅ Llenamos la caja de "Hoy cumplen..."
   const todayList = document.getElementById('today-list');
   if (data.hoy.length === 0) {
-    todayList.innerHTML = '<li>No hay cumpleaños hoy</li>';
+    todayList.innerHTML = '<li>No hay cumpleanios hoy</li>';
   } else {
     data.hoy.forEach(s => {
       const li = document.createElement('li');
@@ -42,7 +42,7 @@ fetch('/cumpleanios', {
   }
 
   // ✅ Ahora inicializamos el calendario
-  const events = data.cumpleaños.map(s => {
+  const events = data.cumpleanios.map(s => {
     const fecha = new Date(s.fecha_nacimiento);
     // Asegúrate de poner año actual para que todos los cumples aparezcan en este año
     const anioActual = new Date().getFullYear();
@@ -64,7 +64,7 @@ fetch('/cumpleanios', {
 })
 .catch(error => {
   console.error(error);
-  alert('Error al cargar cumpleaños');
+  alert('Error al cargar cumpleanios');
 });
 </script>
 </body>
