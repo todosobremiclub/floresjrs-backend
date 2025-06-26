@@ -250,63 +250,45 @@ router.post('/login', async (req, res) => {
   const { numero, dni } = req.body;
 
   try {
-    const resultado = await db.query(`
-      SELECT 
-        s.numero_socio AS numero,
-        s.dni,
-        CONCAT(s.nombre, ' ', s.apellido) AS nombre,
-        s.subcategoria AS categoria,
-        EXTRACT(YEAR FROM s.fecha_nacimiento)::text AS nacimiento,
-        TO_CHAR(s.fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
-        s.foto_url AS "fotoUrl",
-        'Flores Jrs' AS club,
-        MAX(pm.anio * 100 + pm.mes) AS ultimo_pago
-      FROM socios s
-      LEFT JOIN pagos_mensuales pm ON s.numero_socio = pm.socio_numero
-      WHERE s.numero_socio = $1 AND s.dni = $2
-      GROUP BY s.numero_socio, s.dni, s.nombre, s.apellido, s.subcategoria, s.fecha_nacimiento, s.fecha_ingreso, s.foto_url
-      LIMIT 1
-    `, [numero, dni]);
+    const resultado = await db.query(
+      `SELECT 
+         numero_socio AS numero,
+         dni,
+         CONCAT(nombre, ' ', apellido) AS nombre,
+         subcategoria AS categoria,
+         EXTRACT(YEAR FROM fecha_nacimiento)::text AS nacimiento,
+         TO_CHAR(fecha_ingreso, 'YYYY-MM-DD') AS ingreso,
+         'Activo' AS estado,
+         foto_url AS "fotoUrl",
+         'Flores Jrs' AS club
+       FROM socios
+       WHERE numero_socio = $1 AND dni = $2
+       LIMIT 1`,
+      [numero, dni]
+    );
 
     if (resultado.rows.length === 0) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    const socio = resultado.rows[0];
-
-    // Convertimos a texto legible
-    const ultimoPago = socio.ultimo_pago
-      ? `${String(socio.ultimo_pago).substring(4)}/${String(socio.ultimo_pago).substring(0, 4)}`
-      : 'Sin pagos';
-
-    // Determinar si está al día (último pago en el mes actual o anterior)
-    const hoy = new Date();
-    const actual = hoy.getFullYear() * 100 + (hoy.getMonth() + 1);
-    const alDia = socio.ultimo_pago && socio.ultimo_pago >= actual - 1;
-
     const jwt = require('jsonwebtoken');
-    const token = jwt.sign({ numero: socio.numero, dni: socio.dni }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { numero: resultado.rows[0].numero, dni: resultado.rows[0].dni },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.json({
-      socio: {
-        numero: socio.numero,
-        dni: socio.dni,
-        nombre: socio.nombre,
-        categoria: socio.categoria,
-        nacimiento: socio.nacimiento,
-        ingreso: socio.ingreso,
-        fotoUrl: socio.fotoUrl,
-        club: socio.club,
-        ultimoPago,
-        alDia
-      },
+      socio: resultado.rows[0],
       token
     });
+
   } catch (err) {
     console.error('❌ Error en /socio/login:', err.message);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
 
 
 // GET /socio/:numero/:dni → para Flutter (sin protección) [MOVER AL FINAL]
