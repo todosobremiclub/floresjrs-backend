@@ -6,7 +6,8 @@ const serviceAccount = JSON.parse(json);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: 'floresjrs-b6d5e.appspot.com'
+  storageBucket: 'floresjrs-b6d5e.firebasestorage.app'
+
 });
 
 module.exports = admin;
