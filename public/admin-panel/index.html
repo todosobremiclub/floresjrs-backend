@@ -171,7 +171,7 @@
   <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
   <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
   <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
-  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light"⚙️ Configuración</a>
+  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light⚙️ Configuración</a>
   <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
   <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
 </div>
@@ -393,7 +393,12 @@ console.log('📷 Foto socio:', s.foto_url);
     <td>${s.fecha_ingreso ?? ''}</td>
     <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
     <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
-    <td>${s.foto_url ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>` : 'Sin foto'}</td>
+    <td>${
+  s.foto_url
+    ? `<img src="${typeof s.foto_url === 'string' ? s.foto_url : s.foto_url.url}" width="30" style="border-radius:4px"/>`
+    : 'Sin foto'
+}</td>
+
     <td>
       <div class="d-flex justify-content-center gap-1">
         <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
