@@ -271,6 +271,29 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
+const socio = resultado.rows[0];
+
+// Buscar el último pago del socio
+const pagos = await db.query(
+  'SELECT anio, mes FROM pagos_mensuales WHERE socio_numero = $1 ORDER BY anio DESC, mes DESC LIMIT 1',
+  [socio.numero]
+);
+
+let ultimoPago = '';
+let alDia = false;
+
+if (pagos.rows.length > 0) {
+  const { anio, mes } = pagos.rows[0];
+  ultimoPago = `${anio}-${mes.toString().padStart(2, '0')}`;
+
+  const hoy = new Date();
+  const fechaPago = new Date(anio, mes - 1); // mes base 0
+  const diferenciaMeses = hoy.getFullYear() * 12 + hoy.getMonth() - (fechaPago.getFullYear() * 12 + fechaPago.getMonth());
+
+  alDia = diferenciaMeses <= 1;
+}
+
+
     const jwt = require('jsonwebtoken');
     const token = jwt.sign(
       { numero: resultado.rows[0].numero, dni: resultado.rows[0].dni },
@@ -279,9 +302,14 @@ router.post('/login', async (req, res) => {
     );
 
     res.json({
-      socio: resultado.rows[0],
-      token
-    });
+  socio: {
+    ...socio,
+    ultimoPago,
+    alDia
+  },
+  token
+});
+
 
   } catch (err) {
     console.error('❌ Error en /socio/login:', err.message);
