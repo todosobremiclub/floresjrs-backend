@@ -70,6 +70,15 @@
   </div>
 
   <script>
+
+function fetchConToken(url, opciones = {}) {
+  return fetch(url, {
+    ...opciones,
+    headers: { 'Authorization': 'Bearer ' + token, ...opciones.headers },
+  });
+}
+
+
     function cerrarSesion() {
       localStorage.removeItem('token');
       window.location.href = '/admin-panel/login.html';
@@ -81,13 +90,12 @@
       window.location.href = "/admin-panel/login.html";
     }
 
-    fetch('/cumpleanios', {
-      headers: { 'Authorization': token }
-    })
-    .then(resp => {
-      if (!resp.ok) throw new Error("No autorizado o error de servidor");
-      return resp.json();
-    })
+  fetchConToken('/cumpleanios')
+  .then(resp => {
+    if (!resp.ok) throw new Error("No autorizado o error de servidor");
+    return resp.json();
+  })
+
     .then(data => {
       const todayList = document.getElementById('today-list');
       if (data.hoy.length === 0) {
