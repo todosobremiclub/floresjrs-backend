@@ -524,7 +524,9 @@ document.getElementById('fecha_nacimiento').value = socio.nacimiento?.substring(
 document.getElementById('fecha_ingreso').value = socio.ingreso?.substring(0, 10) ?? '';
 document.getElementById('activo').checked = socio.activo;
 document.getElementById('becado').checked = socio.becado;
+const form = document.getElementById('formNuevoSocio');
 delete form.dataset.foto;
+
 form.dataset.editing = id;
 modal.show();
 
