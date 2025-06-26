@@ -381,25 +381,51 @@ const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
 
 console.log('📷 Foto socio:', s.foto_url);
 
-  fila.innerHTML += `
-    <td>${s.numero}</td>
-    <td>${s.dni}</td>
-    <td>${s.nombre}</td>
-    <td>${s.apellido}</td>
-    <td>${s.categoria}</td>
-    <td>${s.telefono ?? '—'}</td>
-    <td>${s.nacimiento ?? ''}</td>
-    <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
-    <td>${s.fecha_ingreso ?? ''}</td>
-    <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
-    <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
-    <td>${
+// Validar la URL de la foto
+const urlFoto =
   typeof s.foto_url === 'string' && s.foto_url.trim() !== ''
-    ? `<img src="${s.foto_url}" width="30" style="border-radius:4px"/>`
-    : typeof s.foto_url === 'object' && s.foto_url?.url?.trim()
-    ? `<img src="${s.foto_url.url}" width="30" style="border-radius:4px"/>`
-    : 'Sin foto'
-}</td>
+    ? s.foto_url
+    : typeof s.foto_url === 'object' &&
+      typeof s.foto_url.url === 'string' &&
+      s.foto_url.url.trim() !== ''
+    ? s.foto_url.url
+    : null;
+
+// Validar la URL de la foto
+const urlFoto =
+  typeof s.foto_url === 'string' && s.foto_url.trim() !== ''
+    ? s.foto_url
+    : typeof s.foto_url === 'object' &&
+      typeof s.foto_url.url === 'string' &&
+      s.foto_url.url.trim() !== ''
+    ? s.foto_url.url
+    : null;
+
+fila.innerHTML += `
+  <td>${s.numero}</td>
+  <td>${s.dni}</td>
+  <td>${s.nombre}</td>
+  <td>${s.apellido}</td>
+  <td>${s.categoria}</td>
+  <td>${s.telefono ?? '—'}</td>
+  <td>${s.nacimiento ?? ''}</td>
+  <td>${s.nacimiento?.substring(0, 4) ?? ''}</td>
+  <td>${s.fecha_ingreso ?? ''}</td>
+  <td><input type="checkbox" class="check-activo" data-id="${s.numero}" ${s.activo ? 'checked' : ''} /></td>
+  <td><input type="checkbox" class="check-becado" data-id="${s.numero}" ${s.becado ? 'checked' : ''} /></td>
+  <td>${
+    urlFoto
+      ? `<img src="${urlFoto}" width="30" style="border-radius:4px"/>`
+      : 'Sin foto'
+  }</td>
+  <td>
+    <div class="d-flex justify-content-center gap-1">
+      <button class="btn btn-sm btn-outline-light btn-editar" data-id="${s.numero}">✏️</button>
+      <button class="btn btn-sm btn-outline-warning btn-eliminar" data-id="${s.numero}">🗑️</button>
+    </div>
+  </td>
+`;
+
 
 
 
