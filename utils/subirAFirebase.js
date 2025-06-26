@@ -24,7 +24,8 @@ async function subirAFirebase(buffer, nombreOriginal) {
 
   const url = `https://firebasestorage.googleapis.com/v0/b/${bucketPublic}/o/${encodeURIComponent(nombreArchivo)}?alt=media&token=${token}`;
 
-  return { url };
+  return url;
+
 }
 
 module.exports = subirAFirebase;
