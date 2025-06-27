@@ -238,7 +238,8 @@ await db.query(
 );
 
 
-    res.json({ mensaje: 'Foto subida correctamente', url: imagenUrl });
+    res.json({ mensaje: 'Foto subida correctamente', url });
+
   } catch (err) {
     console.error('❌ Error real al subir imagen:', err); // 👈 log completo
     res.status(500).json({ error: 'Error al subir imagen' });
