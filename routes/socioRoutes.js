@@ -231,12 +231,12 @@ router.post('/:id/foto', verificarToken, upload.single('foto'), async (req, res)
   }
 
   try {
-    const imagenUrl = await subirAFirebase(req.file.buffer, req.file.originalname);
+const { url } = await subirAFirebase(req.file.buffer, req.file.originalname);
+await db.query(
+  'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
+  [url, id]
+);
 
-    await db.query(
-      'UPDATE socios SET foto_url = $1 WHERE numero_socio = $2',
-      [imagenUrl, id]
-    );
 
     res.json({ mensaje: 'Foto subida correctamente', url: imagenUrl });
   } catch (err) {
