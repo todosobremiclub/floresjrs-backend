@@ -262,6 +262,18 @@ function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('show');
 }
 
+// 👉 Función para obtener el próximo número de socio
+async function obtenerProximoNumeroSocio() {
+  try {
+    const res = await fetchConToken('/socio/ultimo-numero');
+    const data = await res.json();
+    return data.siguiente.toString().padStart(4, '0'); // 👉 formato 0001, 0002, etc
+  } catch (err) {
+    alert('❌ Error al obtener número de socio');
+    return '';
+  }
+}
+
 
    let sociosOriginales = [];
 let ordenActual = { campo: null, asc: true };
@@ -469,14 +481,20 @@ async function cargarCategoriasEnSelect() {
   const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
   const form = document.getElementById('formNuevoSocio');
 
-  document.getElementById('btnAbrirFormulario').addEventListener('click', async () => {
-    form.reset();
-    await cargarCategoriasEnSelect();
-    delete form.dataset.editing;
-    document.getElementById('activo').checked = true;
-    document.getElementById('becado').checked = false;
-    modal.show();
-  });
+document.getElementById('btnAbrirFormulario').addEventListener('click', async () => {
+  form.reset();
+  await cargarCategoriasEnSelect();
+  delete form.dataset.editing;
+  document.getElementById('activo').checked = true;
+  document.getElementById('becado').checked = false;
+
+  // 👇 Obtener y setear el próximo número de socio
+  const proximoNumero = await obtenerProximoNumeroSocio();
+  document.getElementById('numero_socio').value = proximoNumero;
+
+  modal.show();
+});
+;
 
   // ✅ Filtros nuevos: categoría y año
   document.getElementById('filtro-categoria').addEventListener('change', () => {
@@ -515,7 +533,7 @@ document.getElementById('filtro-estado-pago').addEventListener('change', () => {
         const socio = await res.json();
 await cargarCategoriasEnSelect(); // 👈 Primero cargamos las opciones
 
-document.getElementById('numero_socio').value = socio.numero;
+document.getElementById('numero_socio').readOnly = true; // ✅ no editable al editar
 document.getElementById('dni').value = socio.dni;
 document.getElementById('nombre').value = socio.nombre;
 document.getElementById('apellido').value = socio.apellido;

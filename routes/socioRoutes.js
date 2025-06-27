@@ -13,6 +13,20 @@ const subirAFirebase = require('../utils/subirAFirebase');
 
 console.log("✅ socioRoutes.js se está ejecutando");
 
+// GET /socio/ultimo-numero → obtener el próximo número de socio (protegido)
+router.get('/ultimo-numero', verificarToken, async (req, res) => {
+  try {
+    const resultado = await db.query('SELECT MAX(numero_socio) AS ultimo FROM socios');
+    const ultimo = resultado.rows[0].ultimo || 0;
+    const siguiente = ultimo + 1;
+    res.json({ siguiente });
+  } catch (err) {
+    console.error('❌ Error al obtener último número de socio:', err);
+    res.status(500).json({ error: 'Error al obtener número de socio' });
+  }
+});
+
+
 // GET /socio → obtener todos los socios con pagos mensuales (protegido)
 router.get('/', verificarToken, async (req, res) => {
   try {
