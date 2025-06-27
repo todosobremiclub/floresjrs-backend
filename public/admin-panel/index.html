@@ -406,7 +406,7 @@ const urlFoto = (() => {
 
 
 fila.innerHTML += `
-  <td>${s.numero}</td>
+  <td>${s.numero.toString().padStart(4, '0')}</td>
   <td>${s.dni}</td>
   <td>${s.nombre}</td>
   <td>${s.apellido}</td>
@@ -533,7 +533,7 @@ document.getElementById('filtro-estado-pago').addEventListener('change', () => {
         const socio = await res.json();
 await cargarCategoriasEnSelect(); // 👈 Primero cargamos las opciones
 
-document.getElementById('numero_socio').readOnly = true; // ✅ no editable al editar
+document.getElementById('numero_socio').value = socio.numero.toString().padStart(4, '0');
 document.getElementById('dni').value = socio.dni;
 document.getElementById('nombre').value = socio.nombre;
 document.getElementById('apellido').value = socio.apellido;
