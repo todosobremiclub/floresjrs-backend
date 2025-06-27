@@ -382,7 +382,13 @@ const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
 console.log('📷 Foto socio:', s.foto_url);
 
 // Validar la URL de la foto
-const urlFoto = (typeof s.foto_url === 'string' && s.foto_url.startsWith('http')) ? s.foto_url : null;
+const urlFoto = (() => {
+  if (!s.foto_url) return null;
+  if (typeof s.foto_url === 'string') return s.foto_url;
+  if (typeof s.foto_url === 'object' && typeof s.foto_url.url === 'string') return s.foto_url.url;
+  return null;
+})();
+
 
 
 
