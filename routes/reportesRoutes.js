@@ -31,4 +31,3 @@ router.get('/recaudacion-mensual', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
-x|
