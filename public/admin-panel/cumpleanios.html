@@ -125,8 +125,9 @@
           data.hoy.forEach(s => {
   const li = document.createElement('li');
 li.innerHTML = `
-  <strong>🎂 ${s.nombre} ${s.apellido}</strong><br>
-  <span class="text-primary">🏷️ ${s.categoria || 'Sin categoría'} – ${s.edad} años</span>
+  <span style="color: #002f6c;">
+    🎂 <strong style="color: #002f6c;">${s.nombre} ${s.apellido}</strong> – ${s.categoria || 'Sin categoría'} – ${s.edad} años
+  </span>
 `;
 todayList.appendChild(li);
 
