@@ -146,11 +146,14 @@ todayList.appendChild(li);
         });
 
         const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-          initialView: 'dayGridMonth',
-          locale: 'es',
-          events: events,
-          height: 'auto',
-        });
+  initialView: 'dayGridMonth',
+  locale: 'es',
+  events: events,
+  height: 'auto',
+  contentHeight: 500, // 👈 achica el calendario visualmente
+  dayMaxEventRows: 2, // 👈 limita el número de eventos visibles por día
+});
+
         calendar.render();
       })
       .catch(err => {
