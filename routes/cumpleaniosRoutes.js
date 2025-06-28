@@ -9,11 +9,12 @@ router.get('/', verificarToken, async (req, res) => {
   try {
     const result = await db.query(`
       SELECT 
-        numero_socio,
-        nombre,
-        apellido,
-        fecha_nacimiento,
-        categoria
+  numero_socio,
+  nombre,
+  apellido,
+  fecha_nacimiento,
+  subcategoria AS categoria
+
       FROM socios
       WHERE activo = true
       ORDER BY fecha_nacimiento ASC
