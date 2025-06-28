@@ -10,7 +10,6 @@ const pagosRoutes = require('./routes/pagosRoutes');
 const montoRoutes = require('./routes/montoRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
 const novedadesRoutes = require('./routes/novedadesRoutes');
-const reportesRoutes = require('./routes/reportesRoutes'); // ✅ NUEVO
 const cumpleaniosRoutes = require('./routes/cumpleaniosRoutes');
 const reportesRoutes = require('./routes/reportesRoutes');
 
