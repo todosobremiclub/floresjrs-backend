@@ -124,11 +124,12 @@
         } else {
           data.hoy.forEach(s => {
   const li = document.createElement('li');
-  li.innerHTML = `
-    <span class="text-primary">🏷️ ${s.categoria || 'Sin categoría'} – ${s.edad} años</span>
+li.innerHTML = `
+  <strong>🎂 ${s.nombre} ${s.apellido}</strong><br>
+  <span class="text-primary">🏷️ ${s.categoria || 'Sin categoría'} – ${s.edad} años</span>
+`;
+todayList.appendChild(li);
 
-
-  todayList.appendChild(li);
 });
 
         }
