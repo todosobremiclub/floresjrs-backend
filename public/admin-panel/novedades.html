@@ -146,6 +146,8 @@
 
 <script>
 const token = localStorage.getItem('token');
+let choicesCategorias = null;
+
 if (!token) location.href = 'login.html';
 
 function logout() {
@@ -172,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (valor === 'categoria_anio') cargarAnios();
   });
 
-let choicesCategorias = null; // 👈 global
+
 
 choicesCategorias = new Choices('#categoriaSelect', {
   removeItemButton: true,
