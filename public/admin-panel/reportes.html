@@ -45,17 +45,16 @@
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
   <div class="sidebar" id="sidebar">
-  <h4>Menú</h4>
-  <a href="/admin-panel/index.html" class="btn btn-outline-light">🏠 Home</a>
-  <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
-  <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
-  <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
-  <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
-  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
-  <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
-  <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
-</div>
-
+    <h4>Menú</h4>
+    <a href="/admin-panel/index.html" class="btn btn-outline-light">🏠 Home</a>
+    <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+    <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
+    <a href="#" class="btn btn-outline-light">🔔 Notificaciones</a>
+    <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
+    <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+    <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
+    <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
+  </div>
 
   <div class="main-content">
     <div class="text-center mb-4 mt-2 mt-md-0">
@@ -68,28 +67,10 @@
       <div class="report-title">1. Total recaudado en el mes</div>
       <div class="month-nav">
         <button onclick="cambiarMes(-1)">◀</button>
-        <span id="mesActual">Marzo</span>
+        <span id="mesActual">Junio</span>
         <button onclick="cambiarMes(1)">▶</button>
       </div>
-      <h3 class="text-center" id="recaudacionMes">$ 0</h3>
-    </div>
-
-    <!-- 2. Socios activos al día -->
-    <div class="report-box">
-      <div class="report-title">2. Socios activos al día</div>
-      <h3 class="text-center" id="activosAlDia">0 / 0</h3>
-    </div>
-
-    <!-- 3. Recaudación por categoría -->
-    <div class="report-box">
-      <div class="report-title">3. Recaudación por categoría</div>
-      <ul id="listaRecaudacionCat"></ul>
-    </div>
-
-    <!-- 4. Cantidad de socios por categoría -->
-    <div class="report-box">
-      <div class="report-title">4. Socios por categoría</div>
-      <ul id="listaSociosCat"></ul>
+      <h4 id="recaudacion-total" class="text-success text-center mt-3">$ 0</h4>
     </div>
   </div>
 
@@ -105,6 +86,4 @@
   <script src="./js/reportes.js"></script>
 </body>
 </html>
-
-
 

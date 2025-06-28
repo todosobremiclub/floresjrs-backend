@@ -12,6 +12,7 @@ const categoriasRoutes = require('./routes/categoriasRoutes');
 const novedadesRoutes = require('./routes/novedadesRoutes');
 const reportesRoutes = require('./routes/reportesRoutes'); // ✅ NUEVO
 const cumpleaniosRoutes = require('./routes/cumpleaniosRoutes');
+const reportesRoutes = require('./routes/reportesRoutes');
 
 
 
@@ -37,6 +38,7 @@ app.use('/config/categorias', categoriasRoutes);          // Categorías deporti
 app.use('/novedades', novedadesRoutes);                   // Novedades
 app.use('/reportes', reportesRoutes);                     // ✅ Reportes con token
 app.use('/cumpleanios', cumpleaniosRoutes);
+app.use('/reportes', reportesRoutes);
 
 
 // 👉 Redirección raíz
