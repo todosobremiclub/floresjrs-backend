@@ -74,14 +74,16 @@
       <label class="form-label">Destino</label>
       <select class="form-select" id="destino">
         <option value="todos">Todos los socios</option>
-        <option value="categoria">Solo por categoría</option>
+        <option value="categoria">Solo por categoría</option>	
         <option value="categoria_anio">Categoría + Año</option>
       </select>
     </div>
-    <div class="mb-3" id="categoriaContainer" style="display: none;">
-      <label class="form-label">Categoría</label>
-      <select class="form-select" id="categoria"></select>
-    </div>
+    <div id="categoriaContainer" class="mb-3" style="display:none">
+  <label for="categoriaSelect" class="form-label">Categoría(s)</label>
+  <select id="categoriaSelect" class="form-select" multiple></select>
+  <div class="form-text text-white">Podés seleccionar una o varias categorías</div>
+</div>
+
     <div class="mb-3" id="anioContainer" style="display: none;">
   <label class="form-label">Año de nacimiento</label>
   <select class="form-select" id="anio_nacimiento">
@@ -98,14 +100,16 @@
   <h5 class="text-white">Novedades publicadas</h5>
   <table class="table table-bordered bg-white text-dark">
     <thead class="table-primary">
-      <tr>
-        <th>Imagen</th>
-        <th>Título</th>
-        <th>Texto</th>
-        <th>Fecha</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
+  <tr>
+    <th>Imagen</th>
+    <th>Título</th>
+    <th>Texto</th>
+    <th><small>Categorías</small></th> <!-- ✅ NUEVO -->
+    <th>Fecha</th>
+    <th>Acciones</th>
+  </tr>
+</thead>
+
     <tbody id="tablaNovedades"></tbody>
   </table>
 </div>
@@ -171,8 +175,14 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('titulo', document.getElementById('titulo').value);
     formData.append('texto', document.getElementById('texto').value);
     formData.append('destino', document.getElementById('destino').value);
-    if (document.getElementById('categoria').value)
-      formData.append('categoria', document.getElementById('categoria').value);
+    const destino = document.getElementById('destino').value;
+formData.append('destino', destino);
+
+if (destino === 'categoria' || destino === 'categoria_anio') {
+  const categoriasSeleccionadas = Array.from(document.getElementById('categoriaSelect').selectedOptions).map(opt => opt.value);
+  formData.append('categorias', JSON.stringify(categoriasSeleccionadas));
+}
+
     if (document.getElementById('anio_nacimiento').value)
       formData.append('anio_nacimiento', document.getElementById('anio_nacimiento').value);
     if (document.getElementById('imagen').files[0])
@@ -199,14 +209,24 @@ async function cargar() {
     const tituloSeguro = n.titulo.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${n.imagen_url ? `<img src="${n.imagen_url}">` : '—'}</td>
-      <td>${n.titulo}</td>
-      <td>${n.texto}</td>
-      <td>${new Date(n.fecha).toLocaleDateString()}</td>
-      <td>
-        <button class="btn btn-sm btn-warning me-1" onclick="editar(${n.id}, '${tituloSeguro}', \`${textoSeguro}\`)">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="eliminar(${n.id})">🗑️</button>
-      </td>`;
+  <td>${n.imagen_url ? `<img src="${n.imagen_url}">` : '—'}</td>
+  <td>${n.titulo}</td>
+  <td>${n.texto}</td>
+  <td>${
+  n.categoria
+    ? n.categoria
+        .split(',')
+        .map(cat => `<span class="badge bg-primary me-1">${cat.trim()}</span>`)
+        .join('')
+    : '—'
+}</td>
+
+  <td>${new Date(n.fecha).toLocaleDateString()}</td>
+  <td>
+    <button class="btn btn-sm btn-warning me-1" onclick="editar(${n.id}, '${tituloSeguro}', \`${textoSeguro}\`)">✏️</button>
+    <button class="btn btn-sm btn-danger" onclick="eliminar(${n.id})">🗑️</button>
+  </td>`;
+
     tabla.appendChild(tr);
   });
 }
@@ -245,7 +265,7 @@ async function cargarCategorias() {
   try {
     const res = await fetchConToken('/config/categorias');
     const data = await res.json();
-    const categoriaSelect = document.getElementById('categoria');
+    const categoriaSelect = document.getElementById('categoriaSelect');
     categoriaSelect.innerHTML = '';
     data.forEach(cat => {
       const option = document.createElement('option');

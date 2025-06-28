@@ -5,27 +5,44 @@ const upload = multer(); // sin almacenamiento local, recibimos buffer
 const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
 
-// POST /novedades → publicar novedad con texto, imagen y filtros de destino
-const subirImagen = require('../utils/subirAFirebase'); // 👈 AGREGAR ESTO ARRIBA
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const upload = multer(); // sin almacenamiento local, recibimos buffer
+const db = require('../config/db');
+const verificarToken = require('../middlewares/verificarToken');
+const subirImagen = require('../utils/subirAFirebase'); // 👈 subida a Firebase
 
+// POST /novedades → publicar novedad con texto, imagen y filtros de destino
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
-    const { titulo, texto, destino, categoria, anio_nacimiento } = req.body;
+    const { titulo, texto, destino, categorias, anio_nacimiento } = req.body;
 
     if (!titulo || !texto || !destino) {
       return res.status(400).json({ error: 'Faltan datos obligatorios' });
     }
 
+    // 👉 Convertir array de categorías a string separado por coma
+    let categoriasStr = null;
+    if (destino === 'categoria' || destino === 'categoria_anio') {
+      try {
+        const categoriasArray = JSON.parse(categorias);
+        categoriasStr = categoriasArray.join(',');
+      } catch (err) {
+        return res.status(400).json({ error: 'Formato de categorías inválido' });
+      }
+    }
+
     let imagen_url = null;
     if (req.file) {
-      const subida = await subirImagen(req.file.buffer, req.file.originalname); // 👈 SUBIDA REAL
+      const subida = await subirImagen(req.file.buffer, req.file.originalname);
       imagen_url = subida.url;
     }
 
     await db.query(`
       INSERT INTO novedades (titulo, texto, imagen_url, destino, categoria, anio_nacimiento)
       VALUES ($1, $2, $3, $4, $5, $6)
-    `, [titulo, texto, imagen_url, destino, categoria || null, anio_nacimiento || null]);
+    `, [titulo, texto, imagen_url, destino, categoriasStr, anio_nacimiento || null]);
 
     res.json({ mensaje: 'Novedad publicada' });
   } catch (err) {
@@ -95,5 +112,3 @@ router.delete('/:id', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
-
-
