@@ -122,10 +122,14 @@
           todayList.innerHTML = '<li>🎂 No hay cumpleaños hoy</li>';
         } else {
           data.hoy.forEach(s => {
-            const li = document.createElement('li');
-            li.textContent = `🎂 ${s.nombre} ${s.apellido}`;
-            todayList.appendChild(li);
-          });
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <strong>🎂 ${s.nombre} ${s.apellido}</strong><br>
+    🏷️ ${s.categoria || 'Sin categoría'} – ${s.edad} años
+  `;
+  todayList.appendChild(li);
+});
+
         }
 
         const events = data.cumpleanios.map(s => {

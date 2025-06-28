@@ -12,13 +12,28 @@ router.get('/', verificarToken, async (req, res) => {
         numero_socio,
         nombre,
         apellido,
-        fecha_nacimiento
+        fecha_nacimiento,
+        categoria
       FROM socios
       WHERE activo = true
       ORDER BY fecha_nacimiento ASC
     `);
 
-    const socios = result.rows;
+    const socios = result.rows.map(s => {
+      const fechaNacimiento = new Date(s.fecha_nacimiento);
+      const hoy = new Date();
+
+      let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+      const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+      if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+        edad--;
+      }
+
+      return {
+        ...s,
+        edad
+      };
+    });
 
     const hoy = new Date();
     const diaHoy = hoy.getDate();
