@@ -20,20 +20,23 @@ router.get('/', verificarToken, async (req, res) => {
     `);
 
     const socios = result.rows.map(s => {
-      const fechaNacimiento = new Date(s.fecha_nacimiento);
-      const hoy = new Date();
+  if (!s.fecha_nacimiento) return { ...s, edad: null };
 
-      let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-      const mes = hoy.getMonth() - fechaNacimiento.getMonth();
-      if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
-        edad--;
-      }
+  const fechaNacimiento = new Date(s.fecha_nacimiento);
+  const hoy = new Date();
 
-      return {
-        ...s,
-        edad
-      };
-    });
+  let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+  const mes = hoy.getMonth() - fechaNacimiento.getMonth();
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
+    edad--;
+  }
+
+  return {
+    ...s,
+    edad
+  };
+});
+
 
     const hoy = new Date();
     const diaHoy = hoy.getDate();
