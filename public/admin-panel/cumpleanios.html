@@ -9,6 +9,11 @@
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
+
+.fc-toolbar-title {
+  text-transform: capitalize;
+}
+
     body {
       background-color: #004aad;
       color: white;
@@ -77,7 +82,8 @@
   <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
   <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
   <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
-  <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
+  <button class="btn btn-outline-light mt-auto" onclick="cerrarSesion()">Cerrar sesión</button>
+
 </div>
 
 
