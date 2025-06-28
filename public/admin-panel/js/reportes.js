@@ -50,5 +50,3 @@ async function actualizarMes() {
 window.cambiarMes = cambiarMes;
 window.actualizarMes = actualizarMes;
 
-
-
