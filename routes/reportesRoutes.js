@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
 
-// GET /reportes/recaudacion-mensual?mes=2025-05
+// GET /reportes/recaudacion-mensual?mes=YYYY-MM
 router.get('/recaudacion-mensual', verificarToken, async (req, res) => {
   const mesParam = req.query.mes;
 
@@ -11,20 +11,20 @@ router.get('/recaudacion-mensual', verificarToken, async (req, res) => {
     return res.status(400).json({ error: 'Mes inválido. Usar formato YYYY-MM' });
   }
 
+  const [anio, mes] = mesParam.split('-').map(Number);
+
   try {
     const resultado = await db.query(`
       SELECT COUNT(*) AS cantidad
       FROM pagos_mensuales
-      WHERE mes = $1
+      WHERE mes_pagado = $1
     `, [mesParam]);
 
-    const cantidad = parseInt(resultado.rows[0].cantidad, 10) || 0;
+    const resultadoMonto = await db.query(`SELECT monto FROM monto LIMIT 1`);
+    const montoCuota = resultadoMonto.rows[0]?.monto ?? 0;
 
-    // Obtener el monto actual de la cuota
-    const montoRes = await db.query('SELECT monto FROM monto_cuota ORDER BY id DESC LIMIT 1');
-    const monto = parseInt(montoRes.rows[0]?.monto || 0, 10);
-
-    const total = cantidad * monto;
+    const cantidad = parseInt(resultado.rows[0].cantidad) || 0;
+    const total = cantidad * montoCuota;
 
     res.json({ total });
   } catch (err) {
