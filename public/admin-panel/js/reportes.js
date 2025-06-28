@@ -37,7 +37,12 @@ async function actualizarMes() {
   } catch (err) {
     document.getElementById('recaudacionMes').textContent = 'Error';
     console.error('❌ Error al obtener recaudación mensual:', err);
+
+
+
   }
 }
 
+window.cambiarMes = cambiarMes;
+window.actualizarMes = actualizarMes;
 
