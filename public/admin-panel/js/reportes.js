@@ -13,6 +13,7 @@ const nombresMeses = [
 ];
 
 let mesActual = new Date().getMonth(); // 0-indexado (0 = enero)
+let anioActual = new Date().getFullYear();
 
 document.addEventListener('DOMContentLoaded', () => {
   actualizarMes();
@@ -20,8 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function cambiarMes(direccion) {
   mesActual += direccion;
-  if (mesActual < 0) mesActual = 11;
-  if (mesActual > 11) mesActual = 0;
+  if (mesActual < 0) {
+    mesActual = 11;
+    anioActual -= 1;
+  }
+  if (mesActual > 11) {
+    mesActual = 0;
+    anioActual += 1;
+  }
   actualizarMes();
 }
 
@@ -29,11 +36,7 @@ async function actualizarMes() {
   document.getElementById('mesActual').textContent = nombresMeses[mesActual];
 
   try {
-    const anioActual = new Date().getFullYear();
-    const mesFormateado = String(mesActual + 1).padStart(2, '0');
-    const fechaFormato = `${anioActual}-${mesFormateado}`;
-
-    const res = await fetchConToken(`/reportes/recaudacion-mensual?mes=${fechaFormato}`);
+    const res = await fetchConToken(`/reportes/recaudacion-mensual?anio=${anioActual}&mes=${mesActual + 1}`);
     const data = await res.json();
     const total = data.total ?? 0;
 
@@ -46,5 +49,6 @@ async function actualizarMes() {
 
 window.cambiarMes = cambiarMes;
 window.actualizarMes = actualizarMes;
+
 
 
