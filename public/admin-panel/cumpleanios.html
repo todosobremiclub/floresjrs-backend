@@ -85,9 +85,10 @@
     <h2 class="mb-4">🎉 Cumpleaños</h2>
 
     <div class="today-box">
-      <h5>🎈 Hoy cumplen años:</h5>
-      <ul id="today-list" class="mb-0"></ul>
-    </div>
+  <h5 class="text-primary">🎈 Hoy cumplen años:</h5>
+  <ul id="today-list" class="mb-0"></ul>
+</div>
+
 
     <div id="calendar"></div>
   </div>
@@ -124,9 +125,9 @@
           data.hoy.forEach(s => {
   const li = document.createElement('li');
   li.innerHTML = `
-    <strong>🎂 ${s.nombre} ${s.apellido}</strong><br>
-    🏷️ ${s.categoria || 'Sin categoría'} – ${s.edad} años
-  `;
+    <span class="text-primary">🏷️ ${s.categoria || 'Sin categoría'} – ${s.edad} años</span>
+
+
   todayList.appendChild(li);
 });
 
