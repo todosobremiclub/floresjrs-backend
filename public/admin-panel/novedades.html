@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Novedades - Flores Jrs</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<!-- Choices.js CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     body { background-color: #004aad; color: white; margin: 0; }
@@ -169,6 +172,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (valor === 'categoria_anio') cargarAnios();
   });
 
+let choicesCategorias = null; // 👈 global
+
+choicesCategorias = new Choices('#categoriaSelect', {
+  removeItemButton: true,
+  placeholder: true,
+  placeholderValue: 'Seleccionar una o varias categorías',
+  searchEnabled: false
+});
+
+
   document.getElementById('formNovedad').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -265,18 +278,25 @@ async function cargarCategorias() {
   try {
     const res = await fetchConToken('/config/categorias');
     const data = await res.json();
-    const categoriaSelect = document.getElementById('categoriaSelect');
-    categoriaSelect.innerHTML = '';
-    data.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat.nombre;
-      option.textContent = cat.nombre;
-      categoriaSelect.appendChild(option);
-    });
+
+    // Limpiar y agregar nuevas opciones al selector multiselección
+    if (choicesCategorias) {
+      choicesCategorias.clearChoices();
+      choicesCategorias.setChoices(
+        data.map(cat => ({
+          value: cat.nombre,
+          label: cat.nombre
+        })),
+        'value',
+        'label',
+        true
+      );
+    }
   } catch (err) {
     console.error('❌ Error al cargar categorías:', err);
   }
 }
+
 
 async function cargarAnios() {
   try {
@@ -306,4 +326,8 @@ async function cargarAnios() {
 
 </script>
 </body>
+
+<!-- Choices.js JS -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
 </html>
