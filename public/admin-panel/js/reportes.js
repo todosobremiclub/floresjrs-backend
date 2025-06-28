@@ -29,20 +29,21 @@ async function actualizarMes() {
   document.getElementById('mesActual').textContent = nombresMeses[mesActual];
 
   try {
-    const res = await fetchConToken(`/reportes/recaudacion-mensual?mes=${mesActual + 1}`);
+    const anioActual = new Date().getFullYear();
+    const mesFormateado = String(mesActual + 1).padStart(2, '0');
+    const res = await fetchConToken(`/reportes/recaudacion-mensual?mes=${anioActual}-${mesFormateado}`);
+
     const data = await res.json();
     const total = data.total ?? 0;
 
-    document.getElementById('recaudacionMes').textContent = `$ ${total.toLocaleString('es-AR')}`;
+    document.getElementById('recaudacion-total').textContent = `$ ${total.toLocaleString('es-AR')}`;
   } catch (err) {
-    document.getElementById('recaudacionMes').textContent = 'Error';
+    document.getElementById('recaudacion-total').textContent = 'Error';
     console.error('❌ Error al obtener recaudación mensual:', err);
-
-
-
   }
 }
 
 window.cambiarMes = cambiarMes;
 window.actualizarMes = actualizarMes;
+
 
