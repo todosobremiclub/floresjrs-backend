@@ -4,13 +4,6 @@ const multer = require('multer');
 const upload = multer(); // sin almacenamiento local, recibimos buffer
 const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
-
-const express = require('express');
-const router = express.Router();
-const multer = require('multer');
-const upload = multer(); // sin almacenamiento local, recibimos buffer
-const db = require('../config/db');
-const verificarToken = require('../middlewares/verificarToken');
 const subirImagen = require('../utils/subirAFirebase'); // 👈 subida a Firebase
 
 // POST /novedades → publicar novedad con texto, imagen y filtros de destino
