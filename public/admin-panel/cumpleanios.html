@@ -9,11 +9,9 @@
   <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-
-.fc-toolbar-title {
-  text-transform: capitalize;
-}
-
+    .fc-toolbar-title {
+      text-transform: capitalize;
+    }
     body {
       background-color: #004aad;
       color: white;
@@ -32,6 +30,7 @@
       flex-direction: column;
       gap: 1rem;
       z-index: 1040;
+      transition: transform 0.3s ease;
     }
     .sidebar a, .sidebar button {
       color: white;
@@ -70,9 +69,39 @@
       border-radius: 12px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.15);
     }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1051;
+      display: none;
+    }
+
+    @media (max-width: 767px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      .toggle-btn {
+        display: block;
+      }
+      .main-content {
+        margin-left: 0 !important;
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
+<button id="toggleBtn" class="toggle-btn">☰</button>
+
 <div class="sidebar" id="sidebar">
   <h4>Menú</h4>
   <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
@@ -85,87 +114,88 @@
   <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
 </div>
 
+<div class="main-content">
+  <h2 class="mb-4">🎉 Cumpleaños</h2>
 
-
-  <div class="main-content">
-    <h2 class="mb-4">🎉 Cumpleaños</h2>
-
-    <div class="today-box">
-  <h5 class="text-primary">🎈 Hoy cumplen años:</h5>
-  <ul id="today-list" class="mb-0"></ul>
-</div>
-
-
-    <div id="calendar"></div>
+  <div class="today-box">
+    <h5 class="text-primary">🎈 Hoy cumplen años:</h5>
+    <ul id="today-list" class="mb-0"></ul>
   </div>
 
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert("⚠️ No estás autenticado. Redirigiendo al login...");
-      window.location.href = "/admin-panel/login.html";
-    }
+  <div id="calendar"></div>
+</div>
 
-    function fetchConToken(url, opciones = {}) {
-      return fetch(url, {
-        ...opciones,
-        headers: { 'Authorization': 'Bearer ' + token, ...opciones.headers },
-      });
-    }
+<script>
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert("⚠️ No estás autenticado. Redirigiendo al login...");
+    window.location.href = "/admin-panel/login.html";
+  }
 
-    function cerrarSesion() {
-      localStorage.removeItem('token');
-      window.location.href = '/admin-panel/login.html';
-    }
+  function fetchConToken(url, opciones = {}) {
+    return fetch(url, {
+      ...opciones,
+      headers: { 'Authorization': 'Bearer ' + token, ...opciones.headers },
+    });
+  }
 
-    fetchConToken('/cumpleanios')
-      .then(resp => {
-        if (!resp.ok) throw new Error("No autorizado o error de servidor");
-        return resp.json();
-      })
-      .then(data => {
-        const todayList = document.getElementById('today-list');
-        if (data.hoy.length === 0) {
-          todayList.innerHTML = '<li>🎂 No hay cumpleaños hoy</li>';
-        } else {
-          data.hoy.forEach(s => {
-  const li = document.createElement('li');
-li.innerHTML = `
-  <span style="color: #002f6c;">
-    🎂 <strong style="color: #002f6c;">${s.nombre} ${s.apellido}</strong> – ${s.categoria || 'Sin categoría'} – ${s.edad} años
-  </span>
-`;
-todayList.appendChild(li);
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/admin-panel/login.html';
+  }
 
-});
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('show');
+  }
 
-        }
+  document.getElementById('toggleBtn').addEventListener('click', toggleSidebar);
 
-        const events = data.cumpleanios.map(s => {
-          const fecha = new Date(s.fecha_nacimiento);
-          const anioActual = new Date().getFullYear();
-          fecha.setFullYear(anioActual);
-          return {
-            title: `🎂 ${s.nombre} ${s.apellido}`,
-            start: fecha.toISOString().split('T')[0]
-          };
+  fetchConToken('/cumpleanios')
+    .then(resp => {
+      if (!resp.ok) throw new Error("No autorizado o error de servidor");
+      return resp.json();
+    })
+    .then(data => {
+      const todayList = document.getElementById('today-list');
+      if (data.hoy.length === 0) {
+        todayList.innerHTML = '<li>🎂 No hay cumpleaños hoy</li>';
+      } else {
+        data.hoy.forEach(s => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <span style="color: #002f6c;">
+              🎂 <strong>${s.nombre} ${s.apellido}</strong> – ${s.categoria || 'Sin categoría'} – ${s.edad} años
+            </span>
+          `;
+          todayList.appendChild(li);
         });
+      }
 
-        const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-  initialView: 'dayGridMonth',
-  locale: 'es',
-  events: events,
-  height: 'auto',
-  contentHeight: 500, // 👈 achica el calendario visualmente
-  dayMaxEventRows: 2, // 👈 limita el número de eventos visibles por día
-});
-
-        calendar.render();
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Error al cargar cumpleanios");
+      const events = data.cumpleanios.map(s => {
+        const fecha = new Date(s.fecha_nacimiento);
+        const anioActual = new Date().getFullYear();
+        fecha.setFullYear(anioActual);
+        return {
+          title: `🎂 ${s.nombre} ${s.apellido}`,
+          start: fecha.toISOString().split('T')[0]
+        };
       });
-  </script>
+
+      const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        events: events,
+        height: 'auto',
+        contentHeight: 500,
+        dayMaxEventRows: 2
+      });
+
+      calendar.render();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error al cargar cumpleaños");
+    });
+</script>
 </body>
 </html>
