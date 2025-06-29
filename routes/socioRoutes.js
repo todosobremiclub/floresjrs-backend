@@ -86,6 +86,14 @@ router.get('/:id', verificarToken, async (req, res) => {
       return res.status(404).json({ error: 'Socio no encontrado' });
     }
 
+const socio = resultado.rows[0];
+
+// ❌ Si no está activo, denegar acceso
+if (!socio.activo) {
+  return res.status(403).json({ error: 'Este socio está inactivo y no puede acceder a la app' });
+}
+
+
     res.json(resultado.rows[0]);
   } catch (err) {
     console.error('❌ Error al buscar socio por ID:', err);
@@ -277,7 +285,7 @@ router.post('/login', async (req, res) => {
          foto_url AS "fotoUrl",
          'Flores Jrs' AS club
        FROM socios
-       WHERE numero_socio = $1 AND dni = $2
+       WHERE numero_socio = $1 AND dni = $2 AND activo = true
        LIMIT 1`,
       [numero, dni]
     );
@@ -355,8 +363,9 @@ router.get('/:numero/:dni', async (req, res) => {
          foto_url AS "fotoUrl",
          'Flores Jrs' AS club
        FROM socios 
-       WHERE numero_socio = $1 AND dni = $2`,
+       WHERE numero_socio = $1 AND dni = $2 AND activo = true`,
       [numero, dni]
+
     );
 
     if (resultado.rows.length === 0) {

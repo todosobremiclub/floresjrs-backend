@@ -271,7 +271,8 @@ btnNuevoPago.addEventListener('click', async () => {
     const res = await fetch('/socio', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     });
-    const socios = await res.json();
+    const socios = (await res.json()).filter(s => s.activo);
+
 
     // Guardamos todos los socios temporalmente para búsquedas posteriores
     window.sociosParaBusqueda = socios;
