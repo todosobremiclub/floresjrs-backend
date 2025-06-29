@@ -339,7 +339,7 @@ function mostrarFiltrados(filtroTexto = '') {
   const filtroCategoria = document.getElementById('filtro-categoria').value;
   const filtroAnio = document.getElementById('filtro-anio').value;
   const filtroEstado = document.getElementById('filtro-estado-pago').value;
-  const mostrarInactivos = document.getElementById('filtro-inactivos')?.checked;
+  
 
   // Calcular alDia para todos los socios antes de filtrar
   const hoy = new Date();
@@ -349,15 +349,20 @@ function mostrarFiltrados(filtroTexto = '') {
   const mesActual = formato(anio, mes);
   const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
 
-  sociosOriginales.forEach(s => {
-    const pagos = s.pagos ?? [];
-    const becado = s.becado;
-    s.alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
-  });
+ sociosOriginales.forEach(s => {
+  const pagos = s.pagos ?? [];
+  const becado = !!s.becado;    // Aseguramos booleano
+  s.activo = !!s.activo;        // Aseguramos booleano
+  s.alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
+});
+
 
   // Filtrar socios
+const incluirInactivos = document.getElementById('checkIncluirInactivos').checked;
+
   let sociosFiltrados = sociosOriginales.filter(s => {
-    if (!mostrarInactivos && !s.activo) return false;
+  if (!incluirInactivos && !s.activo) return false;
+
 
     const coincideTexto = (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtroTexto.toLowerCase());
     const coincideCategoria = !filtroCategoria || s.categoria === filtroCategoria;
@@ -451,8 +456,9 @@ async function cargarSocios() {
     }
 
     const socios = await res.json();
-    sociosOriginales = socios;
-    ordenActual = { campo: null, asc: true };
+sociosOriginales = socios;
+ordenActual = { campo: null, asc: true };
+
 
     poblarFiltros(socios);
     mostrarFiltrados();
@@ -485,6 +491,11 @@ async function cargarCategoriasEnSelect() {
   cargarSocios();
   const modal = new bootstrap.Modal(document.getElementById('modalNuevoSocio'));
   const form = document.getElementById('formNuevoSocio');
+
+document.getElementById('checkIncluirInactivos').addEventListener('change', () => {
+  mostrarFiltrados(document.getElementById('buscador').value);
+});
+
 
 document.getElementById('btnAbrirFormulario').addEventListener('click', async () => {
   form.reset();
