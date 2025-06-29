@@ -404,8 +404,9 @@ cargarPagos();
 
 function logout() {
   localStorage.removeItem('token');
-  window.location.href = 'login.html';
+  window.location.href = '/admin-panel/login.html';
 }
+
 
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('show');
