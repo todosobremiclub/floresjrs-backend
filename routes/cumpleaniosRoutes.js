@@ -44,7 +44,8 @@ router.get('/', verificarToken, async (req, res) => {
       return fecha.getDate() === diaHoy && (fecha.getMonth() + 1) === mesHoy;
     });
 
-    res.json({ cumpleanios: socios, hoy: sociosHoy });
+    res.json(sociosHoy);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener cumpleanios' });
