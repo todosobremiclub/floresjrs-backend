@@ -1,30 +1,47 @@
+// routes/reportesRoutes.js
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
+const verificarToken = require('../middlewares/verificarToken');
 
-// GET /reportes/recaudacion-mensual?anio=2025&mes=6
-router.get('/recaudacion-mensual', async (req, res) => {
-  const { anio, mes } = req.query;
-
-  if (!anio || !mes) {
-    return res.status(400).json({ error: 'Año y mes son requeridos' });
-  }
-
+// Recaudado por fecha real de pago (de la tabla pagos)
+router.get('/recaudado-por-fecha', verificarToken, async (req, res) => {
   try {
-    const resultado = await db.query(
-      `SELECT COALESCE(SUM(monto), 0) AS total
-       FROM pagos
-       WHERE EXTRACT(YEAR FROM fecha_pago) = $1
-       AND EXTRACT(MONTH FROM fecha_pago) = $2`,
-      [anio, mes]
-    );
+    const resultado = await db.query(`
+      SELECT
+        EXTRACT(YEAR FROM fecha_pago) AS anio,
+        EXTRACT(MONTH FROM fecha_pago) AS mes,
+        SUM(monto) AS total
+      FROM pagos
+      GROUP BY anio, mes
+      ORDER BY anio, mes
+    `);
 
-    res.json({ total: resultado.rows[0].total });
+    res.json(resultado.rows);
   } catch (err) {
-    console.error('❌ Error en /recaudacion-mensual:', err);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('❌ Error al obtener recaudado por fecha:', err);
+    res.status(500).json({ error: 'Error al obtener datos de reportes por fecha' });
+  }
+});
+
+// Recaudado por mes pagado (de la tabla pagos_mensuales)
+router.get('/recaudado-por-mes-pagado', verificarToken, async (req, res) => {
+  try {
+    const resultado = await db.query(`
+      SELECT
+        anio,
+        mes,
+        SUM(monto) AS total
+      FROM pagos_mensuales
+      GROUP BY anio, mes
+      ORDER BY anio, mes
+    `);
+
+    res.json(resultado.rows);
+  } catch (err) {
+    console.error('❌ Error al obtener recaudado por mes pagado:', err);
+    res.status(500).json({ error: 'Error al obtener datos de reportes por mes pagado' });
   }
 });
 
 module.exports = router;
-
