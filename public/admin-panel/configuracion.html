@@ -113,19 +113,23 @@
   </div>
 
 <div class="mb-4">
-  <h5 class="text-white">💰 Monto de cuota por mes</h5>
-  <div class="table-responsive">
-    <table class="table table-sm table-bordered table-striped text-white" style="background-color:#002f6c;">
-
-      <thead>
-        <tr>
-          <th>Mes</th>
-          <th>Monto ($)</th>
-          <th style="width:80px">Guardar</th>
-        </tr>
-      </thead>
-      <tbody id="tablaMontos"></tbody>
-    </table>
+  <div class="d-flex align-items-center justify-content-between">
+    <h5 class="text-white m-0">💰 Monto de cuota por mes</h5>
+    <button class="btn btn-sm btn-outline-light" onclick="toggleMontos()">🔽 Mostrar</button>
+  </div>
+  <div id="contenedorMontos" class="mt-3" style="display: none;">
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered table-striped text-white" style="background-color:#002f6c;">
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>Monto ($)</th>
+            <th style="width:80px">Guardar</th>
+          </tr>
+        </thead>
+        <tbody id="tablaMontos"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -286,7 +290,8 @@ async function guardarMontoMensual(mes) {
   const anio = new Date().getFullYear();
   const input = document.getElementById(`monto-${mes}`);
   const monto = parseFloat(input.value);
-  if (isNaN(monto) || monto <= 0) return alert('Ingresá un monto válido');
+  if (isNaN(monto) || monto < 0) return alert('Ingresá un monto válido');
+	
 
   try {
     const res = await fetchConToken('/montos-mensuales', {
@@ -297,6 +302,19 @@ async function guardarMontoMensual(mes) {
     alert('✅ Monto guardado correctamente');
   } catch {
     alert('❌ No se pudo guardar el monto');
+  }
+}
+
+function toggleMontos() {
+  const contenedor = document.getElementById('contenedorMontos');
+  const boton = event.target;
+
+  if (contenedor.style.display === 'none') {
+    contenedor.style.display = 'block';
+    boton.textContent = '🔼 Ocultar';
+  } else {
+    contenedor.style.display = 'none';
+    boton.textContent = '🔽 Mostrar';
   }
 }
 
