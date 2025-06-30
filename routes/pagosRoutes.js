@@ -211,19 +211,15 @@ router.delete('/mensuales/:id', verificarToken, async (req, res) => {
 router.get('/mensuales', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(`
-      SELECT 
-        s.numero_socio AS socio_numero,
-        s.nombre,
-        s.apellido,
-        s.dni,
-        pm.anio,
-        pm.mes,
-        TO_CHAR(pm.fecha_pago, 'YYYY-MM-DD') AS fecha_pago,
-        pm.id
-      FROM pagos_mensuales pm
-      JOIN socios s ON s.numero_socio = pm.socio_numero
-      ORDER BY s.numero_socio, pm.anio, pm.mes
-    `);
+  SELECT p.id, p.numero_socio, s.nombre, s.apellido, p.fecha_pago,
+         pm.anio, pm.mes, mm.monto
+  FROM pagos_mensuales pm
+  JOIN pagos p ON pm.pago_id = p.id
+  JOIN socios s ON p.numero_socio = s.numero
+  LEFT JOIN montos_mensuales mm ON pm.anio = mm.anio AND pm.mes = mm.mes
+  ORDER BY s.numero, pm.anio, pm.mes
+`);
+
 
     const agrupados = {};
 
@@ -240,11 +236,13 @@ router.get('/mensuales', verificarToken, async (req, res) => {
       }
 
       agrupados[id].pagos.push({
-        id: row.id,
-        anio: row.anio,
-        mes: row.mes.toString().padStart(2, '0'),
-        fecha_pago: row.fecha_pago
-      });
+  id: row.id,
+  anio: row.anio,
+  mes: row.mes.toString().padStart(2, '0'),
+  fecha_pago: row.fecha_pago,
+  monto: row.monto
+});
+
     });
 
     res.json(Object.values(agrupados));
