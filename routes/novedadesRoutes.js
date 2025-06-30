@@ -15,11 +15,19 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
       return res.status(400).json({ error: 'Faltan datos obligatorios' });
     }
 
-    // 👉 Convertir array de categorías a string separado por coma
+    // ✅ Validación obligatoria de categoría si destino lo requiere
     let categoriasStr = null;
     if (destino === 'categoria' || destino === 'categoria_anio') {
+      if (!categorias) {
+        return res.status(400).json({ error: 'Debe seleccionar al menos una categoría' });
+      }
+
       try {
         const categoriasArray = JSON.parse(categorias);
+        if (!Array.isArray(categoriasArray) || categoriasArray.length === 0) {
+          return res.status(400).json({ error: 'Debe seleccionar al menos una categoría' });
+        }
+
         categoriasStr = categoriasArray.join(',');
       } catch (err) {
         return res.status(400).json({ error: 'Formato de categorías inválido' });
@@ -105,3 +113,4 @@ router.delete('/:id', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
+
