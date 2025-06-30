@@ -194,41 +194,44 @@
       return resp.json();
     })
     .then(data => {
-      const todayList = document.getElementById('today-list');
-      if (data.hoy.length === 0) {
-        todayList.innerHTML = '<li>🎂 No hay cumpleaños hoy</li>';
-      } else {
-        data.hoy.forEach(s => {
-          const li = document.createElement('li');
-          li.innerHTML = `
-            <span style="color: #002f6c;">
-              🎂 <strong>${s.nombre} ${s.apellido}</strong> – ${s.categoria || 'Sin categoría'} – ${s.edad} años
-            </span>
-          `;
-          todayList.appendChild(li);
-        });
-      }
+  const todayList = document.getElementById('today-list');
 
-      const events = data.cumpleanios.map(s => {
-        const fecha = new Date(s.fecha_nacimiento);
-        const anioActual = new Date().getFullYear();
-        fecha.setFullYear(anioActual);
-        return {
-          title: `🎂 ${s.nombre} ${s.apellido}`,
-          start: fecha.toISOString().split('T')[0]
-        };
-      });
+  if (!Array.isArray(data) || data.length === 0) {
+    todayList.innerHTML = '<li>🎂 No hay cumpleaños hoy</li>';
+  } else {
+    data.forEach(s => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span style="color: #002f6c;">
+          🎂 <strong>${s.nombre} ${s.apellido}</strong> – ${s.categoria || 'Sin categoría'} – ${s.edad ?? ''} años
+        </span>
+      `;
+      todayList.appendChild(li);
+    });
+  }
 
-      const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'dayGridMonth',
-        locale: 'es',
-        events: events,
-        height: 'auto',
-        contentHeight: 500,
-        dayMaxEventRows: 2
-      });
+  const eventos = data.map(s => {
+    const fecha = new Date(s.fecha_nacimiento);
+    const anioActual = new Date().getFullYear();
+    fecha.setFullYear(anioActual);
+    return {
+      title: `🎂 ${s.nombre} ${s.apellido}`,
+      start: fecha.toISOString().split('T')[0]
+    };
+  });
 
-      calendar.render();
+  const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+    initialView: 'dayGridMonth',
+    locale: 'es',
+    events: eventos,
+    height: 'auto',
+    contentHeight: 500,
+    dayMaxEventRows: 2
+  });
+
+  calendar.render();
+})
+
     })
     .catch(err => {
       console.error(err);
