@@ -112,14 +112,22 @@
     <h2 class="text-warning m-0">Configuración del Sistema</h2>
   </div>
 
-  <div class="mb-4">
-    <label for="montoCuota" class="form-label">💰 Monto de cuota actual</label>
-    <div class="input-group">
-      <span class="input-group-text">$</span>
-      <input type="number" id="montoCuota" class="form-control" placeholder="Ej: 5000" />
-      <button class="btn btn-yellow" id="guardarMonto">Guardar</button>
-    </div>
+<div class="mb-4">
+  <h5 class="text-white">💰 Monto de cuota por mes</h5>
+  <div class="table-responsive">
+    <table class="table table-sm table-bordered table-dark table-striped">
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th>Monto ($)</th>
+          <th style="width:80px">Guardar</th>
+        </tr>
+      </thead>
+      <tbody id="tablaMontos"></tbody>
+    </table>
   </div>
+</div>
+
 
   <hr class="border-light" />
 
@@ -195,50 +203,8 @@ async function cargarCategorias() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const montoInput = document.getElementById('montoCuota');
-  const btnGuardar = document.getElementById('guardarMonto');
-  const formCategoria = document.getElementById('formCategoria');
-  const inputCategoria = document.getElementById('nuevaCategoria');
-
-  // Cargar monto actual
-  fetchConToken('/pagos/monto')
-    .then(res => res.json())
-    .then(data => montoInput.value = data.monto)
-    .catch(() => alert('Error al cargar el monto actual'));
-
-  // Guardar nuevo monto
-  btnGuardar.addEventListener('click', () => {
-    const monto = parseFloat(montoInput.value);
-    if (isNaN(monto) || monto <= 0) return alert('Ingresá un monto válido');
-    fetchConToken('/pagos/monto', {
-      method: 'POST',
-      body: JSON.stringify({ monto })
-    }).then(res => {
-      if (res.ok) alert('✅ Monto actualizado');
-      else alert('❌ Error al guardar el monto');
-    });
-  });
-
-  // Agregar nueva categoría
-  formCategoria.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nombre = inputCategoria.value.trim();
-    if (!nombre) return;
-
-    try {
-      const res = await fetchConToken('/config/categorias', {
-        method: 'POST',
-        body: JSON.stringify({ nombre })
-      });
-      if (!res.ok) throw new Error();
-      inputCategoria.value = '';
-      cargarCategorias();
-    } catch {
-      alert('❌ Error al guardar categoría');
-    }
-  });
-
   cargarCategorias();
+  cargarMontosMensuales(); // 👉 esta es la nueva función que se ejecuta al iniciar
 });
 
 // Edición y eliminación
@@ -283,6 +249,54 @@ document.body.addEventListener('click', async (e) => {
 
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('show');
+}
+async function cargarMontosMensuales() {
+  const anioActual = new Date().getFullYear();
+  const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const tabla = document.getElementById('tablaMontos');
+  tabla.innerHTML = '';
+
+  try {
+    const res = await fetchConToken('/montos-mensuales');
+    const datos = await res.json();
+    const montosPorMes = {};
+
+    datos.forEach(m => {
+      if (m.anio === anioActual) montosPorMes[m.mes] = m.monto;
+    });
+
+    for (let mes = 1; mes <= 12; mes++) {
+      const monto = montosPorMes[mes] || '';
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${nombresMeses[mes - 1]}</td>
+        <td><input type="number" class="form-control form-control-sm" id="monto-${mes}" value="${monto}" /></td>
+        <td><button class="btn btn-sm btn-yellow" onclick="guardarMontoMensual(${mes})">Guardar</button></td>
+      `;
+      tabla.appendChild(fila);
+    }
+  } catch {
+    alert('❌ Error al cargar montos mensuales');
+  }
+}
+
+async function guardarMontoMensual(mes) {
+  const anio = new Date().getFullYear();
+  const input = document.getElementById(`monto-${mes}`);
+  const monto = parseFloat(input.value);
+  if (isNaN(monto) || monto <= 0) return alert('Ingresá un monto válido');
+
+  try {
+    const res = await fetchConToken('/montos-mensuales', {
+      method: 'POST',
+      body: JSON.stringify({ mes, anio, monto })
+    });
+    if (!res.ok) throw new Error();
+    alert('✅ Monto guardado correctamente');
+  } catch {
+    alert('❌ No se pudo guardar el monto');
+  }
 }
 
 </script>
