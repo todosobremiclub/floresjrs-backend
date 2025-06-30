@@ -94,19 +94,34 @@ router.post('/mensuales', verificarToken, async (req, res) => {
       return res.status(200).json({ mensaje: 'No hay meses nuevos para registrar' });
     }
 
-    const values = nuevosMeses.flatMap(m => {
-      const [anio, mes] = m.split('-');
-      return [numeroSocio, parseInt(anio), parseInt(mes)];
-    });
+    const valoresFinales = [];
+const placeholders = [];
 
-    const placeholders = nuevosMeses.map((_, i) => `($${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3}, CURRENT_DATE)`).join(', ');
+for (let i = 0; i < nuevosMeses.length; i++) {
+  const [anioStr, mesStr] = nuevosMeses[i].split('-');
+  const anio = parseInt(anioStr);
+  const mes = parseInt(mesStr);
 
-    const query = `
-      INSERT INTO pagos_mensuales (socio_numero, anio, mes, fecha_pago)
-      VALUES ${placeholders}
-    `;
+  // Buscar monto para ese mes
+  const montoRes = await db.query(
+    'SELECT monto FROM montos_mensuales WHERE mes = $1 AND anio = $2',
+    [mes, anio]
+  );
 
-    await db.query(query, values);
+  const monto = montoRes.rows[0]?.monto ?? 0;
+
+  // Agregar valores
+  placeholders.push(`($${i * 5 + 1}, $${i * 5 + 2}, $${i * 5 + 3}, $${i * 5 + 4}, $${i * 5 + 5})`);
+  valoresFinales.push(numeroSocio, anio, mes, monto, new Date()); // fecha actual
+}
+
+const query = `
+  INSERT INTO pagos_mensuales (socio_numero, anio, mes, monto, fecha_pago)
+  VALUES ${placeholders.join(', ')}
+`;
+
+await db.query(query, valoresFinales);
+
 
     res.json({ mensaje: 'Meses registrados correctamente' });
   } catch (error) {
