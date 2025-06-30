@@ -191,12 +191,15 @@ choicesCategorias = new Choices('#categoriaSelect', {
     formData.append('texto', document.getElementById('texto').value);
     formData.append('destino', document.getElementById('destino').value);
     const destino = document.getElementById('destino').value;
-formData.append('destino', destino);
 
-if (destino === 'categoria' || destino === 'categoria_anio') {
-  const categoriasSeleccionadas = Array.from(document.getElementById('categoriaSelect').selectedOptions).map(opt => opt.value);
-  formData.append('categorias', JSON.stringify(categoriasSeleccionadas));
-}
+
+  if (destino === 'categoria' || destino === 'categoria_anio') {
+    const categoriasSeleccionadas = Array.from(document.querySelectorAll('#categoriaSelect option'))
+      .filter(opt => opt.selected)
+      .map(opt => opt.value);
+    formData.append('categorias', JSON.stringify(categoriasSeleccionadas));
+  }
+
 
     if (document.getElementById('anio_nacimiento').value)
       formData.append('anio_nacimiento', document.getElementById('anio_nacimiento').value);
