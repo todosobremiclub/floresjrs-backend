@@ -16,7 +16,10 @@ router.get('/', verificarToken, async (req, res) => {
 // POST crear o actualizar monto
 router.post('/', verificarToken, async (req, res) => {
   const { mes, anio, monto } = req.body;
-  if (!mes || !anio || !monto) return res.status(400).json({ error: 'Datos incompletos' });
+if (mes == null || anio == null || monto == null) {
+  return res.status(400).json({ error: 'Datos incompletos' });
+}
+
 
   try {
     await db.query(`
