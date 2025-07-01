@@ -17,7 +17,14 @@ router.get('/recaudado-por-fecha', verificarToken, async (req, res) => {
       ORDER BY anio, mes
     `);
 
-    res.json(resultado.rows);
+    const datos = resultado.rows.map(r => ({
+      mes: `${r.mes}/${r.anio}`,
+      total: parseFloat(r.total)
+    }));
+
+    const totalAnual = datos.reduce((acum, r) => acum + r.total, 0);
+
+    res.json({ meses: datos, totalAnual });
   } catch (err) {
     console.error('❌ Error al obtener recaudado por fecha:', err);
     res.status(500).json({ error: 'Error al obtener datos de reportes por fecha' });
