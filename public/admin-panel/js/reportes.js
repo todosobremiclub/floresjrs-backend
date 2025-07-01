@@ -38,11 +38,15 @@ async function actualizarMes() {
   try {
     const res = await fetchConToken(`/reportes/recaudacion-mensual?anio=${anioActual}&mes=${mesActual + 1}`);
     const data = await res.json();
-    const total = data.total ?? 0;
 
-    document.getElementById('recaudacionMes').textContent = `$ ${total.toLocaleString('es-AR')}`;
+    const totalMes = data.total ?? 0;
+    const totalAnual = data.totalAnual ?? 0;
+
+    document.getElementById('recaudacionMes').textContent = `$ ${totalMes.toLocaleString('es-AR')}`;
+    document.getElementById('totalAnual').textContent = `$ ${totalAnual.toLocaleString('es-AR')}`;
   } catch (err) {
     document.getElementById('recaudacionMes').textContent = 'Error';
+    document.getElementById('totalAnual').textContent = 'Error';
     console.error('❌ Error al obtener recaudación mensual:', err);
   }
 }

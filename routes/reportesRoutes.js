@@ -58,5 +58,42 @@ router.get('/recaudado-por-mes-pagado', verificarToken, async (req, res) => {
   }
 });
 
+// 👉 Total recaudado por mes específico y acumulado anual
+router.get('/recaudacion-mensual', verificarToken, async (req, res) => {
+  const { anio, mes } = req.query;
+
+  if (!anio || !mes) {
+    return res.status(400).json({ error: 'Año y mes requeridos' });
+  }
+
+  try {
+    // Total del mes específico
+    const mensual = await db.query(
+      `SELECT SUM(monto) AS total
+       FROM pagos
+       WHERE EXTRACT(YEAR FROM fecha_pago) = $1
+         AND EXTRACT(MONTH FROM fecha_pago) = $2`,
+      [anio, mes]
+    );
+
+    // Total acumulado del año
+    const anual = await db.query(
+      `SELECT SUM(monto) AS total
+       FROM pagos
+       WHERE EXTRACT(YEAR FROM fecha_pago) = $1`,
+      [anio]
+    );
+
+    res.json({
+      total: parseFloat(mensual.rows[0].total || 0),
+      totalAnual: parseFloat(anual.rows[0].total || 0)
+    });
+  } catch (err) {
+    console.error('❌ Error al obtener recaudación mensual:', err);
+    res.status(500).json({ error: 'Error al consultar recaudación mensual' });
+  }
+});
+
 module.exports = router;
+
 
