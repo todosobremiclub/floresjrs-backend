@@ -49,17 +49,15 @@ router.get('/recaudado-por-fecha-pago', verificarToken, async (req, res) => {
       total: parseFloat(r.total)
     }));
 
-    // 👉 Total acumulado del año actual
-    const anioActual = new Date().getFullYear();
-    const totalAnual = meses
-      .filter(r => r.mes.startsWith(`${anioActual}-`))
-      .reduce((acum, r) => acum + r.total, 0);
+    const totalAnual = meses.reduce((acum, r) => acum + r.total, 0);
 
     res.json({ meses, totalAnual });
   } catch (err) {
-    console.error('❌ Error al obtener recaudado por fecha de pago:', err);
-    res.status(500).json({ error: 'Error al obtener reporte por fecha de pago' });
-  }
+  console.error('❌ Error al obtener recaudado por fecha de pago:', err);  // ya está
+  console.error(err.stack); // 👉 agregamos esta línea nueva para ver el stack del error
+  res.status(500).json({ error: 'Error al obtener reporte por fecha de pago' });
+}
+
 });
 
 module.exports = router;
