@@ -12,11 +12,24 @@ const nombresMeses = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
 
-let mesActual = new Date().getMonth(); // 0-indexado (0 = enero)
+let mesActual = new Date().getMonth(); // 0 = Enero
 let anioActual = new Date().getFullYear();
+let datosPorMes = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-  actualizarMes();
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetchConToken('/reportes/recaudado-por-fecha');
+    const data = await res.json();
+    datosPorMes = data.meses;
+
+    const totalAnual = data.totalAnual ?? 0;
+    document.getElementById('totalAnual').textContent = `$ ${totalAnual.toLocaleString('es-AR')}`;
+
+    actualizarMes();
+  } catch (err) {
+    console.error('❌ Error al cargar datos:', err);
+    alert('Error al obtener datos de reportes');
+  }
 });
 
 function cambiarMes(direccion) {
@@ -24,33 +37,24 @@ function cambiarMes(direccion) {
   if (mesActual < 0) {
     mesActual = 11;
     anioActual -= 1;
-  }
-  if (mesActual > 11) {
+  } else if (mesActual > 11) {
     mesActual = 0;
     anioActual += 1;
   }
   actualizarMes();
 }
 
-async function actualizarMes() {
+function actualizarMes() {
   document.getElementById('mesActual').textContent = nombresMeses[mesActual];
+  const mesBuscado = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}`;
 
-  try {
-    const res = await fetchConToken(`/reportes/recaudacion-mensual?anio=${anioActual}&mes=${mesActual + 1}`);
-    const data = await res.json();
+  const fila = datosPorMes.find(f => f.mes === mesBuscado);
+  const totalMes = fila?.total ?? 0;
 
-    const totalMes = data.total ?? 0;
-    const totalAnual = data.totalAnual ?? 0;
-
-    document.getElementById('recaudacionMes').textContent = `$ ${totalMes.toLocaleString('es-AR')}`;
-    document.getElementById('totalAnual').textContent = `$ ${totalAnual.toLocaleString('es-AR')}`;
-  } catch (err) {
-    document.getElementById('recaudacionMes').textContent = 'Error';
-    document.getElementById('totalAnual').textContent = 'Error';
-    console.error('❌ Error al obtener recaudación mensual:', err);
-  }
+  document.getElementById('recaudacionMes').textContent = `$ ${totalMes.toLocaleString('es-AR')}`;
 }
 
 window.cambiarMes = cambiarMes;
 window.actualizarMes = actualizarMes;
+
 
