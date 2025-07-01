@@ -157,7 +157,7 @@
     // Reporte 3: socios por categoría
     async function cargarReporteCategorias() {
       try {
-        const res = await fetch('/reportes/socios-por-categoria', {
+        const res = await fetch('../reportes/socios-por-categoria', {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
