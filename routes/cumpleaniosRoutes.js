@@ -39,13 +39,14 @@ router.get('/', verificarToken, async (req, res) => {
       };
     });
 
+    // ✅ Filtrar solo los cumpleaños del mes actual (con split para evitar errores de timezone)
     const sociosMes = socios.filter(s => {
-  const fecha = new Date(s.fecha_nacimiento);
-  return (fecha.getMonth() + 1) === mesHoy;
-});
+      if (!s.fecha_nacimiento) return false;
+      const [anio, mes, dia] = s.fecha_nacimiento.split('-').map(Number);
+      return mes === mesHoy;
+    });
 
-res.json(sociosMes);
-
+    res.json(sociosMes);
 
   } catch (error) {
     console.error(error);
@@ -54,3 +55,4 @@ res.json(sociosMes);
 });
 
 module.exports = router;
+
