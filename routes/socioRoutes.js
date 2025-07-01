@@ -379,6 +379,79 @@ router.get('/:numero/:dni', async (req, res) => {
   }
 });
 
+// GET /socio/paginado → obtener socios paginados con filtros
+router.get('/paginado', verificarToken, async (req, res) => {
+  const page = parseInt(req.query.page || '1');
+  const limit = parseInt(req.query.limit || '50');
+  const offset = (page - 1) * limit;
+
+  const categoria = req.query.categoria;
+  const anio = req.query.anio;
+  const estado = req.query.estado;
+  const buscar = (req.query.buscar || '').toLowerCase();
+
+  try {
+    let filtros = 'WHERE s.activo = true';
+    const params = [];
+
+    if (categoria) {
+      filtros += ` AND s.subcategoria = $${params.length + 1}`;
+      params.push(categoria);
+    }
+
+    if (anio) {
+      filtros += ` AND EXTRACT(YEAR FROM s.fecha_nacimiento) = $${params.length + 1}`;
+      params.push(anio);
+    }
+
+    if (buscar) {
+      filtros += ` AND (LOWER(s.nombre) || ' ' || LOWER(s.apellido) || ' ' || s.dni::text) LIKE $${params.length + 1}`;
+      params.push(`%${buscar}%`);
+    }
+
+    // Contar total de resultados sin límite
+    const totalRes = await db.query(`SELECT COUNT(*) FROM socios s ${filtros}`, params);
+    const total = parseInt(totalRes.rows[0].count);
+    const totalPages = Math.ceil(total / limit);
+
+    // Buscar socios paginados
+    const sociosRes = await db.query(
+      `SELECT 
+         s.numero_socio AS numero,
+         s.dni,
+         s.nombre,
+         s.apellido,
+         s.subcategoria AS categoria,
+         s.telefono,
+         TO_CHAR(s.fecha_nacimiento, 'YYYY-MM-DD') AS nacimiento,
+         TO_CHAR(s.fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
+         s.foto_url,
+         s.activo,
+         s.becado,
+         COALESCE(ARRAY_AGG(
+           TO_CHAR(pm.anio, 'FM0000') || '-' || TO_CHAR(pm.mes, 'FM00')
+         ) FILTER (WHERE pm.id IS NOT NULL), '{}') AS pagos
+       FROM socios s
+       LEFT JOIN pagos_mensuales pm ON s.numero_socio = pm.socio_numero
+       ${filtros}
+       GROUP BY s.numero_socio, s.dni, s.nombre, s.apellido, s.subcategoria, s.telefono, s.fecha_nacimiento, s.fecha_ingreso, s.foto_url, s.activo, s.becado
+       ORDER BY s.numero_socio ASC
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, offset]
+    );
+
+    res.json({
+      socios: sociosRes.rows,
+      total,
+      page,
+      pages: totalPages
+    });
+  } catch (err) {
+    console.error('❌ Error en /socio/paginado:', err);
+    res.status(500).json({ error: 'Error al obtener socios paginados' });
+  }
+});
+
 module.exports = router;
 
 

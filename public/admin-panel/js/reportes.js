@@ -90,14 +90,52 @@ function actualizarMes2() {
   document.getElementById('recaudacionMes2').textContent = `$ ${totalMes.toLocaleString('es-AR')}`;
 }
 
+// ---------- Reporte 3: Socios por categoría ----------
+async function cargarReporteCategorias() {
+  try {
+    const res = await fetchConToken('/reportes/socios-por-categoria');
+    const data = await res.json();
+
+    const categorias = data.map(d => d.categoria || 'Sin categoría');
+    const cantidades = data.map(d => parseInt(d.cantidad));
+
+    const ctx = document.getElementById('graficoCategorias').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: categorias,
+        datasets: [{
+          label: 'Cantidad de socios',
+          data: cantidades,
+          backgroundColor: 'rgba(255, 206, 86, 0.7)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        scales: {
+          x: { beginAtZero: true }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  } catch (err) {
+    console.error('❌ Error al cargar reporte de categorías:', err);
+    alert('Error al obtener datos del reporte de categorías');
+  }
+}
+
 // ---------- Inicio ----------
 document.addEventListener('DOMContentLoaded', async () => {
   await cargarReportePorMes();
   await cargarReportePorFechaPago();
+  await cargarReporteCategorias();
 });
 
 // ---------- Exponer funciones al window (para botones) ----------
 window.cambiarMes = cambiarMes;
 window.cambiarMes2 = cambiarMes2;
-
-

@@ -6,162 +6,176 @@
   <title>Gestión de Socios - Flores Jrs</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<style>
-  body {
-    background-color: #004aad;
-    color: white;
-    margin: 0;
-  }
+  <style>
+    body {
+      background-color: #004aad;
+      color: white;
+      margin: 0;
+    }
 
-  .sidebar {
-    width: 200px;
-    background-color: #002f6c;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 1rem;
-padding-top: 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    z-index: 1040;
-  }
-
-  .sidebar h4 {
-    color: white;
-  }
-
-  .sidebar button,
-  .sidebar a {
-    text-align: left;
-    width: 100%;
-  }
-
-  .main-content {
-    margin-left: 200px;
-    padding: 2rem;
-  }
-
-  .table {
-    table-layout: auto;
-  }
-
-  .table td,
-  .table th {
-    vertical-align: middle;
-    font-size: 0.85rem;
-    padding: 0.35rem 0.5rem;
-    white-space: nowrap;
-  }
-
-  /* Centrar columnas finales (activo, becado, foto, opciones) */
-  .table td:nth-last-child(-n+3),
-  .table th:nth-last-child(-n+3) {
-    text-align: center;
-  }
-
-  /* Compactar columnas de fechas */
-  th:nth-child(7), td:nth-child(7),   /* Fecha de nacimiento */
-  th:nth-child(8), td:nth-child(8),   /* Año de nacimiento */
-  th:nth-child(9), td:nth-child(9) {  /* Fecha de ingreso */
-    max-width: 80px;
-    font-size: 0.75rem;
-    padding: 0.2rem 0.3rem;
-    white-space: nowrap;
-  }
-
-  .btn-yellow {
-    background-color: #ffd500;
-    color: black;
-    font-weight: bold;
-    font-size: 0.9rem;
-    padding: 6px 12px;
-    line-height: 1;
-  }
-
-  .logo {
-    height: 50px;
-  }
-
-  h2.text-warning {
-    font-size: 1.4rem;
-  }
-
-  #buscador {
-    height: 36px;
-    font-size: 0.9rem;
-    padding: 0.25rem 0.75rem;
-  }
-
-  #btnAbrirFormulario {
-    height: 36px;
-    font-size: 0.9rem;
-    padding: 0 12px;
-  }
-
-  .toggle-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1050;
-    display: none;
-  }
-
-  @media (max-width: 767px) {
     .sidebar {
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
+      width: 200px;
+      background-color: #002f6c;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      padding-top: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      z-index: 1040;
     }
 
-    .sidebar.show {
-      transform: translateX(0);
+    .sidebar h4 {
+      color: white;
     }
 
-    .toggle-btn {
-      display: block;
+    .sidebar button,
+    .sidebar a {
+      text-align: left;
+      width: 100%;
     }
 
     .main-content {
-      margin-left: 0 !important;
-      padding: 1rem;
+      margin-left: 200px;
+      padding: 2rem;
+    }
+
+    .table {
+      table-layout: auto;
     }
 
     .table td,
     .table th {
-      font-size: 0.78rem;
-      padding: 0.25rem 0.4rem;
+      vertical-align: middle;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+      white-space: nowrap;
     }
 
-    .btn-yellow {
-      font-size: 0.8rem;
+    .table td:nth-last-child(-n+3),
+    .table th:nth-last-child(-n+3) {
+      text-align: center;
     }
 
-    /* Compactar aún más columnas de fechas en mobile */
     th:nth-child(7), td:nth-child(7),
     th:nth-child(8), td:nth-child(8),
     th:nth-child(9), td:nth-child(9) {
-      font-size: 0.7rem;
-      max-width: 65px;
-      padding: 0.15rem 0.25rem;
+      max-width: 80px;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.3rem;
+      white-space: nowrap;
     }
 
-    /* Hacer tabla scrolleable horizontalmente */
-    .table-responsive {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+    .btn-yellow {
+      background-color: #ffd500;
+      color: black;
+      font-weight: bold;
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      line-height: 1;
     }
 
-    .tabla-socios {
-      min-width: 900px;
+    .logo {
+      height: 50px;
     }
-  }
-</style>
 
+    h2.text-warning {
+      font-size: 1.4rem;
+    }
+
+    #buscador {
+      height: 36px;
+      font-size: 0.9rem;
+      padding: 0.25rem 0.75rem;
+    }
+
+    #btnAbrirFormulario {
+      height: 36px;
+      font-size: 0.9rem;
+      padding: 0 12px;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1050;
+      display: none;
+    }
+
+    @media (max-width: 767px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.show {
+        transform: translateX(0);
+      }
+
+      .toggle-btn {
+        display: block;
+      }
+
+      .main-content {
+        margin-left: 0 !important;
+        padding: 1rem;
+      }
+
+      .table td,
+      .table th {
+        font-size: 0.78rem;
+        padding: 0.25rem 0.4rem;
+      }
+
+      .btn-yellow {
+        font-size: 0.8rem;
+      }
+
+      th:nth-child(7), td:nth-child(7),
+      th:nth-child(8), td:nth-child(8),
+      th:nth-child(9), td:nth-child(9) {
+        font-size: 0.7rem;
+        max-width: 65px;
+        padding: 0.15rem 0.25rem;
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .tabla-socios {
+        min-width: 900px;
+      }
+    }
+
+    .paginacion {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .paginacion button {
+      background-color: #ffd500;
+      color: black;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .paginacion button.active {
+      background-color: #ffa500;
+    }
+  </style>
 </head>
 <body>
   <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -242,6 +256,22 @@ padding-top: 4rem;
 
   </div>
 
+<div id="paginacion" class="paginacion"></div>
+
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = 'btn btn-sm ' + (i === paginaActual ? 'btn-light text-primary fw-bold' : 'btn-outline-light');
+    btn.addEventListener('click', () => {
+      paginaActual = i;
+      mostrarFiltrados(document.getElementById('buscador').value);
+    });
+    paginacion.appendChild(btn);
+  }
+}
+
+
   <script>
 
      const tabla = document.getElementById('tablaSocios');
@@ -254,9 +284,6 @@ padding-top: 4rem;
       window.location.href = '/admin-panel/login.html';
     }
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('show');
-}
 
     function fetchConToken(url, opciones = {}) {
       opciones.headers = opciones.headers || {};
@@ -333,6 +360,9 @@ function ordenarSocios(lista, campo) {
 }
 
 
+let paginaActual = 1;
+const sociosPorPagina = 50;
+
 function mostrarFiltrados(filtroTexto = '') {
   const tabla = document.getElementById('tablaSocios');
   tabla.innerHTML = '';
@@ -340,9 +370,9 @@ function mostrarFiltrados(filtroTexto = '') {
   const filtroCategoria = document.getElementById('filtro-categoria').value;
   const filtroAnio = document.getElementById('filtro-anio').value;
   const filtroEstado = document.getElementById('filtro-estado-pago').value;
-  
+  const incluirInactivos = document.getElementById('checkIncluirInactivos').checked;
 
-  // Calcular alDia para todos los socios antes de filtrar
+  // Calcular al día
   const hoy = new Date();
   const anio = hoy.getFullYear();
   const mes = hoy.getMonth() + 1;
@@ -350,20 +380,15 @@ function mostrarFiltrados(filtroTexto = '') {
   const mesActual = formato(anio, mes);
   const mesAnterior = mes === 1 ? formato(anio - 1, 12) : formato(anio, mes - 1);
 
- sociosOriginales.forEach(s => {
-  const pagos = s.pagos ?? [];
-  const becado = !!s.becado;    // Aseguramos booleano
-  s.activo = !!s.activo;        // Aseguramos booleano
-  s.alDia = becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
-});
-
-
-  // Filtrar socios
-const incluirInactivos = document.getElementById('checkIncluirInactivos').checked;
+  sociosOriginales.forEach(s => {
+    const pagos = s.pagos ?? [];
+    s.activo = !!s.activo;
+    s.becado = !!s.becado;
+    s.alDia = s.becado || pagos.includes(mesActual) || pagos.includes(mesAnterior);
+  });
 
   let sociosFiltrados = sociosOriginales.filter(s => {
-  if (!incluirInactivos && !s.activo) return false;
-
+    if (!incluirInactivos && !s.activo) return false;
 
     const coincideTexto = (`${s.nombre} ${s.apellido} ${s.dni}`.toLowerCase()).includes(filtroTexto.toLowerCase());
     const coincideCategoria = !filtroCategoria || s.categoria === filtroCategoria;
@@ -378,9 +403,18 @@ const incluirInactivos = document.getElementById('checkIncluirInactivos').checke
 
   if (ordenActual.campo) sociosFiltrados = ordenarSocios(sociosFiltrados, ordenActual.campo);
 
-  // Mostrar en tabla
-  sociosFiltrados.forEach(s => agregarFilaSocio(s));
+  // ✅ PAGINACIÓN
+  const totalPaginas = Math.ceil(sociosFiltrados.length / sociosPorPagina);
+  if (paginaActual > totalPaginas) paginaActual = 1;
+
+  const inicio = (paginaActual - 1) * sociosPorPagina;
+  const sociosPagina = sociosFiltrados.slice(inicio, inicio + sociosPorPagina);
+
+  sociosPagina.forEach(s => agregarFilaSocio(s));
+
+  renderizarPaginacion(totalPaginas);
 }
+
 
 
   function agregarFilaSocio(s) {
@@ -660,6 +694,24 @@ modal.show();
     }
   });
 });
+function renderizarPaginacion(totalPaginas) {
+  const paginacion = document.getElementById('paginacion');
+  if (!paginacion) return;
+
+  paginacion.innerHTML = '';
+
+  for (let i = 1; i <= totalPaginas; i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = 'btn ' + (i === paginaActual ? 'btn-light text-primary fw-bold' : 'btn-outline-light');
+    btn.addEventListener('click', () => {
+      paginaActual = i;
+      mostrarFiltrados(document.getElementById('buscador').value);
+    });
+    paginacion.appendChild(btn);
+  }
+}
+
 
   </script>
 <div class="modal fade" id="modalNuevoSocio" tabindex="-1">
@@ -689,6 +741,7 @@ modal.show();
     <option value="" disabled selected>Seleccione una categoría</option>
   </select>
 </div>
+
 
           <div class="mb-2">
             <input type="text" id="telefono" class="form-control" placeholder="Teléfono" />
