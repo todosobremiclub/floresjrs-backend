@@ -224,34 +224,32 @@ if (cumpleaniosHoy.length === 0) {
 const eventos = [];
 
 data.forEach(s => {
-  const fechaOriginal = new Date(s.fecha_nacimiento);
-  const mes = fechaOriginal.getMonth();
-  const dia = fechaOriginal.getDate();
+  const [anioNacimiento, mesNacimiento, diaNacimiento] = s.fecha_nacimiento
+    .split('T')[0].split('-').map(Number);
 
-  // Generar eventos para 3 años: anterior, actual y siguiente
-  const anios = [new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1];
+  // Mostramos los cumpleaños para varios años (podés sumar más si querés)
+  const anios = [2023, 2024, 2025, 2026, 2027];
 
   anios.forEach(anio => {
-    const fecha = new Date(anio, mes, dia);
+    const fecha = `${anio}-${mesNacimiento.toString().padStart(2, '0')}-${diaNacimiento.toString().padStart(2, '0')}`;
     eventos.push({
-  title: `🎂 ${s.nombre} ${s.apellido}`,
-  start: `${anio}-${(mes + 1).toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`,
-  allDay: true
-});
-
+      title: `🎂 ${s.nombre} ${s.apellido}`,
+      start: fecha,
+      allDay: true
+    });
   });
 });
 
 
   const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-    initialView: 'dayGridMonth',
-    locale: 'es',
-    timeZone: 'local',
-    events: eventos,
-    height: 'auto',
-    contentHeight: 500,
-    dayMaxEventRows: 2
-  });
+  initialView: 'dayGridMonth',
+  locale: 'es',
+  events: eventos,
+  height: 'auto',
+  contentHeight: 500,
+  dayMaxEventRows: 2
+});
+
 
    calendar.render();
 })
