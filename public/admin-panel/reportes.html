@@ -16,10 +16,17 @@
     }
     .sidebar a { color: white; text-decoration: none; font-weight: bold; }
     .main-content { margin-left: 200px; padding: 2rem; }
-    .card { background: white; color: #004aad; margin-bottom: 2rem; border-radius: 16px; padding: 1rem; }
+    .card { background: white; color: #004aad; margin-bottom: 2rem; border-radius: 16px; padding: 1rem; position: relative; }
     .titulo { font-size: 1.2rem; font-weight: bold; }
     canvas { background: #fff; border-radius: 10px; }
-    .monto-total { position: absolute; top: 1rem; right: 2rem; font-weight: bold; color: green; font-size: 1.2rem; }
+    .monto-total {
+      position: absolute;
+      top: 1rem;
+      right: 2rem;
+      font-weight: bold;
+      color: green;
+      font-size: 1.2rem;
+    }
   </style>
 </head>
 <body>
@@ -41,9 +48,9 @@
     </div>
 
     <!-- Reporte 1: Por fecha de pago -->
-    <div class="card position-relative">
+    <div class="card">
       <div class="titulo">1. Monto acumulado por fecha de pago</div>
-      <div id="acumulado-anual" class="monto-total"></div>
+      <div id="acumulado-anual" class="monto-total">$ 0</div>
       <canvas id="graficoFechaPago"></canvas>
     </div>
 
@@ -56,11 +63,16 @@
 
   <script>
     const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'login.html';
+
+    function fetchConToken(url, opciones = {}) {
+      opciones.headers = opciones.headers || {};
+      opciones.headers['Authorization'] = `Bearer ${token}`;
+      return fetch(url, opciones);
+    }
 
     async function cargarReporte(url) {
-      const res = await fetch(url, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetchConToken(url);
       return await res.json();
     }
 
@@ -69,7 +81,7 @@
       new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: data.map(d => d.mes),
+          labels: data.map(d => `${d.mes}/${d.anio}`),
           datasets: [{
             label,
             data: data.map(d => d.total),
@@ -77,8 +89,14 @@
           }]
         },
         options: {
+          responsive: true,
           scales: {
-            y: { beginAtZero: true }
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: value => `$ ${value.toLocaleString('es-AR')}`
+              }
+            }
           }
         }
       });
@@ -92,9 +110,9 @@
         renderGrafico('graficoFechaPago', fechaPago.meses, 'Recaudado por mes (fecha de pago)');
         renderGrafico('graficoMesPagado', mesPagado.meses, 'Recaudado por mes (mes pagado)', 'rgba(255, 193, 7, 0.7)');
 
-        document.getElementById('acumulado-anual').textContent = `$ ${fechaPago.totalAnual}`;
+        document.getElementById('acumulado-anual').textContent = `$ ${fechaPago.totalAnual.toLocaleString('es-AR')}`;
       } catch (err) {
-        alert('Error al cargar reportes');
+        alert('❌ Error al cargar reportes');
         console.error(err);
       }
     }
@@ -108,3 +126,4 @@
   </script>
 </body>
 </html>
+
