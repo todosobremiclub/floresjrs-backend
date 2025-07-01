@@ -235,7 +235,8 @@ data.forEach(s => {
     const fecha = new Date(anio, mes, dia);
     eventos.push({
       title: `🎂 ${s.nombre} ${s.apellido}`,
-      start: fecha.toISOString().split('T')[0]
+      start: `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}`
+
     });
   });
 });
