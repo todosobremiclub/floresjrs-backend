@@ -171,134 +171,133 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = '/admin-panel/login.html';
+  const token = localStorage.getItem('token');
+  if (!token) window.location.href = '/admin-panel/login.html';
 
-    const nombresMeses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const nombresMeses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-    // Reporte 1
-    let mesActual = new Date().getMonth();
-    let anioActual = new Date().getFullYear();
-    let datosPorMes = [];
+  // Reporte 1
+  let mesActual = new Date().getMonth();
+  let anioActual = new Date().getFullYear();
+  let datosPorMes = [];
 
-    async function cargarDatos() {
-      try {
-        const res = await fetch('/reportes/recaudado-por-fecha', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
-        datosPorMes = data.meses;
-        document.getElementById('acumuladoAnual').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
-        actualizarMes();
-      } catch (err) {
-        console.error('❌ Error reporte 1:', err);
-      }
-    }
-
-    function actualizarMes() {
-      document.getElementById('mesActual').textContent = nombresMeses[mesActual];
-      const mesBuscado = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}`;
-      const fila = datosPorMes.find(f => f.mes === mesBuscado);
-      document.getElementById('montoMes').textContent = fila ? `$ ${fila.total.toLocaleString('es-AR')}` : '$ 0';
-    }
-
-    function cambiarMes(dir) {
-      mesActual += dir;
-      if (mesActual < 0) { mesActual = 11; anioActual--; }
-      else if (mesActual > 11) { mesActual = 0; anioActual++; }
+  async function cargarDatos() {
+    try {
+      const res = await fetch('/reportes/recaudado-por-fecha', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      datosPorMes = data.meses;
+      document.getElementById('acumuladoAnual').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
       actualizarMes();
+    } catch (err) {
+      console.error('❌ Error reporte 1:', err);
     }
+  }
 
-    // Reporte 2
-    let mesActual2 = new Date().getMonth();
-    let anioActual2 = new Date().getFullYear();
-    let datosPorMes2 = [];
+  function actualizarMes() {
+    document.getElementById('mesActual').textContent = nombresMeses[mesActual];
+    const mesBuscado = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}`;
+    const fila = datosPorMes.find(f => f.mes === mesBuscado);
+    document.getElementById('montoMes').textContent = fila ? `$ ${fila.total.toLocaleString('es-AR')}` : '$ 0';
+  }
 
-    async function cargarDatosFechaPago() {
-      try {
-        const res = await fetch('/reportes/recaudado-por-fecha-pago', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
-        datosPorMes2 = data.meses;
-        document.getElementById('acumuladoAnual2').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
-        actualizarMes2();
-      } catch (err) {
-        console.error('❌ Error reporte 2:', err);
-      }
-    }
+  function cambiarMes(dir) {
+    mesActual += dir;
+    if (mesActual < 0) { mesActual = 11; anioActual--; }
+    else if (mesActual > 11) { mesActual = 0; anioActual++; }
+    actualizarMes();
+  }
 
-    function actualizarMes2() {
-      document.getElementById('mesActual2').textContent = nombresMeses[mesActual2];
-      const mesBuscado = `${anioActual2}-${String(mesActual2 + 1).padStart(2, '0')}`;
-      const fila = datosPorMes2.find(f => f.mes === mesBuscado);
-      document.getElementById('montoMes2').textContent = fila ? `$ ${fila.total.toLocaleString('es-AR')}` : '$ 0';
-    }
+  // Reporte 2
+  let mesActual2 = new Date().getMonth();
+  let anioActual2 = new Date().getFullYear();
+  let datosPorMes2 = [];
 
-    function cambiarMes2(dir) {
-      mesActual2 += dir;
-      if (mesActual2 < 0) { mesActual2 = 11; anioActual2--; }
-      else if (mesActual2 > 11) { mesActual2 = 0; anioActual2++; }
+  async function cargarDatosFechaPago() {
+    try {
+      const res = await fetch('/reportes/recaudado-por-fecha-pago', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      datosPorMes2 = data.meses;
+      document.getElementById('acumuladoAnual2').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
       actualizarMes2();
+    } catch (err) {
+      console.error('❌ Error reporte 2:', err);
     }
+  }
 
-    // Reporte 3: socios por categoría
-    async function cargarReporteCategorias() {
-      try {
-        const res = await fetch('../reportes/socios-por-categoria', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
+  function actualizarMes2() {
+    document.getElementById('mesActual2').textContent = nombresMeses[mesActual2];
+    const mesBuscado = `${anioActual2}-${String(mesActual2 + 1).padStart(2, '0')}`;
+    const fila = datosPorMes2.find(f => f.mes === mesBuscado);
+    document.getElementById('montoMes2').textContent = fila ? `$ ${fila.total.toLocaleString('es-AR')}` : '$ 0';
+  }
 
-        const categorias = data.map(d => d.categoria || 'Sin categoría');
-        const cantidades = data.map(d => parseInt(d.cantidad));
+  function cambiarMes2(dir) {
+    mesActual2 += dir;
+    if (mesActual2 < 0) { mesActual2 = 11; anioActual2--; }
+    else if (mesActual2 > 11) { mesActual2 = 0; anioActual2++; }
+    actualizarMes2();
+  }
 
-        const ctx = document.getElementById('graficoCategorias').getContext('2d');
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: categorias,
-            datasets: [{
-              label: 'Cantidad de socios',
-              data: cantidades,
-              backgroundColor: 'rgba(255, 206, 86, 0.7)',
-              borderColor: 'rgba(255, 206, 86, 1)',
-              borderWidth: 1
-            }]
+  // Reporte 3: socios por categoría
+  async function cargarReporteCategorias() {
+    try {
+      const res = await fetch('/reportes/socios-por-categoria', {  // <== 🔧 CORREGIDO
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+
+      const categorias = data.map(d => d.categoria || 'Sin categoría');
+      const cantidades = data.map(d => parseInt(d.cantidad));
+
+      const ctx = document.getElementById('graficoCategorias').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: categorias,
+          datasets: [{
+            label: 'Cantidad de socios',
+            data: cantidades,
+            backgroundColor: 'rgba(255, 206, 86, 0.7)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          scales: {
+            x: { beginAtZero: true }
           },
-          options: {
-            indexAxis: 'y',
-            responsive: true,
-            scales: {
-              x: { beginAtZero: true }
-            },
-            plugins: {
-              legend: { display: false }
-            }
+          plugins: {
+            legend: { display: false }
           }
-        });
-      } catch (err) {
-        console.error('❌ Error reporte 3:', err);
-      }
+        }
+      });
+    } catch (err) {
+      console.error('❌ Error reporte 3:', err);
     }
+  }
 
-    function logout() {
-      localStorage.removeItem('token');
-      location.href = '/admin-panel/login.html';
-    }
+  function logout() {
+    localStorage.removeItem('token');
+    location.href = '/admin-panel/login.html';
+  }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-      await cargarDatos();
-      await cargarDatosFechaPago();
-      await cargarReporteCategorias();
-    });
- 
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('show');
+  }
 
-  <script>
-    function toggleSidebar() {
-      document.querySelector('.sidebar').classList.toggle('show');
-    }
-  </script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    await cargarDatos();
+    await cargarDatosFechaPago();
+    await cargarReporteCategorias();
+  });
+</script>
+
 
 
 </body>
