@@ -7,7 +7,7 @@ const verificarToken = require('../middlewares/verificarToken');
 // ✅ Recaudado por mes pagado (de pagos_mensuales)
 router.get('/recaudado-por-fecha', verificarToken, async (req, res) => {
   try {
-    	
+    const resultado = await db.query(`
       SELECT anio, mes, SUM(monto) AS total
       FROM pagos_mensuales
       GROUP BY anio, mes
