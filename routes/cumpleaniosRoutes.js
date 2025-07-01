@@ -39,12 +39,13 @@ router.get('/', verificarToken, async (req, res) => {
       };
     });
 
-    const sociosHoy = socios.filter(s => {
-      const fecha = new Date(s.fecha_nacimiento);
-      return fecha.getDate() === diaHoy && (fecha.getMonth() + 1) === mesHoy;
-    });
+    const sociosMes = socios.filter(s => {
+  const fecha = new Date(s.fecha_nacimiento);
+  return (fecha.getMonth() + 1) === mesHoy;
+});
 
-    res.json(sociosHoy);
+res.json(sociosMes);
+
 
   } catch (error) {
     console.error(error);
