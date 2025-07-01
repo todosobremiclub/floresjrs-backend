@@ -7,7 +7,7 @@ const verificarToken = require('../middlewares/verificarToken');
 // ✅ Recaudado por mes pagado (de pagos_mensuales)
 router.get('/recaudado-por-fecha', verificarToken, async (req, res) => {
   try {
-    const resultado = await db.query(`
+    	
       SELECT anio, mes, SUM(monto) AS total
       FROM pagos_mensuales
       GROUP BY anio, mes
@@ -35,14 +35,15 @@ router.get('/recaudado-por-fecha', verificarToken, async (req, res) => {
 router.get('/recaudado-por-fecha-pago', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(`
-      SELECT
-        EXTRACT(YEAR FROM fecha_pago) AS anio,
-        EXTRACT(MONTH FROM fecha_pago) AS mes,
-        SUM(monto) AS total
-      FROM pagos_mensuales
-      GROUP BY anio, mes
-      ORDER BY anio, mes
-    `);
+  SELECT
+    EXTRACT(YEAR FROM fecha_pago) AS anio,
+    EXTRACT(MONTH FROM fecha_pago) AS mes,
+    SUM(monto) AS total
+  FROM pagos_mensuales
+  GROUP BY EXTRACT(YEAR FROM fecha_pago), EXTRACT(MONTH FROM fecha_pago)
+  ORDER BY anio, mes
+`);
+
 
     const meses = resultado.rows.map(r => ({
       mes: `${r.anio}-${String(r.mes).padStart(2, '0')}`,
