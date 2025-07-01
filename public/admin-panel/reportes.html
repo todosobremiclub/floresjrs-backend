@@ -15,11 +15,21 @@
     }
     .sidebar a { color: white; text-decoration: none; font-weight: bold; }
     .main-content { margin-left: 200px; padding: 2rem; }
-    .card { background: white; color: #004aad; margin-bottom: 2rem; border-radius: 16px; padding: 1rem; text-align: center; }
+    .card {
+      background: white; color: #004aad; margin-bottom: 2rem;
+      border-radius: 16px; padding: 1rem; text-align: center;
+      position: relative;
+    }
     .titulo { font-size: 1.2rem; font-weight: bold; color: black; text-align: left; }
     .monto-total { position: absolute; top: 1.5rem; right: 2rem; font-weight: bold; color: green; font-size: 1.3rem; }
-    .mes-control { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1rem; }
-    .monto-mes { font-size: 2rem; font-weight: bold; color: green; margin-top: 1rem; }
+    .mes-control {
+      display: flex; align-items: center; justify-content: center;
+      gap: 1rem; margin-top: 1rem;
+    }
+    .monto-mes {
+      font-size: 2rem; font-weight: bold; color: green;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -40,26 +50,39 @@
       <h2 class="text-warning">Reportes - Flores Jrs</h2>
     </div>
 
-    <div class="card position-relative">
-      <div class="titulo">1. Total recaudado en el mes</div>
+    <!-- Reporte 1 -->
+    <div class="card">
+      <div class="titulo">1. Total recaudado por mes pagado</div>
       <div id="acumuladoAnual" class="monto-total">$ 0</div>
-
       <div class="mes-control">
         <button class="btn btn-primary" onclick="cambiarMes(-1)">◀</button>
-        <div id="mesActual">Junio</div>
+        <div id="mesActual">Mes</div>
         <button class="btn btn-primary" onclick="cambiarMes(1)">▶</button>
       </div>
-
       <div id="montoMes" class="monto-mes">$ 0</div>
+    </div>
+
+    <!-- Reporte 2 -->
+    <div class="card">
+      <div class="titulo">2. Total recaudado por fecha real de pago</div>
+      <div id="acumuladoAnual2" class="monto-total">$ 0</div>
+      <div class="mes-control">
+        <button class="btn btn-primary" onclick="cambiarMes2(-1)">◀</button>
+        <div id="mesActual2">Mes</div>
+        <button class="btn btn-primary" onclick="cambiarMes2(1)">▶</button>
+      </div>
+      <div id="montoMes2" class="monto-mes">$ 0</div>
     </div>
   </div>
 
-   <!-- AL FINAL, justo antes del cierre de </body> -->
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/admin-panel/login.html';
 
-    const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+    // Reporte 1: mes pagado
     let mesActual = new Date().getMonth();
     let anioActual = new Date().getFullYear();
     let datosPorMes = [];
@@ -71,13 +94,11 @@
         });
         const data = await res.json();
         datosPorMes = data.meses;
-
         const total = data.totalAnual ?? 0;
         document.getElementById('acumuladoAnual').textContent = `$ ${total.toLocaleString('es-AR')}`;
         actualizarMes();
       } catch (err) {
-        console.error('Error al obtener datos:', err);
-        alert('Error al obtener datos');
+        console.error('❌ Error al obtener datos de reporte 1:', err);
       }
     }
 
@@ -100,17 +121,58 @@
       actualizarMes();
     }
 
-    function logout() {
-      localStorage.removeItem('token');
-      window.location.href = '/admin-panel/login.html';
+    // Reporte 2: fecha de pago
+    let mesActual2 = new Date().getMonth();
+    let anioActual2 = new Date().getFullYear();
+    let datosPorMes2 = [];
+
+    async function cargarDatosFechaPago() {
+      try {
+        const res = await fetch('/reportes/recaudado-por-fecha-pago', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        datosPorMes2 = data.meses;
+        const total = data.totalAnual ?? 0;
+        document.getElementById('acumuladoAnual2').textContent = `$ ${total.toLocaleString('es-AR')}`;
+        actualizarMes2();
+      } catch (err) {
+        console.error('❌ Error al obtener datos de reporte 2:', err);
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', cargarDatos);
-    window.cambiarMes = cambiarMes;
-    window.actualizarMes = actualizarMes;
+    function actualizarMes2() {
+      document.getElementById('mesActual2').textContent = nombresMeses[mesActual2];
+      const mesBuscado = `${anioActual2}-${String(mesActual2 + 1).padStart(2, '0')}`;
+      const fila = datosPorMes2.find(f => f.mes === mesBuscado);
+      document.getElementById('montoMes2').textContent = fila ? `$ ${fila.total.toLocaleString('es-AR')}` : '$ 0';
+    }
+
+    function cambiarMes2(dir) {
+      mesActual2 += dir;
+      if (mesActual2 < 0) {
+        mesActual2 = 11;
+        anioActual2--;
+      } else if (mesActual2 > 11) {
+        mesActual2 = 0;
+        anioActual2++;
+      }
+      actualizarMes2();
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      location.href = '/admin-panel/login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await cargarDatos();
+      await cargarDatosFechaPago();
+    });
   </script>
 </body>
 </html>
+
 
 
 

@@ -31,5 +31,36 @@ router.get('/recaudado-por-fecha', verificarToken, async (req, res) => {
   }
 });
 
+// 👉 Recaudado según la fecha real en que se pagó (sin importar el mes abonado)
+router.get('/recaudado-por-fecha-pago', verificarToken, async (req, res) => {
+  try {
+    const resultado = await db.query(`
+      SELECT
+        EXTRACT(YEAR FROM fecha_pago) AS anio,
+        EXTRACT(MONTH FROM fecha_pago) AS mes,
+        SUM(monto) AS total
+      FROM pagos_mensuales
+      GROUP BY anio, mes
+      ORDER BY anio, mes
+    `);
+
+    const meses = resultado.rows.map(r => ({
+      mes: `${r.anio}-${String(r.mes).padStart(2, '0')}`,
+      total: parseFloat(r.total)
+    }));
+
+    // 👉 Total acumulado del año actual
+    const anioActual = new Date().getFullYear();
+    const totalAnual = meses
+      .filter(r => r.mes.startsWith(`${anioActual}-`))
+      .reduce((acum, r) => acum + r.total, 0);
+
+    res.json({ meses, totalAnual });
+  } catch (err) {
+    console.error('❌ Error al obtener recaudado por fecha de pago:', err);
+    res.status(500).json({ error: 'Error al obtener reporte por fecha de pago' });
+  }
+});
+
 module.exports = router;
 
