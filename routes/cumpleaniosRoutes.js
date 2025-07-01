@@ -39,14 +39,9 @@ router.get('/', verificarToken, async (req, res) => {
       };
     });
 
-    // ✅ Filtrar solo los cumpleaños del mes actual (con split para evitar errores de timezone)
-    const sociosMes = socios.filter(s => {
-      if (!s.fecha_nacimiento) return false;
-      const [anio, mes, dia] = s.fecha_nacimiento.toISOString().split('T')[0].split('-').map(Number);
-      return mes === mesHoy;
-    });
-
-    res.json(sociosMes);
+    // ✅ Mostrar todos los socios con fecha válida (cumpleaños de todo el año)
+    const sociosConFecha = socios.filter(s => s.fecha_nacimiento);
+    res.json(sociosConFecha);
 
   } catch (error) {
     console.error(error);
