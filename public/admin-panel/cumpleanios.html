@@ -221,15 +221,25 @@ if (cumpleaniosHoy.length === 0) {
 }
 
 
-  const eventos = data.map(s => {
-    const fecha = new Date(s.fecha_nacimiento);
-    const anioActual = new Date().getFullYear();
-    fecha.setFullYear(anioActual);
-    return {
+const eventos = [];
+
+data.forEach(s => {
+  const fechaOriginal = new Date(s.fecha_nacimiento);
+  const mes = fechaOriginal.getMonth();
+  const dia = fechaOriginal.getDate();
+
+  // Generar eventos para 3 años: anterior, actual y siguiente
+  const anios = [new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1];
+
+  anios.forEach(anio => {
+    const fecha = new Date(anio, mes, dia);
+    eventos.push({
       title: `🎂 ${s.nombre} ${s.apellido}`,
       start: fecha.toISOString().split('T')[0]
-    };
+    });
   });
+});
+
 
   const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
     initialView: 'dayGridMonth',
