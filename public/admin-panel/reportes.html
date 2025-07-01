@@ -54,6 +54,7 @@
     </div>
   </div>
 
+   <!-- AL FINAL, justo antes del cierre de </body> -->
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/admin-panel/login.html';
@@ -105,8 +106,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', cargarDatos);
+    window.cambiarMes = cambiarMes;
+    window.actualizarMes = actualizarMes;
   </script>
 </body>
 </html>
+
+
 
 
