@@ -252,9 +252,9 @@
     </thead>
     <tbody id="tablaSocios"></tbody>
   </table>
-</div>
+</div> <!-- cierre de .table-responsive -->
+<div id="paginacion" class="paginacion"></div>
 
-  </div>
 
 
   <script>
@@ -679,6 +679,7 @@ modal.show();
     }
   });
 });
+
 function renderizarPaginacion(totalPaginas) {
   const paginacion = document.getElementById('paginacion');
   if (!paginacion) return;
@@ -697,7 +698,6 @@ function renderizarPaginacion(totalPaginas) {
     paginacion.appendChild(btn);
   }
 }
-
 
   </script>
 <div class="modal fade" id="modalNuevoSocio" tabindex="-1">
