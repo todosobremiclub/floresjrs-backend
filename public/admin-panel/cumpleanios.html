@@ -234,10 +234,11 @@ data.forEach(s => {
   anios.forEach(anio => {
     const fecha = new Date(anio, mes, dia);
     eventos.push({
-      title: `🎂 ${s.nombre} ${s.apellido}`,
-      start: `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}`
+  title: `🎂 ${s.nombre} ${s.apellido}`,
+  start: `${anio}-${(mes + 1).toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`,
+  allDay: true
+});
 
-    });
   });
 });
 
