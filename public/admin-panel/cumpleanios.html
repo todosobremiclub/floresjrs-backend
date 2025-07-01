@@ -246,6 +246,7 @@ data.forEach(s => {
   const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
     initialView: 'dayGridMonth',
     locale: 'es',
+    timeZone: 'local',
     events: eventos,
     height: 'auto',
     contentHeight: 500,
