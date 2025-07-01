@@ -73,16 +73,22 @@
       </div>
       <div id="montoMes2" class="monto-mes">$ 0</div>
     </div>
+
+    <!-- Reporte 3 -->
+    <div class="card">
+      <div class="titulo">3. Socios por categoría</div>
+      <canvas id="graficoCategorias" height="400"></canvas>
+    </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/admin-panel/login.html';
 
-    const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const nombresMeses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-    // Reporte 1: mes pagado
+    // Reporte 1
     let mesActual = new Date().getMonth();
     let anioActual = new Date().getFullYear();
     let datosPorMes = [];
@@ -94,11 +100,10 @@
         });
         const data = await res.json();
         datosPorMes = data.meses;
-        const total = data.totalAnual ?? 0;
-        document.getElementById('acumuladoAnual').textContent = `$ ${total.toLocaleString('es-AR')}`;
+        document.getElementById('acumuladoAnual').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
         actualizarMes();
       } catch (err) {
-        console.error('❌ Error al obtener datos de reporte 1:', err);
+        console.error('❌ Error reporte 1:', err);
       }
     }
 
@@ -111,17 +116,12 @@
 
     function cambiarMes(dir) {
       mesActual += dir;
-      if (mesActual < 0) {
-        mesActual = 11;
-        anioActual--;
-      } else if (mesActual > 11) {
-        mesActual = 0;
-        anioActual++;
-      }
+      if (mesActual < 0) { mesActual = 11; anioActual--; }
+      else if (mesActual > 11) { mesActual = 0; anioActual++; }
       actualizarMes();
     }
 
-    // Reporte 2: fecha de pago
+    // Reporte 2
     let mesActual2 = new Date().getMonth();
     let anioActual2 = new Date().getFullYear();
     let datosPorMes2 = [];
@@ -133,11 +133,10 @@
         });
         const data = await res.json();
         datosPorMes2 = data.meses;
-        const total = data.totalAnual ?? 0;
-        document.getElementById('acumuladoAnual2').textContent = `$ ${total.toLocaleString('es-AR')}`;
+        document.getElementById('acumuladoAnual2').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
         actualizarMes2();
       } catch (err) {
-        console.error('❌ Error al obtener datos de reporte 2:', err);
+        console.error('❌ Error reporte 2:', err);
       }
     }
 
@@ -150,14 +149,49 @@
 
     function cambiarMes2(dir) {
       mesActual2 += dir;
-      if (mesActual2 < 0) {
-        mesActual2 = 11;
-        anioActual2--;
-      } else if (mesActual2 > 11) {
-        mesActual2 = 0;
-        anioActual2++;
-      }
+      if (mesActual2 < 0) { mesActual2 = 11; anioActual2--; }
+      else if (mesActual2 > 11) { mesActual2 = 0; anioActual2++; }
       actualizarMes2();
+    }
+
+    // Reporte 3: socios por categoría
+    async function cargarReporteCategorias() {
+      try {
+        const res = await fetch('/reportes/socios-por-categoria', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+
+        const categorias = data.map(d => d.categoria || 'Sin categoría');
+        const cantidades = data.map(d => parseInt(d.cantidad));
+
+        const ctx = document.getElementById('graficoCategorias').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: categorias,
+            datasets: [{
+              label: 'Cantidad de socios',
+              data: cantidades,
+              backgroundColor: 'rgba(255, 206, 86, 0.7)',
+              borderColor: 'rgba(255, 206, 86, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            scales: {
+              x: { beginAtZero: true }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('❌ Error reporte 3:', err);
+      }
     }
 
     function logout() {
@@ -168,10 +202,9 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await cargarDatos();
       await cargarDatosFechaPago();
+      await cargarReporteCategorias();
     });
   </script>
 </body>
 </html>
-
-
 
