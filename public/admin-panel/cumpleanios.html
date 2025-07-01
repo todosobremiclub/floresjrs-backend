@@ -196,19 +196,30 @@
     .then(data => {
   const todayList = document.getElementById('today-list');
 
-  if (!Array.isArray(data) || data.length === 0) {
-    todayList.innerHTML = '<li>🎂 No hay cumpleaños hoy</li>';
-  } else {
-    data.forEach(s => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <span style="color: #002f6c;">
-          🎂 <strong>${s.nombre} ${s.apellido}</strong> – ${s.categoria || 'Sin categoría'} – ${s.edad ?? ''} años
-        </span>
-      `;
-      todayList.appendChild(li);
-    });
-  }
+  const hoy = new Date();
+const diaHoy = hoy.getDate();
+const mesHoy = hoy.getMonth() + 1;
+
+const cumpleaniosHoy = data.filter(s => {
+  if (!s.fecha_nacimiento) return false;
+  const [anio, mes, dia] = s.fecha_nacimiento.split('T')[0].split('-').map(Number);
+  return dia === diaHoy && mes === mesHoy;
+});
+
+if (cumpleaniosHoy.length === 0) {
+  todayList.innerHTML = '<li>🎂 No hay cumpleaños hoy</li>';
+} else {
+  cumpleaniosHoy.forEach(s => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span style="color: #002f6c;">
+        🎂 <strong>${s.nombre} ${s.apellido}</strong> – ${s.categoria || 'Sin categoría'} – ${s.edad ?? ''} años
+      </span>
+    `;
+    todayList.appendChild(li);
+  });
+}
+
 
   const eventos = data.map(s => {
     const fecha = new Date(s.fecha_nacimiento);
