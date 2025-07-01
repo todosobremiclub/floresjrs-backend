@@ -256,21 +256,6 @@
 
   </div>
 
-<div id="paginacion" class="paginacion"></div>
-
-
-  for (let i = 1; i <= totalPaginas; i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.className = 'btn btn-sm ' + (i === paginaActual ? 'btn-light text-primary fw-bold' : 'btn-outline-light');
-    btn.addEventListener('click', () => {
-      paginaActual = i;
-      mostrarFiltrados(document.getElementById('buscador').value);
-    });
-    paginacion.appendChild(btn);
-  }
-}
-
 
   <script>
 
@@ -697,6 +682,7 @@ modal.show();
 function renderizarPaginacion(totalPaginas) {
   const paginacion = document.getElementById('paginacion');
   if (!paginacion) return;
+
 
   paginacion.innerHTML = '';
 
