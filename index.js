@@ -13,6 +13,8 @@ const novedadesRoutes = require('./routes/novedadesRoutes');
 const cumpleaniosRoutes = require('./routes/cumpleaniosRoutes');
 const reportesRoutes = require('./routes/reportesRoutes');
 const montosMensualesRoutes = require('./routes/montosMensualesRoutes');
+const notificacionesRoutes = require('./routes/notificacionesRoutes');
+
 
 
 
@@ -39,6 +41,8 @@ app.use('/novedades', novedadesRoutes);                   // Novedades
 app.use('/reportes', reportesRoutes);                     // ✅ Reportes con token
 app.use('/cumpleanios', cumpleaniosRoutes);
 app.use('/montos-mensuales', montosMensualesRoutes);
+app.use('/notificaciones', notificacionesRoutes);
+
 
 
 // 👉 Redirección raíz
