@@ -4,7 +4,7 @@ const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSO
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    storageBucket: 'floresjrs-b6d5e.appspot.com' // Reemplazá si aplica
+    storageBucket: 'floresjrs-b6d5e.firebasestorage.app' // Reemplazá si aplica
   });
 }
 
