@@ -98,123 +98,78 @@
 </style>
 
 </head>
-<body>
-  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('show');
+  }
 
-  <div class="sidebar" id="sidebar">
-    <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
-    <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
-    <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
-    <a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
-    <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
-    <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
-    <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
-    <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
-  </div>
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/admin-panel/login.html';
+  }
 
-  <div class="main-content">
-    <h2>Enviar notificación push</h2>
-    <form id="form-notificacion" class="mt-4">
-      <div class="mb-3">
-        <input type="text" class="form-control" id="titulo" placeholder="Título de la notificación" required>
-      </div>
-      <div class="mb-3">
-        <textarea class="form-control" id="cuerpo" rows="3" placeholder="Cuerpo del mensaje" required></textarea>
-      </div>
-      <button type="submit" class="btn btn-warning">Enviar notificación</button>
-    </form>
-    <div id="resultado" class="mt-3"></div>
+  document.getElementById('form-notificacion').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    <hr class="my-4" />
+    const titulo = document.getElementById('titulo').value;
+    const cuerpo = document.getElementById('cuerpo').value;
+    const token = localStorage.getItem('token');
 
-    <h4>📜 Historial de notificaciones</h4>
-    <table class="table table-bordered mt-3">
-      <thead>
-  <tr>
-    <th style="width: 20%">Fecha</th>
-    <th style="width: 25%">Título</th>
-    <th>Mensaje</th>
-    <th style="width: 10%">Acción</th>
-  </tr>
-</thead>
-
-      <tbody id="tablaHistorial">
-        <tr><td colspan="3">Cargando...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <script>
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('show');
-    }
-
-    document.getElementById('form-notificacion').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const titulo = document.getElementById('titulo').value;
-      const cuerpo = document.getElementById('cuerpo').value;
-      const token = localStorage.getItem('token');
-
-      try {
-        const res = await fetch('/notificaciones/enviar', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
-          },
-          body: JSON.stringify({ titulo, cuerpo })
-        });
-
-        const data = await res.json();
-        const resultado = document.getElementById('resultado');
-        if (data.success) {
-          resultado.innerHTML = '<span class="text-success">✅ Notificación enviada correctamente</span>';
-          document.getElementById('form-notificacion').reset();
-          cargarHistorial();
-        } else {
-          resultado.innerHTML = '<span class="text-danger">❌ Error: ' + data.error + '</span>';
-        }
-      } catch (err) {
-        console.error(err);
-        document.getElementById('resultado').innerHTML = '<span class="text-danger">❌ Error al enviar la notificación</span>';
-      }
-    });
-
-    async function cargarHistorial() {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/notificaciones', {
-        headers: { 'Authorization': token }
+    try {
+      const res = await fetch('/notificaciones/enviar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ titulo, cuerpo })
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const tbody = document.getElementById('tablaHistorial');
-        if (data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="3">No hay notificaciones registradas.</td></tr>';
-        } else {
-          tbody.innerHTML = data.map(n => `
-  <tr>
-    <td>${n.fecha_envio}</td>
-    <td>${n.titulo}</td>
-    <td>${n.cuerpo}</td>
-    <td>
-      <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">
-        🗑️
-      </button>
-    </td>
-  </tr>
-`).join('');
-
-        }
+      const data = await res.json();
+      const resultado = document.getElementById('resultado');
+      if (data.success) {
+        resultado.innerHTML = '<span class="text-success">✅ Notificación enviada correctamente</span>';
+        document.getElementById('form-notificacion').reset();
+        cargarHistorial();
       } else {
-        console.error('❌ Error al cargar historial');
+        resultado.innerHTML = '<span class="text-danger">❌ Error: ' + data.error + '</span>';
       }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('resultado').innerHTML = '<span class="text-danger">❌ Error al enviar la notificación</span>';
     }
+  });
 
-    cargarHistorial();
+  async function cargarHistorial() {
+    const token = localStorage.getItem('token');
+    const res = await fetch('/notificaciones', {
+      headers: { 'Authorization': token }
+    });
 
-<script>
+    if (res.ok) {
+      const data = await res.json();
+      const tbody = document.getElementById('tablaHistorial');
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">No hay notificaciones registradas.</td></tr>';
+      } else {
+        tbody.innerHTML = data.map(n => `
+          <tr>
+            <td>${n.fecha_envio}</td>
+            <td>${n.titulo}</td>
+            <td>${n.cuerpo}</td>
+            <td>
+              <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    } else {
+      console.error('❌ Error al cargar historial');
+    }
+  }
+
   async function eliminarNotificacion(id) {
     if (!confirm('¿Eliminar esta notificación?')) return;
 
@@ -239,8 +194,9 @@
       alert('❌ Error al eliminar');
     }
   }
-</script>
 
+  cargarHistorial();
+</script>
 </body>
 </html>
 
