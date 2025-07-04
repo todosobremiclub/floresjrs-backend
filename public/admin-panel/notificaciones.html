@@ -8,195 +8,242 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-  body {
-    background-color: #004aad;
-    color: white;
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-  }
+    body {
+      background-color: #004aad;
+      color: white;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-  .sidebar {
-    width: 200px;
-    background-color: #002f6c;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 1rem;
-    padding-top: 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    z-index: 1040;
-    transition: transform 0.3s ease;
-    overflow-y: auto;
-  }
-
-  .sidebar a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-  }
-
-  .sidebar a:hover {
-    text-decoration: underline;
-  }
-
-  .main-content {
-    margin-left: 200px;
-    padding: 2rem;
-  }
-
-  .hamburger {
-    display: none;
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1050;
-    background: #002f6c;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-  }
-
-  @media (max-width: 768px) {
     .sidebar {
-      transform: translateX(-100%);
+      width: 200px;
+      background-color: #002f6c;
+      height: 100vh;
       position: fixed;
-    }
-    .sidebar.show {
-      transform: translateX(0);
-    }
-    .main-content {
-      margin-left: 0;
+      top: 0;
+      left: 0;
+      padding: 1rem;
       padding-top: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      z-index: 1040;
+      transition: transform 0.3s ease;
+      overflow-y: auto;
     }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .sidebar a:hover {
+      text-decoration: underline;
+    }
+
+    .main-content {
+      margin-left: 200px;
+      padding: 2rem;
+    }
+
     .hamburger {
-      display: block;
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1050;
+      background: #002f6c;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
     }
-  }
 
-  .table th {
-    color: white;
-    vertical-align: middle;
-    background-color: #002f6c;
-  }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding-top: 4rem;
+      }
+      .hamburger {
+        display: block;
+      }
+    }
 
-  .table td {
-    color: #004aad; /* 🔵 Texto azul oscuro sobre fondo blanco */
-    vertical-align: middle;
-    font-weight: bold;
-  }
+    .table th {
+      color: white;
+      vertical-align: middle;
+      background-color: #002f6c;
+    }
 
-  .table tbody tr:nth-child(even) {
-    background-color: #f2f2f2; /* gris claro */
-  }
+    .table td {
+      color: #004aad;
+      vertical-align: middle;
+      font-weight: bold;
+    }
 
-  .table tbody tr:nth-child(odd) {
-    background-color: #ffffff; /* blanco */
-  }
-</style>
+    .table tbody tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
 
+    .table tbody tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+  </style>
 </head>
-<script>
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('show');
-  }
+<body>
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
 
-  function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/admin-panel/login.html';
-  }
+  <div class="sidebar" id="sidebar">
+    <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
+    <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+    <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
+    <a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
+    <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
+    <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+    <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
+    <button class="btn btn-outline-light mt-auto" onclick="logout()">Cerrar sesión</button>
+  </div>
 
-  document.getElementById('form-notificacion').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  <div class="main-content">
+    <h2>Enviar notificación push</h2>
+    <form id="form-notificacion" class="mt-4">
+      <div class="mb-3">
+        <input type="text" class="form-control" id="titulo" placeholder="Título de la notificación" required>
+      </div>
+      <div class="mb-3">
+        <textarea class="form-control" id="cuerpo" rows="3" placeholder="Cuerpo del mensaje" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-warning">Enviar notificación</button>
+    </form>
+    <div id="resultado" class="mt-3"></div>
 
-    const titulo = document.getElementById('titulo').value;
-    const cuerpo = document.getElementById('cuerpo').value;
-    const token = localStorage.getItem('token');
+    <hr class="my-4" />
 
-    try {
-      const res = await fetch('/notificaciones/enviar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({ titulo, cuerpo })
-      });
+    <h4>📜 Historial de notificaciones</h4>
+    <table class="table table-bordered mt-3">
+      <thead>
+        <tr>
+          <th style="width: 20%">Fecha</th>
+          <th style="width: 25%">Título</th>
+          <th>Mensaje</th>
+          <th style="width: 10%">Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tablaHistorial">
+        <tr><td colspan="4">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-      const data = await res.json();
-      const resultado = document.getElementById('resultado');
-      if (data.success) {
-        resultado.innerHTML = '<span class="text-success">✅ Notificación enviada correctamente</span>';
-        document.getElementById('form-notificacion').reset();
-        cargarHistorial();
-      } else {
-        resultado.innerHTML = '<span class="text-danger">❌ Error: ' + data.error + '</span>';
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('show');
       }
-    } catch (err) {
-      console.error(err);
-      document.getElementById('resultado').innerHTML = '<span class="text-danger">❌ Error al enviar la notificación</span>';
-    }
-  });
 
-  async function cargarHistorial() {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/notificaciones', {
-      headers: { 'Authorization': token }
-    });
+      window.toggleSidebar = toggleSidebar;
 
-    if (res.ok) {
-      const data = await res.json();
-      const tbody = document.getElementById('tablaHistorial');
-      if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No hay notificaciones registradas.</td></tr>';
-      } else {
-        tbody.innerHTML = data.map(n => `
-          <tr>
-            <td>${n.fecha_envio}</td>
-            <td>${n.titulo}</td>
-            <td>${n.cuerpo}</td>
-            <td>
-              <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">
-                🗑️
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      }
-    } else {
-      console.error('❌ Error al cargar historial');
-    }
-  }
+      window.logout = function() {
+        localStorage.removeItem('token');
+        window.location.href = '/admin-panel/login.html';
+      };
 
-  async function eliminarNotificacion(id) {
-    if (!confirm('¿Eliminar esta notificación?')) return;
+      document.getElementById('form-notificacion').addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch(`/notificaciones/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': token
+        const titulo = document.getElementById('titulo').value;
+        const cuerpo = document.getElementById('cuerpo').value;
+        const token = localStorage.getItem('token');
+
+        try {
+          const res = await fetch('/notificaciones/enviar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({ titulo, cuerpo })
+          });
+
+          const data = await res.json();
+          const resultado = document.getElementById('resultado');
+          if (data.success) {
+            resultado.innerHTML = '<span class="text-success">✅ Notificación enviada correctamente</span>';
+            document.getElementById('form-notificacion').reset();
+            cargarHistorial();
+          } else {
+            resultado.innerHTML = '<span class="text-danger">❌ Error: ' + data.error + '</span>';
+          }
+        } catch (err) {
+          console.error(err);
+          document.getElementById('resultado').innerHTML = '<span class="text-danger">❌ Error al enviar la notificación</span>';
         }
       });
 
-      if (res.ok) {
-        alert('✅ Eliminada');
-        cargarHistorial();
-      } else {
-        const err = await res.json();
-        alert('❌ Error: ' + (err.error || 'No se pudo eliminar'));
-      }
-    } catch (e) {
-      console.error(e);
-      alert('❌ Error al eliminar');
-    }
-  }
+      async function cargarHistorial() {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/notificaciones', {
+          headers: { 'Authorization': token }
+        });
 
-  cargarHistorial();
-</script>
+        if (res.ok) {
+          const data = await res.json();
+          const tbody = document.getElementById('tablaHistorial');
+          if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">No hay notificaciones registradas.</td></tr>';
+          } else {
+            tbody.innerHTML = data.map(n => `
+              <tr>
+                <td>${n.fecha_envio}</td>
+                <td>${n.titulo}</td>
+                <td>${n.cuerpo}</td>
+                <td>
+                  <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            `).join('');
+          }
+        } else {
+          console.error('❌ Error al cargar historial');
+        }
+      }
+
+      window.eliminarNotificacion = async function(id) {
+        if (!confirm('¿Eliminar esta notificación?')) return;
+
+        const token = localStorage.getItem('token');
+        try {
+          const res = await fetch(`/notificaciones/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': token
+            }
+          });
+
+          if (res.ok) {
+            alert('✅ Eliminada');
+            cargarHistorial();
+          } else {
+            const err = await res.json();
+            alert('❌ Error: ' + (err.error || 'No se pudo eliminar'));
+          }
+        } catch (e) {
+          console.error(e);
+          alert('❌ Error al eliminar');
+        }
+      };
+
+      cargarHistorial();
+    });
+  </script>
 </body>
 </html>
-
