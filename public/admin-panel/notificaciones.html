@@ -8,78 +8,95 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body {
-      background-color: #004aad;
-      color: white;
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-    }
+  body {
+    background-color: #004aad;
+    color: white;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .sidebar {
+    width: 200px;
+    background-color: #002f6c;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 1rem;
+    padding-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    z-index: 1040;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .sidebar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .sidebar a:hover {
+    text-decoration: underline;
+  }
+
+  .main-content {
+    margin-left: 200px;
+    padding: 2rem;
+  }
+
+  .hamburger {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1050;
+    background: #002f6c;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
     .sidebar {
-      width: 200px;
-      background-color: #002f6c;
-      height: 100vh;
+      transform: translateX(-100%);
       position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      padding-top: 4rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-      z-index: 1040;
-      transition: transform 0.3s ease;
-      overflow-y: auto;
     }
-    .sidebar a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .sidebar a:hover {
-      text-decoration: underline;
+    .sidebar.show {
+      transform: translateX(0);
     }
     .main-content {
-      margin-left: 200px;
-      padding: 2rem;
+      margin-left: 0;
+      padding-top: 4rem;
     }
     .hamburger {
-      display: none;
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1050;
-      background: #002f6c;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
+      display: block;
     }
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-        position: fixed;
-      }
-      .sidebar.show {
-        transform: translateX(0);
-      }
-      .main-content {
-        margin-left: 0;
-        padding-top: 4rem;
-      }
-      .hamburger {
-        display: block;
-      }
-    }
-    .table th, .table td {
-      color: white;
-      vertical-align: middle;
-    }
-    .table thead {
-      background-color: #002f6c;
-    }
-    .table tbody tr:nth-child(even) {
-      background-color: #003f8c;
-    }
-  </style>
+  }
+
+  .table th {
+    color: white;
+    vertical-align: middle;
+    background-color: #002f6c;
+  }
+
+  .table td {
+    color: #004aad; /* 🔵 Texto azul oscuro sobre fondo blanco */
+    vertical-align: middle;
+    font-weight: bold;
+  }
+
+  .table tbody tr:nth-child(even) {
+    background-color: #f2f2f2; /* gris claro */
+  }
+
+  .table tbody tr:nth-child(odd) {
+    background-color: #ffffff; /* blanco */
+  }
+</style>
+
 </head>
 <body>
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
