@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const admin = require('../config/firebaseAdmin'); // 🔗 Conexión con Firebase Admin
-const verificarToken = require('../middlewares/verificarToken'); // 🔐 Asegura el acceso
-const db = require('../config/db'); // 📦 Conexión a PostgreSQL
+const admin = require('../config/firebaseAdmin');      // 🔗 Conexión con Firebase Admin
+const verificarToken = require('../middlewares/verificarToken'); // 🔐 Middleware de autenticación
+const db = require('../config/db');                    // 📦 Conexión a PostgreSQL
 
-// POST /notificaciones/enviar → Enviar notificación y guardar en BD
+// POST /notificaciones/enviar → Enviar notificación y guardar en la base de datos
 router.post('/enviar', verificarToken, async (req, res) => {
   const { titulo, cuerpo } = req.body;
 
@@ -36,18 +36,18 @@ router.post('/enviar', verificarToken, async (req, res) => {
   }
 });
 
-// GET /notificaciones → Obtener historial
+// GET /notificaciones → Obtener historial de notificaciones
 router.get('/', verificarToken, async (req, res) => {
   try {
     const result = await db.query(`
-      SELECT id, titulo, cuerpo, TO_CHAR(fecha_envio, 'DD/MM/YYYY HH24:MI') as fecha_envio
+      SELECT id, titulo, cuerpo, TO_CHAR(fecha_envio, 'DD/MM/YYYY HH24:MI') AS fecha_envio
       FROM notificaciones
       ORDER BY fecha_envio DESC
       LIMIT 50
     `);
     res.json(result.rows);
   } catch (error) {
-    console.error('❌ Error al consultar historial:', error);
+    console.error('❌ Error al obtener historial de notificaciones:', error);
     res.status(500).json({ error: 'Error al obtener historial de notificaciones' });
   }
 });
