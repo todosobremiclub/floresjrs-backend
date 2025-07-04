@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const admin = require('../config/firebaseAdmin');      // 🔗 Conexión con Firebase Admin
+const admin = require('../config/firebaseAdmin'); // 🔗 Conexión con Firebase Admin
 const verificarToken = require('../middlewares/verificarToken'); // 🔐 Middleware de autenticación
-const db = require('../config/db');                    // 📦 Conexión a PostgreSQL
+const db = require('../config/db'); // 📦 Conexión a PostgreSQL
 
-// POST /notificaciones/enviar → Enviar notificación y guardar en la base de datos
+// POST /notificaciones/enviar → Enviar notificación y guardar en BD
 router.post('/enviar', verificarToken, async (req, res) => {
   const { titulo, cuerpo } = req.body;
 
@@ -36,7 +36,7 @@ router.post('/enviar', verificarToken, async (req, res) => {
   }
 });
 
-// GET /notificaciones → Obtener historial de notificaciones
+// GET /notificaciones → Obtener historial
 router.get('/', verificarToken, async (req, res) => {
   try {
     const result = await db.query(`
@@ -47,10 +47,28 @@ router.get('/', verificarToken, async (req, res) => {
     `);
     res.json(result.rows);
   } catch (error) {
-    console.error('❌ Error al obtener historial de notificaciones:', error);
+    console.error('❌ Error al consultar historial:', error);
     res.status(500).json({ error: 'Error al obtener historial de notificaciones' });
   }
 });
 
+// DELETE /notificaciones/:id → Eliminar una notificación
+router.delete('/:id', verificarToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await db.query('DELETE FROM notificaciones WHERE id = $1', [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Notificación no encontrada' });
+    }
+
+    res.json({ success: true, mensaje: 'Notificación eliminada' });
+  } catch (error) {
+    console.error('❌ Error al eliminar notificación:', error);
+    res.status(500).json({ error: 'Error al eliminar notificación' });
+  }
+});
+
 module.exports = router;
+
 

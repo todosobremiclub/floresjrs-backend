@@ -130,12 +130,14 @@
     <h4>📜 Historial de notificaciones</h4>
     <table class="table table-bordered mt-3">
       <thead>
-        <tr>
-          <th style="width: 25%">Fecha</th>
-          <th style="width: 25%">Título</th>
-          <th>Mensaje</th>
-        </tr>
-      </thead>
+  <tr>
+    <th style="width: 20%">Fecha</th>
+    <th style="width: 25%">Título</th>
+    <th>Mensaje</th>
+    <th style="width: 10%">Acción</th>
+  </tr>
+</thead>
+
       <tbody id="tablaHistorial">
         <tr><td colspan="3">Cargando...</td></tr>
       </tbody>
@@ -192,12 +194,18 @@
           tbody.innerHTML = '<tr><td colspan="3">No hay notificaciones registradas.</td></tr>';
         } else {
           tbody.innerHTML = data.map(n => `
-            <tr>
-              <td>${n.fecha_envio}</td>
-              <td>${n.titulo}</td>
-              <td>${n.cuerpo}</td>
-            </tr>
-          `).join('');
+  <tr>
+    <td>${n.fecha_envio}</td>
+    <td>${n.titulo}</td>
+    <td>${n.cuerpo}</td>
+    <td>
+      <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">
+        🗑️
+      </button>
+    </td>
+  </tr>
+`).join('');
+
         }
       } else {
         console.error('❌ Error al cargar historial');
@@ -205,7 +213,34 @@
     }
 
     cargarHistorial();
-  </script>
+
+<script>
+  async function eliminarNotificacion(id) {
+    if (!confirm('¿Eliminar esta notificación?')) return;
+
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`/notificaciones/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': token
+        }
+      });
+
+      if (res.ok) {
+        alert('✅ Eliminada');
+        cargarHistorial();
+      } else {
+        const err = await res.json();
+        alert('❌ Error: ' + (err.error || 'No se pudo eliminar'));
+      }
+    } catch (e) {
+      console.error(e);
+      alert('❌ Error al eliminar');
+    }
+  }
+</script>
+
 </body>
 </html>
 
