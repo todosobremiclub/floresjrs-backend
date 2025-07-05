@@ -9,7 +9,7 @@ const subirImagen = require('../utils/subirAFirebase'); // 👈 subida a Firebas
 // POST /noticias → publicar novedad con texto, imagen y filtros de destino
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
-    const { titulo, texto, destino, categorias, anio_nacimiento } = req.body;
+    const { titulo, texto, destino, categorias } = req.body;
 
     if (!titulo || !texto || !destino) {
       return res.status(400).json({ error: 'Faltan datos obligatorios' });
@@ -17,7 +17,7 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
 
     // ✅ Validación obligatoria de categoría si destino lo requiere
     let categoriasStr = null;
-    if (destino === 'categoria' || destino === 'categoria_anio') {
+    if (destino === 'categoria') {
       if (!categorias) {
         return res.status(400).json({ error: 'Debe seleccionar al menos una categoría' });
       }
@@ -41,9 +41,9 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
     }
 
     await db.query(`
-      INSERT INTO noticias (titulo, texto, imagen_url, destino, categoria, anio_nacimiento)
-      VALUES ($1, $2, $3, $4, $5, $6)
-    `, [titulo, texto, imagen_url, destino, categoriasStr, anio_nacimiento || null]);
+      INSERT INTO noticias (titulo, texto, imagen_url, destino, categoria)
+      VALUES ($1, $2, $3, $4, $5)
+    `, [titulo, texto, imagen_url, destino, categoriasStr]);
 
     res.json({ mensaje: 'Novedad publicada' });
   } catch (err) {
@@ -63,7 +63,6 @@ router.get('/', verificarToken, async (req, res) => {
         imagen_url,
         destino,
         categoria,
-        anio_nacimiento,
         fecha
       FROM noticias
       ORDER BY fecha DESC
@@ -113,4 +112,3 @@ router.delete('/:id', verificarToken, async (req, res) => {
 });
 
 module.exports = router;
-
