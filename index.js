@@ -9,7 +9,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const pagosRoutes = require('./routes/pagosRoutes');
 const montoRoutes = require('./routes/montoRoutes');
 const categoriasRoutes = require('./routes/categoriasRoutes');
-const novedadesRoutes = require('./routes/novedadesRoutes');
+const noticiasRoutes = require('./routes/noticiasRoutes');
 const cumpleaniosRoutes = require('./routes/cumpleaniosRoutes');
 const reportesRoutes = require('./routes/reportesRoutes');
 const montosMensualesRoutes = require('./routes/montosMensualesRoutes');
@@ -37,7 +37,7 @@ app.use('/api/admin', adminRoutes);                       // Login admin
 app.use('/pagos', pagosRoutes);                           // Pagos de socios
 app.use('/api/monto', montoRoutes);                       // Monto de cuota
 app.use('/config/categorias', categoriasRoutes);          // Categorías deportivas
-app.use('/novedades', novedadesRoutes);                   // Novedades
+app.use('/noticias', noticiasRoutes);
 app.use('/reportes', reportesRoutes);                     // ✅ Reportes con token
 app.use('/cumpleanios', cumpleaniosRoutes);
 app.use('/montos-mensuales', montosMensualesRoutes);

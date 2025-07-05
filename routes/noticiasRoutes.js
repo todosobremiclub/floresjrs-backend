@@ -6,7 +6,7 @@ const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
 const subirImagen = require('../utils/subirAFirebase'); // 👈 subida a Firebase
 
-// POST /novedades → publicar novedad con texto, imagen y filtros de destino
+// POST /noticias → publicar novedad con texto, imagen y filtros de destino
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
     const { titulo, texto, destino, categorias, anio_nacimiento } = req.body;
@@ -41,7 +41,7 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
     }
 
     await db.query(`
-      INSERT INTO novedades (titulo, texto, imagen_url, destino, categoria, anio_nacimiento)
+      INSERT INTO noticias (titulo, texto, imagen_url, destino, categoria, anio_nacimiento)
       VALUES ($1, $2, $3, $4, $5, $6)
     `, [titulo, texto, imagen_url, destino, categoriasStr, anio_nacimiento || null]);
 
@@ -52,7 +52,7 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   }
 });
 
-// GET /novedades → listar todas las novedades
+// GET /noticias → listar todas las noticias
 router.get('/', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(`
@@ -65,17 +65,17 @@ router.get('/', verificarToken, async (req, res) => {
         categoria,
         anio_nacimiento,
         fecha
-      FROM novedades
+      FROM noticias
       ORDER BY fecha DESC
     `);
     res.json(resultado.rows);
   } catch (err) {
-    console.error('❌ Error al listar novedades:', err);
+    console.error('❌ Error al listar noticias:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
-// PUT /novedades/:id → editar novedad
+// PUT /noticias/:id → editar novedad
 router.put('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   const { titulo, texto } = req.body;
@@ -86,7 +86,7 @@ router.put('/:id', verificarToken, async (req, res) => {
 
   try {
     await db.query(`
-      UPDATE novedades
+      UPDATE noticias
       SET titulo = $1,
           texto = $2
       WHERE id = $3
@@ -99,12 +99,12 @@ router.put('/:id', verificarToken, async (req, res) => {
   }
 });
 
-// DELETE /novedades/:id → eliminar novedad
+// DELETE /noticias/:id → eliminar novedad
 router.delete('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
 
   try {
-    await db.query('DELETE FROM novedades WHERE id = $1', [id]);
+    await db.query('DELETE FROM noticias WHERE id = $1', [id]);
     res.json({ mensaje: 'Novedad eliminada correctamente' });
   } catch (err) {
     console.error('❌ Error al eliminar novedad:', err);

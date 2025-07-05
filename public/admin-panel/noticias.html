@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Novedades - Flores Jrs</title>
+  <title>Noticias - Flores Jrs</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
@@ -42,7 +42,7 @@
   
   <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
   <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
-  <a href="/admin-panel/novedades.html" class="btn btn-outline-light">📢 Novedades</a>
+  <a href="/admin-panel/noticias.html" class="btn btn-outline-light">📢 Noticias</a>
   <a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
   <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
   <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
@@ -55,7 +55,7 @@
 <div class="main-content">
   <div class="text-center mb-4">
     <img src="flores_jrs_logo.png" alt="Escudo" class="logo mb-2" />
-    <h2 class="text-warning m-0">Gestión de Novedades</h2>
+    <h2 class="text-warning m-0">Gestión de Noticias</h2>
   </div>
 
   <form id="formNovedad" enctype="multipart/form-data" class="bg-white text-dark p-4 rounded shadow-sm mx-auto" style="max-width: 700px;">
@@ -100,7 +100,7 @@
 
   </form>
 
-  <h5 class="text-white">Novedades publicadas</h5>
+  <h5 class="text-white">Noticias publicadas</h5>
   <table class="table table-bordered bg-white text-dark">
     <thead class="table-primary">
   <tr>
@@ -113,7 +113,7 @@
   </tr>
 </thead>
 
-    <tbody id="tablaNovedades"></tbody>
+    <tbody id="tablaNoticias"></tbody>
   </table>
 </div>
 
@@ -206,7 +206,7 @@ choicesCategorias = new Choices('#categoriaSelect', {
     if (document.getElementById('imagen').files[0])
       formData.append('imagen', document.getElementById('imagen').files[0]);
 
-    const res = await fetchConToken('/novedades', { method: 'POST', body: formData });
+    const res = await fetchConToken('/noticias', { method: 'POST', body: formData });
     const data = await res.json();
     if (!res.ok) return alert(data.error);
     alert('✅ Publicada');
@@ -218,11 +218,11 @@ choicesCategorias = new Choices('#categoriaSelect', {
 });
 
 async function cargar() {
-  const res = await fetchConToken('/novedades');
-  const novedades = await res.json();
-  const tabla = document.getElementById('tablaNovedades');
+  const res = await fetchConToken('/noticias');
+  const noticias = await res.json();
+  const tabla = document.getElementById('tablaNoticias');
   tabla.innerHTML = '';
-  novedades.forEach(n => {
+  noticias.forEach(n => {
     const textoSeguro = n.texto.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
     const tituloSeguro = n.titulo.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
     const tr = document.createElement('tr');
@@ -260,7 +260,7 @@ async function guardarCambios() {
   const id = document.getElementById('edit_id').value;
   const titulo = document.getElementById('edit_titulo').value;
   const texto = document.getElementById('edit_texto').value;
-  const res = await fetchConToken('/novedades/' + id, {
+  const res = await fetchConToken('/noticias/' + id, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ titulo, texto })
@@ -273,7 +273,7 @@ async function guardarCambios() {
 
 async function eliminar(id) {
   if (!confirm('¿Eliminar esta novedad?')) return;
-  const res = await fetchConToken('/novedades/' + id, { method: 'DELETE' });
+  const res = await fetchConToken('/noticias/' + id, { method: 'DELETE' });
   const data = await res.json();
   if (!res.ok) return alert(data.error);
   cargar();
