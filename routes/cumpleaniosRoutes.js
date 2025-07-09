@@ -82,7 +82,8 @@ router.get('/hoy', verificarToken, async (req, res) => {
       };
     });
 
-    res.json(cumpleanierosHoy);
+    // ✅ Envolvemos en un objeto { cumpleanios: [...] }
+    res.json({ cumpleanios: cumpleanierosHoy });
   } catch (error) {
     console.error('❌ Error al obtener cumpleañeros de hoy:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
