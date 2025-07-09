@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
 
-// ✅ GET /cumpleanios/hoy
+// GET /cumpleanios/hoy → solo los socios que cumplen hoy
 router.get('/hoy', verificarToken, async (req, res) => {
   try {
     const result = await db.query(`
