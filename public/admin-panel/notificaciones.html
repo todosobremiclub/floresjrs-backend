@@ -167,7 +167,8 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': token
+              'Authorization': 'Bearer ' + token
+
             },
             body: JSON.stringify({ titulo, cuerpo })
           });
@@ -190,8 +191,10 @@
       async function cargarHistorial() {
         const token = localStorage.getItem('token');
         const res = await fetch('/notificaciones', {
-          headers: { 'Authorization': token }
-        });
+          headers: {
+  'Authorization': 'Bearer ' + token
+}
+
 
         if (res.ok) {
           const data = await res.json();
