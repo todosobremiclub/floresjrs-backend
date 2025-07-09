@@ -2,3 +2,5 @@ config/firebase-service-account.json
 
 config/*firebase-adminsdk*.json
 
+firebase-admin-sdk.json 
+firebase-admin-sdk.json 
