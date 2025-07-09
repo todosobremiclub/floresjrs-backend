@@ -24,7 +24,7 @@ router.get('/', verificarToken, async (req, res) => {
     const socios = result.rows.map(s => {
       if (!s.fecha_nacimiento) return { ...s, edad: null };
 
-      const fechaNacimiento = new Date(s.fecha_nacimiento + 'T00:00:00-03:00'); // fuerza zona horaria
+      const fechaNacimiento = new Date(s.fecha_nacimiento + 'T00:00:00-03:00');
       let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
       const mes = hoy.getMonth() - fechaNacimiento.getMonth();
       if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
@@ -49,6 +49,10 @@ router.get('/', verificarToken, async (req, res) => {
 // GET /cumpleanios/hoy → solo los socios que cumplen hoy
 router.get('/hoy', verificarToken, async (req, res) => {
   try {
+    const hoy = new Date();
+    const dia = hoy.getDate();
+    const mes = hoy.getMonth() + 1;
+
     const result = await db.query(`
       SELECT 
         numero_socio,
@@ -59,18 +63,11 @@ router.get('/hoy', verificarToken, async (req, res) => {
         foto_url
       FROM socios
       WHERE activo = true
-    `);
+        AND EXTRACT(DAY FROM fecha_nacimiento) = $1
+        AND EXTRACT(MONTH FROM fecha_nacimiento) = $2
+    `, [dia, mes]);
 
-    const hoy = new Date();
-    const diaHoy = hoy.getDate();
-    const mesHoy = hoy.getMonth() + 1;
-
-    const cumpleanierosHoy = result.rows.filter(s => {
-      if (!s.fecha_nacimiento) return false;
-
-      const fecha = new Date(s.fecha_nacimiento + 'T00:00:00-03:00'); // ✅ aplica GMT-3
-      return fecha.getDate() === diaHoy && (fecha.getMonth() + 1) === mesHoy;
-    }).map(s => {
+    const cumpleanierosHoy = result.rows.map(s => {
       const fechaNacimiento = new Date(s.fecha_nacimiento + 'T00:00:00-03:00');
       let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
       const m = hoy.getMonth() - fechaNacimiento.getMonth();
