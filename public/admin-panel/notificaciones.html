@@ -188,37 +188,42 @@
         }
       });
 
-      async function cargarHistorial() {
-        const token = localStorage.getItem('token');
-        const res = await fetch('/notificaciones', {
-          headers: {
-  'Authorization': 'Bearer ' + token
+     async function cargarHistorial() {
+  const token = localStorage.getItem('token');
+  try {
+    const res = await fetch('/notificaciones', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const tbody = document.getElementById('tablaHistorial');
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">No hay notificaciones registradas.</td></tr>';
+      } else {
+        tbody.innerHTML = data.map(n => `
+          <tr>
+            <td>${n.fecha_envio}</td>
+            <td>${n.titulo}</td>
+            <td>${n.cuerpo}</td>
+            <td>
+              <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    } else {
+      console.error('❌ Error al cargar historial');
+    }
+  } catch (err) {
+    console.error('❌ Excepción al cargar historial', err);
+  }
 }
 
-
-        if (res.ok) {
-          const data = await res.json();
-          const tbody = document.getElementById('tablaHistorial');
-          if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4">No hay notificaciones registradas.</td></tr>';
-          } else {
-            tbody.innerHTML = data.map(n => `
-              <tr>
-                <td>${n.fecha_envio}</td>
-                <td>${n.titulo}</td>
-                <td>${n.cuerpo}</td>
-                <td>
-                  <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">
-                    🗑️
-                  </button>
-                </td>
-              </tr>
-            `).join('');
-          }
-        } else {
-          console.error('❌ Error al cargar historial');
-        }
-      }
 
       window.eliminarNotificacion = async function(id) {
         if (!confirm('¿Eliminar esta notificación?')) return;
