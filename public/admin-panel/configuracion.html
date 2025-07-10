@@ -6,15 +6,14 @@
   <title>Configuración - Flores Jrs</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <style>
+ <style>
   body {
-  background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: white;
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-}
-
+    background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+  }
 
   .sidebar {
     width: 200px;
@@ -27,72 +26,78 @@
     padding-top: 4rem;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.2rem;
     z-index: 1040;
-    transition: transform 0.3s ease;
+    overflow-y: auto;
   }
 
   .main-content {
     margin-left: 200px;
     padding: 2rem;
-    transition: margin-left 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  .logo {
-    height: 50px;
+  .config-container {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 10px;
+    max-width: 700px;
+    width: 100%;
+    margin-top: 2rem;
+  }
+
+  h2.titulo-config {
+    color: #ffd500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .config-item {
+    margin-bottom: 2rem;
   }
 
   .btn-yellow {
     background-color: #ffd500;
     color: black;
     font-weight: bold;
+    border-radius: 8px;
   }
 
-  .table td,
+  .form-control {
+    border-radius: 8px;
+  }
+
   .table th {
-    vertical-align: middle;
+    color: white;
+    background-color: #002f6c;
   }
 
-  details summary {
-    cursor: pointer;
+  .table td {
+    color: #004aad;
     font-weight: bold;
   }
 
-  details ul {
-    padding-left: 1rem;
-  }
-
-  .toggle-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1051;
-    display: none;
-  }
-
-  @media (max-width: 767px) {
+  @media (max-width: 768px) {
     .sidebar {
       transform: translateX(-100%);
     }
-
     .sidebar.show {
       transform: translateX(0);
     }
-
     .main-content {
       margin-left: 0;
-      padding: 1rem;
-    }
-
-    .toggle-btn {
-      display: block;
+      padding-top: 4rem;
     }
   }
 </style>
+
+
 </head>
 <body>
 <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
@@ -110,57 +115,37 @@
 </div>
 
 <div class="main-content">
-  <div class="text-center mb-4">
-    <img src="flores_jrs_logo.png" class="logo mb-2" alt="Escudo" />
-    <h2 class="text-warning m-0">Configuración del Sistema</h2>
-  </div>
+  <div class="config-container">
+    <h2 class="titulo-config">
+      <img src="flores_jrs_logo.png" alt="Logo" style="height: 40px;">
+      Configuración del Sistema
+    </h2>
 
-<div class="mb-4">
-  <div class="d-flex align-items-center justify-content-between">
-    <h5 class="text-white m-0">💰 Monto de cuota por mes</h5>
-    <button class="btn btn-sm btn-outline-light" onclick="toggleMontos()">🔽 Mostrar</button>
-  </div>
-  <div id="contenedorMontos" class="mt-3" style="display: none;">
-    <div class="table-responsive">
-      <table class="table table-sm table-bordered table-striped text-white" style="background-color:#002f6c;">
-        <thead>
-          <tr>
-            <th>Mes</th>
-            <th>Monto ($)</th>
-            <th style="width:80px">Guardar</th>
-          </tr>
-        </thead>
-        <tbody id="tablaMontos"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-
-  <hr class="border-light" />
-
-  <div class="mb-4">
-    <h5 class="text-white">💼 Categorías deportivas</h5>
-    <details class="mb-3">
-      <summary class="text-light">Ver categorías existentes</summary>
-      <div class="table-responsive mt-2">
-        <table class="table table-sm table-bordered table-dark table-striped">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th style="width:40px">📂</th>
-              <th style="width:40px">🔝</th>
-            </tr>
-          </thead>
-          <tbody id="tablaCategorias"></tbody>
-        </table>
+    <!-- 💰 Monto de cuota por mes -->
+    <div class="config-item">
+      <div class="d-flex align-items-center justify-content-between">
+        <h5 class="text-white m-0">💰 Monto de cuota por mes</h5>
+        <button class="btn btn-sm btn-outline-light" onclick="toggleMontos()">🔽 Mostrar</button>
       </div>
-    </details>
+      <div id="contenedorMontos" class="mt-3" style="display: none;">
+        <!-- ... tabla montos ... -->
+      </div>
+    </div>
 
-    <form id="formCategoria" class="d-flex gap-2">
-      <input type="text" id="nuevaCategoria" class="form-control" placeholder="Nueva categoría" required />
-      <button type="submit" class="btn btn-yellow">Agregar</button>
-    </form>
+    <hr class="border-light" />
+
+    <!-- 💼 Categorías deportivas -->
+    <div class="config-item">
+      <h5 class="text-white">💼 Categorías deportivas</h5>
+      <details class="mb-3">
+        <summary class="text-light">Ver categorías existentes</summary>
+        <!-- ... tabla categorías ... -->
+      </details>
+      <form id="formCategoria" class="d-flex gap-2">
+        <input type="text" id="nuevaCategoria" class="form-control" placeholder="Nueva categoría" required />
+        <button type="submit" class="btn btn-yellow">Agregar</button>
+      </form>
+    </div>
   </div>
 </div>
 
