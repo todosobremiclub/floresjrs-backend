@@ -147,17 +147,29 @@
     <hr class="border-light" />
 
     <!-- 💼 Categorías deportivas -->
-    <div class="config-item">
-      <h5 class="text-white">💼 Categorías deportivas</h5>
-      <details class="mb-3">
-        <summary class="text-light">Ver categorías existentes</summary>
-        <!-- ... tabla categorías ... -->
-      </details>
-      <form id="formCategoria" class="d-flex gap-2">
-        <input type="text" id="nuevaCategoria" class="form-control" placeholder="Nueva categoría" required />
-        <button type="submit" class="btn btn-yellow">Agregar</button>
-      </form>
+<div class="config-item">
+  <h5 class="text-white">💼 Categorías deportivas</h5>
+  <details class="mb-3">
+    <summary class="text-light">Ver categorías existentes</summary>
+    <div class="table-responsive mt-2">
+      <table class="table table-sm table-bordered table-dark table-striped">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th style="width:40px">💾</th>
+            <th style="width:40px">🗑️</th>
+          </tr>
+        </thead>
+        <tbody id="tablaCategorias"></tbody>
+      </table>
     </div>
+  </details>
+  <form id="formCategoria" class="d-flex gap-2">
+    <input type="text" id="nuevaCategoria" class="form-control" placeholder="Nueva categoría" required />
+    <button type="submit" class="btn btn-yellow">Agregar</button>
+  </form>
+</div>
+
   </div>
 </div>
 
