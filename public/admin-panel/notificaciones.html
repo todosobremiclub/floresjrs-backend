@@ -7,97 +7,124 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <style>
-    body {
-  background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: white;
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-}
+<style>
+  body {
+    background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+  }
 
+  .sidebar {
+    width: 200px;
+    background-color: #002f6c;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 1rem;
+    padding-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    z-index: 1040;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+  }
 
+  .sidebar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .sidebar a:hover {
+    text-decoration: underline;
+  }
+
+  .main-content {
+    margin-left: 200px;
+    padding: 2rem;
+  }
+
+  .hamburger {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1050;
+    background: #002f6c;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
     .sidebar {
-      width: 200px;
-      background-color: #002f6c;
-      height: 100vh;
+      transform: translateX(-100%);
       position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      padding-top: 4rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-      z-index: 1040;
-      transition: transform 0.3s ease;
-      overflow-y: auto;
     }
-
-    .sidebar a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
+    .sidebar.show {
+      transform: translateX(0);
     }
-
-    .sidebar a:hover {
-      text-decoration: underline;
-    }
-
     .main-content {
-      margin-left: 200px;
-      padding: 2rem;
+      margin-left: 0;
+      padding-top: 4rem;
     }
-
     .hamburger {
-      display: none;
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1050;
-      background: #002f6c;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
+      display: block;
     }
+  }
 
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-        position: fixed;
-      }
-      .sidebar.show {
-        transform: translateX(0);
-      }
-      .main-content {
-        margin-left: 0;
-        padding-top: 4rem;
-      }
-      .hamburger {
-        display: block;
-      }
-    }
+  .table th {
+    color: white;
+    vertical-align: middle;
+    background-color: #002f6c;
+  }
 
-    .table th {
-      color: white;
-      vertical-align: middle;
-      background-color: #002f6c;
-    }
+  .table td {
+    color: #004aad;
+    vertical-align: middle;
+    font-weight: bold;
+  }
 
-    .table td {
-      color: #004aad;
-      vertical-align: middle;
-      font-weight: bold;
-    }
+  .table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
 
-    .table tbody tr:nth-child(even) {
-      background-color: #f2f2f2;
-    }
+  .table tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+  }
 
-    .table tbody tr:nth-child(odd) {
-      background-color: #ffffff;
-    }
-  </style>
+  /* NUEVO: box del formulario con fondo oscuro y blur */
+  .form-box {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border-radius: 10px;
+    padding: 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    color: white;
+  }
+
+  /* NUEVO: centrar logo + título */
+  .title-with-logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .title-with-logo img {
+    height: 50px;
+    margin-bottom: 0.5rem;
+  }
+
+  .title-with-logo h2 {
+    color: #ffd500;
+    font-weight: bold;
+  }
+</style>
+
 </head>
 <body>
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
@@ -114,7 +141,7 @@
   </div>
 
   <div class="main-content">
-    <h2>Enviar notificación push</h2>
+    <h2>Enviar notificación </h2>
     <form id="form-notificacion" class="mt-4">
       <div class="mb-3">
         <input type="text" class="form-control" id="titulo" placeholder="Título de la notificación" required>
