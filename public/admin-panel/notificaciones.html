@@ -205,7 +205,7 @@
       } else {
         tbody.innerHTML = data.map(n => `
           <tr>
-            <td>${n.fecha_envio}</td>
+            <td>${ajustarHoraArgentina(n.fecha_envio)}</td>
             <td>${n.titulo}</td>
             <td>${n.cuerpo}</td>
             <td>
@@ -223,6 +223,14 @@
     console.error('❌ Excepción al cargar historial', err);
   }
 }
+
+// 🔔 Función de ajuste horario Argentina
+function ajustarHoraArgentina(fechaUTC) {
+  const fecha = new Date(fechaUTC);
+  fecha.setHours(fecha.getHours() - 3); // Ajuste UTC-3
+  return fecha.toLocaleString('es-AR', { hour12: false });
+}
+
 
 
       window.eliminarNotificacion = async function(id) {
