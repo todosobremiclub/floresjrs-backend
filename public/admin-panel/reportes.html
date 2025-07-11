@@ -97,25 +97,45 @@
     display: none;
   }
 
-  /* ✅ Estilos móviles */
-  @media (max-width: 767px) {
-    .sidebar {
-      transform: translateX(-100%);
-    }
-
-    .sidebar.show {
-      transform: translateX(0);
-    }
-
-    .toggle-btn {
-      display: block;
-    }
-
-    .main-content {
-      margin-left: 0 !important;
-      padding: 1rem;
-    }
+ /* ✅ Estilos móviles */
+@media (max-width: 767px) {
+  .sidebar {
+    transform: translateX(-100%);
   }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .toggle-btn {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 1rem;
+  }
+
+  /* 🔧 FIX superposición reportes */
+  .card {
+    padding: 1.5rem 1rem 2rem 1rem !important; /* más espacio en mobile */
+  }
+
+  .monto-total {
+    font-size: 1rem !important; /* texto más chico para acumulado anual */
+    top: 1rem !important;       /* un poco más arriba */
+    right: 1rem !important;
+  }
+
+  .monto-mes {
+    font-size: 1.5rem !important; /* monto mensual más chico */
+  }
+
+  .titulo {
+    font-size: 1rem !important; /* título más chico para evitar que colisione */
+  }
+}
+
 </style>
 
 </head>
