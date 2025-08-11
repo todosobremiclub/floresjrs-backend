@@ -245,19 +245,17 @@ if (!localStorage.getItem('token')) {
   let anioActual = new Date().getFullYear();
   let datosPorMes = [];
 
-  async function cargarDatos() {
-    try {
-      const res = await fetchConToken('/reportes/recaudado-por-fecha');
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const data = await res.json();
-      datosPorMes = data.meses;
-      document.getElementById('acumuladoAnual').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
-      actualizarMes();
-    } catch (err) {
-      console.error('❌ Error reporte 1:', err);
-    }
+ async function cargarDatos() {
+  try {
+    const res = await fetchConToken('/reportes/recaudado-por-fecha');
+    const data = await res.json();
+    datosPorMes = data.meses;
+    document.getElementById('acumuladoAnual').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
+    actualizarMes();
+  } catch (err) {
+    console.error('❌ Error reporte 1:', err);
   }
+}
 
   function actualizarMes() {
     document.getElementById('mesActual').textContent = nombresMeses[mesActual];
@@ -279,18 +277,16 @@ if (!localStorage.getItem('token')) {
   let datosPorMes2 = [];
 
   async function cargarDatosFechaPago() {
-    try {
-      const res = await fetchConToken('/reportes/recaudado-por-fecha-pago');
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const data = await res.json();
-      datosPorMes2 = data.meses;
-      document.getElementById('acumuladoAnual2').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
-      actualizarMes2();
-    } catch (err) {
-      console.error('❌ Error reporte 2:', err);
-    }
+  try {
+    const res = await fetchConToken('/reportes/recaudado-por-fecha-pago');
+    const data = await res.json();
+    datosPorMes2 = data.meses;
+    document.getElementById('acumuladoAnual2').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
+    actualizarMes2();
+  } catch (err) {
+    console.error('❌ Error reporte 2:', err);
   }
+}
 
   function actualizarMes2() {
     document.getElementById('mesActual2').textContent = nombresMeses[mesActual2];
@@ -307,44 +303,27 @@ if (!localStorage.getItem('token')) {
   }
 
   // Reporte 3: socios por categoría
-  async function cargarReporteCategorias() {
-    try {
-      const res = await fetchConToken('/reportes/socios-por-categoria');
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const data = await res.json();
+  sync function cargarReporteCategorias() {
+  try {
+    const res = await fetchConToken('/reportes/socios-por-categoria');
+    const data = await res.json();
 
-      const categorias = data.map(d => d.categoria || 'Sin categoría');
-      const cantidades = data.map(d => parseInt(d.cantidad));
+    const categorias = data.map(d => d.categoria || 'Sin categoría');
+    const cantidades = data.map(d => parseInt(d.cantidad));
 
-      const ctx = document.getElementById('graficoCategorias').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: categorias,
-          datasets: [{
-            label: 'Cantidad de socios',
-            data: cantidades,
-            backgroundColor: 'rgba(255, 206, 86, 0.7)',
-            borderColor: 'rgba(255, 206, 86, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          scales: {
-            x: { beginAtZero: true }
-          },
-          plugins: {
-            legend: { display: false }
-          }
-        }
-      });
-    } catch (err) {
-      console.error('❌ Error reporte 3:', err);
-    }
+    const ctx = document.getElementById('graficoCategorias').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: categorias,
+        datasets: [{ label: 'Cantidad de socios', data: cantidades, backgroundColor: 'rgba(255, 206, 86, 0.7)', borderColor: 'rgba(255, 206, 86, 1)', borderWidth: 1 }]
+      },
+      options: { indexAxis: 'y', responsive: true, scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+    });
+  } catch (err) {
+    console.error('❌ Error reporte 3:', err);
   }
+}
 
   function logout() {
     localStorage.removeItem('token');
