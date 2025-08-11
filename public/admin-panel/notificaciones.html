@@ -239,40 +239,33 @@ if (!localStorage.getItem('token')) {
       });
 
      async function cargarHistorial() {
-  const token = localStorage.getItem('token');
   try {
     const res = await fetchConToken('/notificaciones');
-      headers: {
-        'Authorization': 'Bearer ' + token
-      }
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      const tbody = document.getElementById('tablaHistorial');
-      if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No hay notificaciones registradas.</td></tr>';
-      } else {
-        tbody.innerHTML = data.map(n => `
-          <tr>
-            <td>${ajustarHoraArgentina(n.fecha_envio)}</td>
-            <td>${n.titulo}</td>
-            <td>${n.cuerpo}</td>
-            <td>
-              <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">
-                🗑️
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      }
-    } else {
+    if (!res.ok) {
       console.error('❌ Error al cargar historial');
+      return;
     }
+    const data = await res.json();
+    const tbody = document.getElementById('tablaHistorial');
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">No hay notificaciones registradas.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(n => `
+      <tr>
+        <td>${ajustarHoraArgentina(n.fecha_envio)}</td>
+        <td>${n.titulo}</td>
+        <td>${n.cuerpo}</td>
+        <td>
+          <button class="btn btn-sm btn-danger" onclick="eliminarNotificacion(${n.id})">🗑️</button>
+        </td>
+      </tr>
+    `).join('');
   } catch (err) {
     console.error('❌ Excepción al cargar historial', err);
   }
 }
+
 
 // 🔔 Función de ajuste horario Argentina
 function ajustarHoraArgentina(fechaUTC) {
