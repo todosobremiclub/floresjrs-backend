@@ -303,7 +303,7 @@ if (!localStorage.getItem('token')) {
   }
 
   // Reporte 3: socios por categoría
-  sync function cargarReporteCategorias() {
+  async function cargarReporteCategorias() {
   try {
     const res = await fetchConToken('/reportes/socios-por-categoria');
     const data = await res.json();
@@ -316,9 +316,20 @@ if (!localStorage.getItem('token')) {
       type: 'bar',
       data: {
         labels: categorias,
-        datasets: [{ label: 'Cantidad de socios', data: cantidades, backgroundColor: 'rgba(255, 206, 86, 0.7)', borderColor: 'rgba(255, 206, 86, 1)', borderWidth: 1 }]
+        datasets: [{
+          label: 'Cantidad de socios',
+          data: cantidades,
+          backgroundColor: 'rgba(255, 206, 86, 0.7)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1
+        }]
       },
-      options: { indexAxis: 'y', responsive: true, scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        scales: { x: { beginAtZero: true } },
+        plugins: { legend: { display: false } }
+      }
     });
   } catch (err) {
     console.error('❌ Error reporte 3:', err);
