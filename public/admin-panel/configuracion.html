@@ -190,22 +190,32 @@
 </div>
 
 <script>
-const token = localStorage.getItem('token');
-if (!token) window.location.href = 'login.html';
+if (!localStorage.getItem('token')) {
+  window.location.href = '/admin-panel/login.html';
+}
+
 
 function logout() {
   localStorage.removeItem('token');
-  window.location.href = 'login.html';
+  window.location.href = '/admin-panel/login.html';
 }
 
 function fetchConToken(url, options = {}) {
+  const token = localStorage.getItem('token');
   return fetch(url, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
       Authorization: 'Bearer ' + token,
-      ...options.headers,
+      ...(options.headers || {}),
     },
+  }).then(res => {
+    if (res.status === 401) {
+      alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+      localStorage.removeItem('token');
+      window.location.href = '/admin-panel/login.html';
+      throw new Error('Sesión expirada');
+    }
+    return res;
   });
 }
 
