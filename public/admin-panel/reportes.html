@@ -210,6 +210,31 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+
+if (!localStorage.getItem('token')) {
+    window.location.href = '/admin-panel/login.html';
+  }
+
+  // Wrapper con Authorization y manejo de 401
+  function fetchConToken(url, opciones = {}) {
+    const token = localStorage.getItem('token');
+    return fetch(url, {
+      ...opciones,
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        ...(opciones.headers || {})
+      }
+    }).then(res => {
+      if (res.status === 401) {
+        alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+        localStorage.removeItem('token');
+        window.location.href = '/admin-panel/login.html';
+        throw new Error('Sesión expirada');
+      }
+      return res;
+    });
+  }
+
   const token = localStorage.getItem('token');
   if (!token) window.location.href = '/admin-panel/login.html';
 
@@ -222,7 +247,7 @@
 
   async function cargarDatos() {
     try {
-      const res = await fetch('/reportes/recaudado-por-fecha', {
+      const res = await fetchConToken('/reportes/recaudado-por-fecha');
         headers: { 'Authorization': 'Bearer ' + token }
       });
       const data = await res.json();
@@ -255,7 +280,7 @@
 
   async function cargarDatosFechaPago() {
     try {
-      const res = await fetch('/reportes/recaudado-por-fecha-pago', {
+      const res = await fetchConToken('/reportes/recaudado-por-fecha-pago');
         headers: { 'Authorization': 'Bearer ' + token }
       });
       const data = await res.json();
@@ -284,7 +309,7 @@
   // Reporte 3: socios por categoría
   async function cargarReporteCategorias() {
     try {
-      const res = await fetch('/reportes/socios-por-categoria', {  // <== 🔧 CORREGIDO
+      const res = await fetchConToken('/reportes/socios-por-categoria');
         headers: { 'Authorization': 'Bearer ' + token }
       });
       const data = await res.json();
@@ -323,7 +348,7 @@
 
   function logout() {
     localStorage.removeItem('token');
-    location.href = '/admin-panel/login.html';
+    window.location.href = '/admin-panel/login.html';
   }
 
   function toggleSidebar() {
