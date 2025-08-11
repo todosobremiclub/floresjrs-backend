@@ -240,7 +240,7 @@ if (!localStorage.getItem('token')) {
 
      async function cargarHistorial() {
   try {
-    const res = await fetchConToken('/notificaciones/enviar', {
+    const res = await fetchConToken('/notificaciones'); // ✅ ruta correcta, sin objeto vacío si no se usa
     if (!res.ok) {
       console.error('❌ Error al cargar historial');
       return;
@@ -265,6 +265,7 @@ if (!localStorage.getItem('token')) {
     console.error('❌ Excepción al cargar historial', err);
   }
 }
+
 
 
 // 🔔 Función de ajuste horario Argentina
