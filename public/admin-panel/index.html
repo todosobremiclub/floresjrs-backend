@@ -285,10 +285,20 @@ body {
 
 
     function fetchConToken(url, opciones = {}) {
-      opciones.headers = opciones.headers || {};
-      opciones.headers['Authorization'] = `Bearer ${token}`;
-      return fetch(url, opciones);
+  opciones.headers = opciones.headers || {};
+  opciones.headers['Authorization'] = `Bearer ${token}`;
+  
+  return fetch(url, opciones).then(res => {
+    if (res.status === 401) {
+      alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+      localStorage.removeItem('token');
+      window.location.href = '/admin-panel/login.html';
+      throw new Error('Sesión expirada');
     }
+    return res;
+  });
+}
+
 
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('show');
