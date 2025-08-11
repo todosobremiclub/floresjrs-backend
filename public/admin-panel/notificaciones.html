@@ -240,7 +240,7 @@ if (!localStorage.getItem('token')) {
 
      async function cargarHistorial() {
   try {
-    const res = await fetchConToken('/notificaciones');
+    const res = await fetchConToken('/notificaciones/enviar', {
     if (!res.ok) {
       console.error('❌ Error al cargar historial');
       return;
