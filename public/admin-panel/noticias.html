@@ -175,19 +175,31 @@
 const token = localStorage.getItem('token');
 let choicesCategorias = null;
 
-if (!token) location.href = 'login.html';
+if (!token) {
+  window.location.href = '/admin-panel/login.html';
+}
+
 
 function logout() {
   localStorage.removeItem('token');
-  location.href = 'login.html';
+  window.location.href = '/admin-panel/login.html';
 }
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('show');
 }
 function fetchConToken(url, opciones = {}) {
+  const token = localStorage.getItem('token');
   return fetch(url, {
     ...opciones,
-    headers: { 'Authorization': 'Bearer ' + token, ...opciones.headers },
+    headers: { 'Authorization': 'Bearer ' + token, ...(opciones.headers || {}) },
+  }).then(res => {
+    if (res.status === 401) {
+      alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+      localStorage.removeItem('token');
+      window.location.href = '/admin-panel/login.html';
+      throw new Error('Sesión expirada');
+    }
+    return res;
   });
 }
 
