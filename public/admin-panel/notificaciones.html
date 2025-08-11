@@ -168,6 +168,31 @@
 
 
   <script>
+
+if (!localStorage.getItem('token')) {
+    window.location.href = '/admin-panel/login.html';
+  }
+
+  // 👇 Wrapper con manejo de 401
+  function fetchConToken(url, opciones = {}) {
+    const token = localStorage.getItem('token');
+    return fetch(url, {
+      ...opciones,
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        ...(opciones.headers || {})
+      }
+    }).then(res => {
+      if (res.status === 401) {
+        alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+        localStorage.removeItem('token');
+        window.location.href = '/admin-panel/login.html';
+        throw new Error('Sesión expirada');
+      }
+      return res;
+    });
+  }
+
     document.addEventListener('DOMContentLoaded', () => {
       function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('show');
@@ -188,7 +213,7 @@
         const token = localStorage.getItem('token');
 
         try {
-          const res = await fetch('/notificaciones/enviar', {
+          const res = await fetchConToken('/notificaciones/enviar', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -216,7 +241,7 @@
      async function cargarHistorial() {
   const token = localStorage.getItem('token');
   try {
-    const res = await fetch('/notificaciones', {
+    const res = await fetchConToken('/notificaciones');
       headers: {
         'Authorization': 'Bearer ' + token
       }
@@ -263,7 +288,7 @@ function ajustarHoraArgentina(fechaUTC) {
 
         const token = localStorage.getItem('token');
         try {
-          const res = await fetch(`/notificaciones/${id}`, {
+          const res = await fetchConToken(`/notificaciones/${id}`, {
             method: 'DELETE',
             headers: {
               'Authorization': token
