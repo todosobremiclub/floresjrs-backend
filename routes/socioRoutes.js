@@ -1,4 +1,5 @@
 
+
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
@@ -7,7 +8,7 @@ const upload = multer();
 const { v4: uuidv4 } = require('uuid');
 const verificarToken = require('../middlewares/verificarToken');
 const subirAFirebase = require('../utils/subirAFirebase');
-const ExcelJS = require('exceljs'); // ✅ Nueva dependencia para exportar Excel
+const ExcelJS = require('exceljs'); // ✅ Dependencia para exportar Excel
 
 console.log("✅ socioRoutes.js se está ejecutando");
 
@@ -54,6 +55,48 @@ router.get('/', verificarToken, async (req, res) => {
   } catch (err) {
     console.error('❌ Error al listar socios:', err);
     res.status(500).json({ error: 'Error al obtener socios' });
+  }
+});
+
+// GET /socio/exportar-excel → exportar todos los socios a Excel (protegido)
+router.get('/exportar-excel', verificarToken, async (req, res) => {
+  try {
+    const resultado = await db.query(`
+      SELECT s.numero_socio AS numero,s.dni,s.nombre,s.apellido,s.subcategoria AS categoria,s.telefono,
+      TO_CHAR(s.fecha_nacimiento,'YYYY-MM-DD') AS nacimiento,TO_CHAR(s.fecha_ingreso,'YYYY-MM-DD') AS ingreso,
+      s.activo,s.becado,COALESCE(ARRAY_AGG(TO_CHAR(pm.anio,'FM0000')||'-'||TO_CHAR(pm.mes,'FM00')) FILTER (WHERE pm.id IS NOT NULL),'{}') AS pagos
+      FROM socios s LEFT JOIN pagos_mensuales pm ON s.numero_socio=pm.socio_numero
+      GROUP BY s.numero_socio,s.dni,s.nombre,s.apellido,s.subcategoria,s.telefono,s.fecha_nacimiento,s.fecha_ingreso,s.activo,s.becado
+      ORDER BY s.numero_socio ASC`);
+    
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Socios');
+
+    worksheet.columns = [
+      { header: 'Número', key: 'numero', width: 10 },
+      { header: 'DNI', key: 'dni', width: 12 },
+      { header: 'Nombre', key: 'nombre', width: 20 },
+      { header: 'Apellido', key: 'apellido', width: 20 },
+      { header: 'Categoría', key: 'categoria', width: 15 },
+      { header: 'Teléfono', key: 'telefono', width: 15 },
+      { header: 'Nacimiento', key: 'nacimiento', width: 15 },
+      { header: 'Ingreso', key: 'ingreso', width: 15 },
+      { header: 'Activo', key: 'activo', width: 10 },
+      { header: 'Becado', key: 'becado', width: 10 },
+      { header: 'Pagos', key: 'pagos', width: 30 }
+    ];
+
+    resultado.rows.forEach(socio => {
+      worksheet.addRow({ ...socio, pagos: socio.pagos.join(', ') });
+    });
+
+    res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition','attachment; filename="socios.xlsx"');
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    console.error('❌ Error al exportar Excel:', err);
+    res.status(500).json({ error: 'Error al generar Excel' });
   }
 });
 
@@ -258,41 +301,7 @@ router.get('/paginado', verificarToken, async (req, res) => {
   }
 });
 
-// -------------------- NUEVA RUTA: EXPORTAR EXCEL --------------------
-router.get('/exportar-excel', verificarToken, async (req, res) => {
-  try {
-    const resultado = await db.query(`
-      SELECT s.numero_socio AS numero,s.dni,s.nombre,s.apellido,s.subcategoria AS categoria,s.telefono,
-      TO_CHAR(s.fecha_nacimiento,'YYYY-MM-DD') AS nacimiento,TO_CHAR(s.fecha_ingreso,'YYYY-MM-DD') AS ingreso,
-      s.activo,s.becado,COALESCE(ARRAY_AGG(TO_CHAR(pm.anio,'FM0000')||'-'||TO_CHAR(pm.mes,'FM00')) FILTER (WHERE pm.id IS NOT NULL),'{}') AS pagos
-      FROM socios s LEFT JOIN pagos_mensuales pm ON s.numero_socio=pm.socio_numero
-      GROUP BY s.numero_socio,s.dni,s.nombre,s.apellido,s.subcategoria,s.telefono,s.fecha_nacimiento,s.fecha_ingreso,s.activo,s.becado
-      ORDER BY s.numero_socio ASC`);
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Socios');
-    worksheet.columns = [
-      { header: 'Número', key: 'numero', width: 10 },
-      { header: 'DNI', key: 'dni', width: 12 },
-      { header: 'Nombre', key: 'nombre', width: 20 },
-      { header: 'Apellido', key: 'apellido', width: 20 },
-      { header: 'Categoría', key: 'categoria', width: 15 },
-      { header: 'Teléfono', key: 'telefono', width: 15 },
-      { header: 'Nacimiento', key: 'nacimiento', width: 15 },
-      { header: 'Ingreso', key: 'ingreso', width: 15 },
-      { header: 'Activo', key: 'activo', width: 10 },
-      { header: 'Becado', key: 'becado', width: 10 },
-      { header: 'Pagos', key: 'pagos', width: 30 }
-    ];
-    resultado.rows.forEach(socio => worksheet.addRow({ ...socio, pagos: socio.pagos.join(', ') }));
-    res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition','attachment; filename="socios.xlsx"');
-    await workbook.xlsx.write(res);
-    res.end();
-  } catch (err) {
-    console.error('❌ Error al exportar Excel:', err);
-    res.status(500).json({ error: 'Error al generar Excel' });
-  }
-});
+
 
 module.exports = router;
 
