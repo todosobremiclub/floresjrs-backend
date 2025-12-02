@@ -705,10 +705,10 @@ modal.show();
   });
 });
 
+
 function renderizarPaginacion(totalPaginas) {
   const paginacion = document.getElementById('paginacion');
   if (!paginacion) return;
-
 
   paginacion.innerHTML = '';
 
@@ -723,6 +723,43 @@ function renderizarPaginacion(totalPaginas) {
     paginacion.appendChild(btn);
   }
 }
+
+// ✅ Descargar Excel
+document.getElementById('btnExportarExcel').addEventListener('click', async () => {
+  console.log('✅ Botón clic detectado'); // Para verificar en consola
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+    window.location.href = '/admin-panel/login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch('/socio/exportar-excel', {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) throw new Error('Error al descargar Excel');
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'socios.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    console.log('✅ Archivo descargado correctamente');
+  } catch (err) {
+    console.error('❌ Error al descargar Excel:', err);
+    alert('❌ No se pudo descargar el archivo');
+  }
+});
+
+</script>
+
+
 
   </script>
 <div class="modal fade" id="modalNuevoSocio" tabindex="-1">
