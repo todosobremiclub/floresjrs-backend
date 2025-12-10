@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>Redirección a la App</title>
+<script>
+  if (/android/i.test(navigator.userAgent)) {
+    window.location.href = "https://play.google.com/store/apps/details?id=com.floresjuniorsapp.todoapp";
+  } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    window.location.href = "https://apps.apple.com/ar/app/flores-jrs/id6755240466";
+  } else {
+    document.write('<h2>Descarga nuestra app:</h2>');
+    document.write('<p><a href="https://play.google.com/store/apps/details?id=com.floresjuniorsapp.todoapp">Android</a></p>');
+    document.write('<p><a href="https://apps.apple.com/ar/app/flores-jrs/id6755240466">iOS</a></p>');
+  }
+</script>
+</head>
+<body>
+</body>
+</html>
