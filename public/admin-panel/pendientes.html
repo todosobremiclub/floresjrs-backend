@@ -60,7 +60,7 @@
 
     async function cargarSolicitudes() {
       try {
-        const res = await fetchConToken('/solicitudes');
+        const res = await fetchConToken('/solicitud');
         if (!res.ok) throw new Error('Error al obtener solicitudes');
         const solicitudes = await res.json();
         const tbody = document.getElementById('tablaPendientes');
