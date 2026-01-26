@@ -5,6 +5,7 @@ const multer = require('multer');
 const upload = multer();
 const db = require('../config/db');
 const subirAFirebase = require('../utils/subirAFirebase');
+const verificarToken = require('../middlewares/verificarToken'); // Asegúrate de tener este middleware
 
 // POST /solicitud → recibe los datos del formulario de alta
 router.post('/', upload.single('foto'), async (req, res) => {
@@ -31,6 +32,17 @@ router.post('/', upload.single('foto'), async (req, res) => {
   } catch (error) {
     console.error('❌ Error al guardar solicitud:', error);
     res.status(500).json({ error: 'Error al guardar la solicitud' });
+  }
+});
+
+// GET /solicitudes → devuelve todas las solicitudes pendientes (protegido)
+router.get('/', verificarToken, async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM solicitudes ORDER BY fecha_solicitud DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('❌ Error al obtener solicitudes:', error);
+    res.status(500).json({ error: 'Error al obtener solicitudes' });
   }
 });
 
