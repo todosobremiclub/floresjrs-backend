@@ -62,11 +62,6 @@ router.delete('/:id', verificarToken, async (req, res) => {
 // POST /solicitud/:id/confirmar → confirma una solicitud y crea un nuevo socio
 router.post('/:id/confirmar', verificarToken, async (req, res) => {
   const { id } = req.params;
-  const { categoria } = req.body;
-
-  if (!categoria) {
-    return res.status(400).json({ error: 'Falta la categoría del socio' });
-  }
 
   try {
     // 1. Obtener la solicitud
@@ -87,7 +82,8 @@ router.post('/:id/confirmar', verificarToken, async (req, res) => {
     const ultimo = resultNum.rows[0].ultimo || 0;
     const siguiente = ultimo + 1;
 
-    // 4. Insertar nuevo socio
+    // 4. Insertar nuevo socio con categoría "A definir"
+    const categoria = 'A definir';
     await db.query(`
       INSERT INTO socios (
         numero_socio, dni, nombre, apellido, subcategoria, telefono,
