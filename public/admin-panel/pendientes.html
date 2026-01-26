@@ -48,6 +48,28 @@
     </div>
   </div>
 
+  <!-- Modal para confirmar solicitud -->
+  <div class="modal fade" id="modalConfirmar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-light">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Solicitud</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formConfirmar">
+            <input type="hidden" id="solicitudId" />
+            <div class="mb-3">
+              <label for="categoria" class="form-label">Categoría</label>
+              <input type="text" class="form-control" id="categoria" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Confirmar alta</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/admin-panel/login.html';
@@ -77,8 +99,8 @@
               ${s.foto_url ? `<img src="${s.foto_url}" class="foto-miniatura" alt="Foto">` : 'Sin foto'}
             </td>
             <td>
-              <button class="btn btn-success btn-sm me-1" data-id="${s.id}">✔️ Confirmar</button>
-              <button class="btn btn-danger btn-sm" data-id="${s.id}">✖️ Rechazar</button>
+              <button class="btn btn-success btn-sm me-1 btn-confirmar" data-id="${s.id}">✔️ Confirmar</button>
+              <button class="btn btn-danger btn-sm btn-rechazar" data-id="${s.id}">✖️ Rechazar</button>
             </td>
           `;
           tbody.appendChild(fila);
@@ -89,6 +111,63 @@
     }
 
     document.addEventListener('DOMContentLoaded', cargarSolicitudes);
+
+    // Delegar eventos de Confirmar y Rechazar
+    document.getElementById('tablaPendientes').addEventListener('click', async (e) => {
+      const btn = e.target;
+      const id = btn.dataset.id;
+
+      if (btn.classList.contains('btn-rechazar')) {
+        if (confirm('¿Estás seguro de que querés rechazar esta solicitud?')) {
+          try {
+            const res = await fetchConToken(`/solicitud/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('No se pudo eliminar');
+            await cargarSolicitudes();
+          } catch (err) {
+            alert('❌ Error al rechazar la solicitud');
+          }
+        }
+      }
+
+      if (btn.classList.contains('btn-confirmar')) {
+        document.getElementById('solicitudId').value = id;
+        const modal = new bootstrap.Modal(document.getElementById('modalConfirmar'));
+        modal.show();
+      }
+    });
+
+    // Enviar confirmación
+    document.getElementById('formConfirmar').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('solicitudId').value;
+      const categoria = document.getElementById('categoria').value.trim();
+      if (!categoria) {
+        alert('Por favor ingresá una categoría');
+        return;
+      }
+      try {
+        const res = await fetchConToken(`/solicitud/${id}/confirmar`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ categoria })
+        });
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.error || 'Error al confirmar');
+        }
+        const data = await res.json();
+        alert(`✅ Socio creado correctamente. Número asignado: ${data.numero.toString().padStart(4, '0')}`);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmar'));
+        modal.hide();
+        await cargarSolicitudes();
+      } catch (err) {
+        alert('❌ Error al confirmar solicitud: ' + err.message);
+      }
+    });
   </script>
 </body>
 </html>
+
