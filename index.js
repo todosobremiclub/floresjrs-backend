@@ -14,6 +14,7 @@ const cumpleaniosRoutes = require('./routes/cumpleaniosRoutes');
 const reportesRoutes = require('./routes/reportesRoutes');
 const montosMensualesRoutes = require('./routes/montosMensualesRoutes');
 const notificacionesRoutes = require('./routes/notificacionesRoutes');
+const solicitudRoutes = require('./routes/solicitudRoutes');
 
 
 
@@ -42,7 +43,7 @@ app.use('/reportes', reportesRoutes);                     // ✅ Reportes con to
 app.use('/cumpleanios', cumpleaniosRoutes);
 app.use('/montos-mensuales', montosMensualesRoutes);
 app.use('/notificaciones', notificacionesRoutes);
-
+app.use('/solicitud', solicitudRoutes);
 
 
 // 👉 Redirección raíz
