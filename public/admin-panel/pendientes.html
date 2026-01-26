@@ -3,19 +3,70 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solicitudes Pendientes</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solicitudes Pendientes - Flores Jrs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     body {
-      background-color: #f8f9fa;
+      background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
     }
-    .main-container {
-      max-width: 1200px;
-      margin: 2rem auto;
+    .sidebar {
+      width: 200px;
+      background-color: #002f6c;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      padding-top: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      z-index: 1040;
+      transition: transform 0.3s ease;
     }
-    .table th, .table td {
-      vertical-align: middle;
+    .sidebar h4 { color: white; }
+    .sidebar button, .sidebar a {
+      text-align: left;
+      width: 100%;
+    }
+    .main-content {
+      margin-left: 200px;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+    }
+    .btn-yellow {
+      background-color: #ffd500;
+      color: black;
+      font-weight: bold;
+    }
+    .logo {
+      height: 50px;
+    }
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1050;
+      display: none;
+    }
+    @media (max-width: 767px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.show { transform: translateX(0); }
+      .toggle-btn { display: block; }
+      .main-content { margin-left: 0 !important; padding: 1rem; }
+    }
+    .table img {
+      max-height: 60px;
     }
     .foto-miniatura {
       width: 50px;
@@ -26,10 +77,30 @@
   </style>
 </head>
 <body>
-  <div class="container main-container">
-    <h2 class="mb-4 text-center text-primary">Solicitudes Pendientes</h2>
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <div class="sidebar" id="sidebar">
+    <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
+    <a href="/admin-panel/pendientes.html" class="btn btn-outline-light d-flex justify-content-between align-items-center">
+      📥 Pendientes
+      <span id="contadorPendientes" class="badge bg-warning text-dark ms-2" style="display:none;">0</span>
+    </a>
+    <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+    <a href="/admin-panel/noticias.html" class="btn btn-outline-light">📢 Noticias</a>
+    <a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
+    <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
+    <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+    <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
+    <button class="btn btn-outline-light mt-4" onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <div class="main-content">
+    <div class="text-center mb-4">
+      <img src="flores_jrs_logo.png" alt="Escudo" class="logo mb-2" />
+      <h2 class="text-warning m-0">Solicitudes Pendientes</h2>
+    </div>
+
     <div class="table-responsive">
-      <table class="table table-bordered table-striped align-middle">
+      <table class="table table-bordered table-striped bg-white text-dark align-middle">
         <thead class="table-primary">
           <tr>
             <th>Nombre</th>
@@ -51,6 +122,15 @@
   <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/admin-panel/login.html';
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/admin-panel/login.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('show');
+    }
 
     function fetchConToken(url, options = {}) {
       options.headers = options.headers || {};
@@ -88,7 +168,28 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', cargarSolicitudes);
+    async function actualizarContadorPendientes() {
+      try {
+        const res = await fetchConToken('/solicitud');
+        if (!res.ok) return;
+        const solicitudes = await res.json();
+        const cantidad = solicitudes.length;
+        const badge = document.getElementById('contadorPendientes');
+        if (cantidad > 0) {
+          badge.textContent = cantidad;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('❌ Error al obtener solicitudes pendientes:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarSolicitudes();
+      actualizarContadorPendientes();
+    });
 
     document.getElementById('tablaPendientes').addEventListener('click', async (e) => {
       const btn = e.target;
@@ -100,6 +201,7 @@
             const res = await fetchConToken(`/solicitud/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('No se pudo eliminar');
             await cargarSolicitudes();
+            await actualizarContadorPendientes();
           } catch (err) {
             alert('❌ Error al rechazar la solicitud');
           }
@@ -115,7 +217,7 @@
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
               },
-              body: JSON.stringify({ categoria: null }) // Se puede omitir o enviar null
+              body: JSON.stringify({})
             });
             if (!res.ok) {
               const error = await res.json();
@@ -124,6 +226,7 @@
             const data = await res.json();
             alert(`✅ Socio creado correctamente. Número asignado: ${data.numero.toString().padStart(4, '0')}`);
             await cargarSolicitudes();
+            await actualizarContadorPendientes();
           } catch (err) {
             alert('❌ Error al confirmar solicitud: ' + err.message);
           }
@@ -131,7 +234,5 @@
       }
     });
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
