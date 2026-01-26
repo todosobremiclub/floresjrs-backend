@@ -35,7 +35,7 @@ router.post('/', upload.single('foto'), async (req, res) => {
   }
 });
 
-// GET /solicitudes → devuelve todas las solicitudes pendientes (protegido)
+// GET /solicitud → devuelve todas las solicitudes pendientes (protegido)
 router.get('/', verificarToken, async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM solicitudes ORDER BY fecha_solicitud DESC');
@@ -46,4 +46,20 @@ router.get('/', verificarToken, async (req, res) => {
   }
 });
 
+// DELETE /solicitud/:id → elimina una solicitud pendiente (protegido)
+router.delete('/:id', verificarToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await db.query('DELETE FROM solicitudes WHERE id = $1', [id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Solicitud no encontrada' });
+    }
+    res.json({ mensaje: 'Solicitud eliminada correctamente' });
+  } catch (error) {
+    console.error('❌ Error al eliminar solicitud:', error);
+    res.status(500).json({ error: 'Error al eliminar la solicitud' });
+  }
+});
+
 module.exports = router;
+
