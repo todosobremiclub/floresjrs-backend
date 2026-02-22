@@ -4,371 +4,569 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Configuración - Flores Jrs</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
- <style>
-  body {
-    background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
-    background-size: cover;
-    color: white;
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-  }
 
-  .sidebar {
-    width: 200px;
-    background-color: #002f6c;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 1rem;
-    padding-top: 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-    z-index: 1040;
-    overflow-y: auto;
-  }
+  <style>
+    body {
+      background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-/* 🔧 Borde amarillo para todos los botones outline-light del sidebar */
-.sidebar .btn-outline-light {
-  border-color: #FFD500 !important;
-  font-weight: normal !important;
-  color: white;
-  text-align: left;
-  justify-content: flex-start;
-}
-
-/* Opcional: efecto hover */
-.sidebar .btn-outline-light:hover {
-  background-color: #FFD500 !important;
-  color: black !important;
-}
-
-
-  .main-content {
-    margin-left: 200px;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .config-container {
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 2rem;
-    border-radius: 10px;
-    max-width: 700px;
-    width: 100%;
-    margin-top: 2rem;
-  }
-
-  h2.titulo-config {
-    color: #ffd500;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .config-item {
-    margin-bottom: 2rem;
-  }
-
-  .btn-yellow {
-    background-color: #ffd500;
-    color: black;
-    font-weight: bold;
-    border-radius: 8px;
-  }
-
-  .form-control {
-    border-radius: 8px;
-  }
-
-  .table th {
-    color: white;
-    background-color: #002f6c;
-  }
-
-  .table td {
-    color: #004aad;
-    font-weight: bold;
-  }
-
-  @media (max-width: 768px) {
     .sidebar {
-      transform: translateX(-100%);
-    }
-    .sidebar.show {
-      transform: translateX(0);
-    }
-    .main-content {
-      margin-left: 0;
+      width: 200px;
+      background-color: #002f6c;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
       padding-top: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      z-index: 1040;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
     }
-  }
-</style>
 
+    .sidebar .btn-outline-light {
+      border-color: #FFD500 !important;
+      font-weight: normal !important;
+      color: white;
+      text-align: left;
+      justify-content: flex-start;
+    }
 
+    .sidebar .btn-outline-light:hover {
+      background-color: #FFD500 !important;
+      color: black !important;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1050;
+      display: none;
+    }
+
+    .main-content {
+      margin-left: 200px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: margin-left 0.3s ease;
+    }
+
+    .config-container {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 850px;
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    h2.titulo-config {
+      color: #ffd500;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .config-item { margin-bottom: 2rem; }
+
+    .btn-yellow {
+      background-color: #ffd500;
+      color: black;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    .form-control, .form-select { border-radius: 8px; }
+
+    .table th {
+      color: white;
+      background-color: #002f6c;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .table td {
+      color: #004aad;
+      font-weight: bold;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    details summary {
+      cursor: pointer;
+      user-select: none;
+      color: #ffd500;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.show { transform: translateX(0); }
+      .toggle-btn { display: block; }
+      .main-content { margin-left: 0; padding-top: 4rem; }
+      .config-container { padding: 1rem; }
+    }
+  </style>
 </head>
+
 <body>
-<button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-<div class="sidebar" id="sidebar">
-  
-  <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
-<a href="/admin-panel/pendientes.html" class="btn btn-outline-light d-flex justify-content-between align-items-center">
-  📥 Pendientes
-  <span id="contadorPendientes" class="badge bg-warning text-dark ms-2" style="display:none;">0</span>
-</a>
-<a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
-<a href="/admin-panel/noticias.html" class="btn btn-outline-light">📢 Noticias</a>
-<a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
-<a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
-<a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
-<a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
-<button class="btn btn-outline-light mt-4" onclick="logout()">Cerrar sesión</button>
+  <div class="sidebar" id="sidebar">
+    <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
 
-</div>
+    <a href="/admin-panel/pendientes.html" class="btn btn-outline-light d-flex justify-content-between align-items-center">
+      📥 Pendientes
+      <span id="contadorPendientes" class="badge bg-warning text-dark ms-2" style="display:none;">0</span>
+    </a>
 
-<div class="main-content">
-  <div class="config-container">
-    <h2 class="titulo-config">
-      <img src="flores_jrs_logo.png" alt="Logo" style="height: 40px;">
-      Configuración del Sistema
-    </h2>
+    <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+    <a href="/admin-panel/gastos.html" class="btn btn-outline-light">🧾 Gastos</a>
+    <a href="/admin-panel/noticias.html" class="btn btn-outline-light">📢 Noticias</a>
+    <a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
+    <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
+    <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+    <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
 
-   <!-- 💰 Monto de cuota por mes -->
-<div class="config-item">
-  <div class="d-flex align-items-center justify-content-between">
-    <h5 class="text-white m-0">💰 Monto de cuota por mes</h5>
-    <button class="btn btn-sm btn-outline-light" onclick="toggleMontos()">🔽 Mostrar</button>
+    <button class="btn btn-outline-light mt-4" onclick="logout()">Cerrar sesión</button>
   </div>
-  <div id="contenedorMontos" class="mt-3" style="display: none;">
-    <div class="table-responsive">
-      <table class="table table-sm table-bordered table-striped text-white" style="background-color:#002f6c;">
-        <thead>
-          <tr>
-            <th>Mes</th>
-            <th>Monto ($)</th>
-            <th style="width:80px">Guardar</th>
-          </tr>
-        </thead>
-        <tbody id="tablaMontos"></tbody>
-      </table>
+
+  <div class="main-content">
+    <div class="config-container">
+      <h2 class="titulo-config">
+        <img src="flores_jrs_logo.png" alt="Logo" style="height: 40px;">
+        Configuración del Sistema
+      </h2>
+
+      <!-- 💰 Montos mensuales -->
+      <div class="config-item">
+        <details>
+          <summary>💰 Monto de cuota por mes</summary>
+
+          <div class="table-responsive mt-2">
+            <table class="table table-sm table-bordered table-striped bg-white">
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th>Monto ($)</th>
+                  <th style="width:90px;">Guardar</th>
+                </tr>
+              </thead>
+              <tbody id="tablaMontos"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+
+      <hr class="border-light"/>
+
+      <!-- 💼 Categorías deportivas -->
+      <div class="config-item">
+        <details>
+          <summary>💼 Categorías deportivas</summary>
+
+          <div class="table-responsive mt-2">
+            <table class="table table-sm table-bordered table-striped bg-white">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th style="width:55px;">💾</th>
+                  <th style="width:55px;">🗑️</th>
+                </tr>
+              </thead>
+              <tbody id="tablaCategorias"></tbody>
+            </table>
+          </div>
+
+          <form id="formCategoria" class="d-flex gap-2 mt-2">
+            <input type="text" id="nuevaCategoria" class="form-control" placeholder="Nueva categoría" required />
+            <button type="submit" class="btn btn-yellow">Agregar</button>
+          </form>
+        </details>
+      </div>
+
+      <hr class="border-light"/>
+
+      <!-- 🧾 Tipos de gasto -->
+      <div class="config-item">
+        <details>
+          <summary>🧾 Tipos de gasto</summary>
+
+          <div class="table-responsive mt-2">
+            <table class="table table-sm table-bordered table-striped bg-white">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th style="width:55px;">💾</th>
+                  <th style="width:55px;">🗑️</th>
+                </tr>
+              </thead>
+              <tbody id="tablaTiposGasto"></tbody>
+            </table>
+          </div>
+
+          <form id="formTipoGasto" class="d-flex gap-2 mt-2">
+            <input type="text" id="nuevoTipoGasto" class="form-control" placeholder="Nuevo tipo (ej: Cancha, Luz, Indumentaria)" required />
+            <button type="submit" class="btn btn-yellow">Agregar</button>
+          </form>
+        </details>
+      </div>
+
+      <hr class="border-light"/>
+
+      <!-- 👤 Responsables de gasto -->
+      <div class="config-item">
+        <details>
+          <summary>👤 Responsables (quién realizó el gasto)</summary>
+
+          <div class="table-responsive mt-2">
+            <table class="table table-sm table-bordered table-striped bg-white">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th style="width:55px;">💾</th>
+                  <th style="width:55px;">🗑️</th>
+                </tr>
+              </thead>
+              <tbody id="tablaResponsablesGasto"></tbody>
+            </table>
+          </div>
+
+          <form id="formResponsableGasto" class="d-flex gap-2 mt-2">
+            <input type="text" id="nuevoResponsableGasto" class="form-control" placeholder="Nuevo responsable (ej: Tesorería, Juan Pérez)" required />
+            <button type="submit" class="btn btn-yellow">Agregar</button>
+          </form>
+        </details>
+      </div>
+
     </div>
   </div>
-</div>
 
+  <script>
+    // Seguridad: sesión
+    if (!localStorage.getItem('token')) {
+      window.location.href = '/admin-panel/login.html';
+    }
 
-    <hr class="border-light" />
-
-    <!-- 💼 Categorías deportivas -->
-<div class="config-item">
-  <h5 class="text-white">💼 Categorías deportivas</h5>
-  <details class="mb-3">
-    <summary class="text-light">Ver categorías existentes</summary>
-    <div class="table-responsive mt-2">
-      <table class="table table-sm table-bordered table-dark table-striped">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th style="width:40px">💾</th>
-            <th style="width:40px">🗑️</th>
-          </tr>
-        </thead>
-        <tbody id="tablaCategorias"></tbody>
-      </table>
-    </div>
-  </details>
-  <form id="formCategoria" class="d-flex gap-2">
-    <input type="text" id="nuevaCategoria" class="form-control" placeholder="Nueva categoría" required />
-    <button type="submit" class="btn btn-yellow">Agregar</button>
-  </form>
-</div>
-
-  </div>
-</div>
-
-<script>
-if (!localStorage.getItem('token')) {
-  window.location.href = '/admin-panel/login.html';
-}
-
-
-function logout() {
-  localStorage.removeItem('token');
-  window.location.href = '/admin-panel/login.html';
-}
-
-function fetchConToken(url, options = {}) {
-  const token = localStorage.getItem('token');
-
-  const headers = {
-    Authorization: 'Bearer ' + token,
-    ...(options.headers || {}),
-  };
-
-  // Si mandás body y todavía no seteaste Content-Type, asumimos JSON
-  if (options.body && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  return fetch(url, {
-    ...options,
-    headers,
-  }).then(res => {
-    if (res.status === 401) {
-      alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+    function logout() {
       localStorage.removeItem('token');
       window.location.href = '/admin-panel/login.html';
-      throw new Error('Sesión expirada');
     }
-    return res;
-  });
-}
-async function cargarCategorias() {
-  try {
-    const res = await fetchConToken('/config/categorias');
-    const categorias = await res.json();
-    const tabla = document.getElementById('tablaCategorias');
-    tabla.innerHTML = '';
-    categorias.forEach(cat => {
-      const fila = document.createElement('tr');
-      fila.innerHTML = `
-        <td>
-          <input type="text" class="form-control form-control-sm" value="${cat.nombre}" data-original="${cat.nombre}" data-id="${cat.id}" />
-        </td>
-        <td>
-          <button class="btn btn-sm btn-success btn-guardar" data-id="${cat.id}">💾</button>
-        </td>
-        <td>
-          <button class="btn btn-sm btn-danger btn-eliminar" data-id="${cat.id}">🗑️</button>
-        </td>
-      `;
-      tabla.appendChild(fila);
-    });
-  } catch {
-    alert('❌ Error al cargar categorías');
-  }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  cargarCategorias();
-  cargarMontosMensuales(); // 👉 esta es la nueva función que se ejecuta al iniciar
-});
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('show');
+    }
 
-// Edición y eliminación
-// Agregar eventos para botones de editar/eliminar
-document.body.addEventListener('click', async (e) => {
-  const id = e.target.dataset.id;
-  if (!id) return;
+    // fetchConToken unificado (con JSON automático si hay body)
+    function fetchConToken(url, options = {}) {
+      const token = localStorage.getItem('token');
+      const headers = {
+        Authorization: 'Bearer ' + token,
+        ...(options.headers || {}),
+      };
 
-  if (e.target.classList.contains('btn-guardar')) {
-    const input = document.querySelector(`input[data-id="${id}"]`);
-    const nuevoNombre = input.value.trim();
-    if (!nuevoNombre || nuevoNombre === input.dataset.original) return;
+      if (options.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
 
-    try {
-      const res = await fetchConToken(`/config/categorias/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ id, nombre: nuevoNombre })
+      return fetch(url, { ...options, headers }).then(res => {
+        if (res.status === 401) {
+          alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+          localStorage.removeItem('token');
+          window.location.href = '/admin-panel/login.html';
+          throw new Error('Sesión expirada');
+        }
+        return res;
       });
-      if (!res.ok) throw new Error();
-      alert('✅ Categoría actualizada');
-      cargarCategorias();
-    } catch {
-      alert('❌ No se pudo actualizar la categoría');
     }
-  }
 
-  if (e.target.classList.contains('btn-eliminar')) {
-    if (!confirm('¿Eliminar esta categoría?')) return;
-    try {
-      const res = await fetchConToken('/config/categorias', {
+    // =========================
+    // 1) Montos mensuales
+    // =========================
+    async function cargarMontosMensuales() {
+      const anioActual = new Date().getFullYear();
+      const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const tabla = document.getElementById('tablaMontos');
+      tabla.innerHTML = '';
+
+      try {
+        const res = await fetchConToken('/montos-mensuales');
+        const datos = await res.json();
+
+        const montosPorMes = {};
+        datos.forEach(m => {
+          if (m.anio === anioActual) montosPorMes[m.mes] = m.monto;
+        });
+
+        for (let mes = 1; mes <= 12; mes++) {
+          const monto = (montosPorMes[mes] ?? '');
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td>${nombresMeses[mes - 1]}</td>
+            <td>
+              <input type="number" class="form-control form-control-sm" id="monto-${mes}" value="${monto}" />
+            </td>
+            <td>
+              <button class="btn btn-sm btn-yellow" onclick="guardarMontoMensual(${mes})">Guardar</button>
+            </td>
+          `;
+          tabla.appendChild(fila);
+        }
+      } catch (e) {
+        console.error(e);
+        alert('❌ Error al cargar montos mensuales');
+      }
+    }
+
+    async function guardarMontoMensual(mes) {
+      const anio = new Date().getFullYear();
+      const input = document.getElementById(`monto-${mes}`);
+      const monto = parseFloat(input.value);
+
+      if (isNaN(monto) || monto < 0) {
+        return alert('Ingresá un monto válido');
+      }
+
+      try {
+        const res = await fetchConToken('/montos-mensuales', {
+          method: 'POST',
+          body: JSON.stringify({ mes, anio, monto })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Error al guardar');
+
+        alert('✅ Monto guardado correctamente');
+      } catch (e) {
+        console.error(e);
+        alert('❌ No se pudo guardar el monto');
+      }
+    }
+
+    // =========================
+    // Helpers CRUD de listas
+    // =========================
+    function renderTablaSimple(tbodyId, items, entityKey) {
+      const tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = '';
+
+      items.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              value="${item.nombre}"
+              data-entity="${entityKey}"
+              data-id="${item.id}"
+              data-original="${item.nombre}"
+            />
+          </td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-success btn-guardar" data-entity="${entityKey}" data-id="${item.id}">💾</button>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-danger btn-eliminar" data-entity="${entityKey}" data-id="${item.id}">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    const endpoints = {
+      categorias: {
+        list: '/config/categorias',
+        update: (id) => `/config/categorias/${id}`,
+        del: '/config/categorias',
+        post: '/config/categorias',
+        tbody: 'tablaCategorias'
+      },
+      tiposGasto: {
+        list: '/config/tipos-gasto',
+        update: (id) => `/config/tipos-gasto/${id}`,
+        del: '/config/tipos-gasto',
+        post: '/config/tipos-gasto',
+        tbody: 'tablaTiposGasto'
+      },
+      responsablesGasto: {
+        list: '/config/responsables-gasto',
+        update: (id) => `/config/responsables-gasto/${id}`,
+        del: '/config/responsables-gasto',
+        post: '/config/responsables-gasto',
+        tbody: 'tablaResponsablesGasto'
+      }
+    };
+
+    async function cargarLista(entityKey) {
+      try {
+        const res = await fetchConToken(endpoints[entityKey].list);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al cargar');
+
+        // opcional: mostrar solo activos si querés
+        const activos = Array.isArray(data) ? data.filter(x => x.activo !== false) : [];
+        renderTablaSimple(endpoints[entityKey].tbody, activos, entityKey);
+      } catch (e) {
+        console.error(e);
+        alert(`❌ Error al cargar ${entityKey}`);
+      }
+    }
+
+    async function crearItem(entityKey, nombre) {
+      const res = await fetchConToken(endpoints[entityKey].post, {
+        method: 'POST',
+        body: JSON.stringify({ nombre })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo crear');
+      return data;
+    }
+
+    async function actualizarItem(entityKey, id, nombre) {
+      const res = await fetchConToken(endpoints[entityKey].update(id), {
+        method: 'PUT',
+        body: JSON.stringify({ id, nombre })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo actualizar');
+      return data;
+    }
+
+    async function eliminarItem(entityKey, id) {
+      const res = await fetchConToken(endpoints[entityKey].del, {
         method: 'DELETE',
         body: JSON.stringify({ id })
       });
-      if (!res.ok) throw new Error();
-      alert('✅ Categoría eliminada');
-      cargarCategorias();
-    } catch {
-      alert('❌ No se pudo eliminar la categoría');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'No se pudo eliminar');
+      return data;
     }
-  }
-});
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('show');
-}
-async function cargarMontosMensuales() {
-  const anioActual = new Date().getFullYear();
-  const nombresMeses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  const tabla = document.getElementById('tablaMontos');
-  tabla.innerHTML = '';
+    // =========================
+    // 2) Formularios Alta
+    // =========================
+    document.getElementById('formCategoria').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('nuevaCategoria');
+      const nombre = input.value.trim();
+      if (!nombre) return;
 
-  try {
-    const res = await fetchConToken('/montos-mensuales');
-    const datos = await res.json();
-    const montosPorMes = {};
-
-    datos.forEach(m => {
-      if (m.anio === anioActual) montosPorMes[m.mes] = m.monto;
+      try {
+        await crearItem('categorias', nombre);
+        input.value = '';
+        await cargarLista('categorias');
+        alert('✅ Categoría agregada');
+      } catch (err) {
+        alert('❌ ' + (err.message || 'No se pudo agregar'));
+      }
     });
 
-    for (let mes = 1; mes <= 12; mes++) {
-      const monto = montosPorMes[mes] || '';
-      const fila = document.createElement('tr');
-      fila.innerHTML = `
-        <td>${nombresMeses[mes - 1]}</td>
-        <td><input type="number" class="form-control form-control-sm" id="monto-${mes}" value="${monto}" /></td>
-        <td><button class="btn btn-sm btn-yellow" onclick="guardarMontoMensual(${mes})">Guardar</button></td>
-      `;
-      tabla.appendChild(fila);
-    }
-  } catch {
-    alert('❌ Error al cargar montos mensuales');
-  }
-}
+    document.getElementById('formTipoGasto').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('nuevoTipoGasto');
+      const nombre = input.value.trim();
+      if (!nombre) return;
 
-async function guardarMontoMensual(mes) {
-  const anio = new Date().getFullYear();
-  const input = document.getElementById(`monto-${mes}`);
-  const monto = parseFloat(input.value);
-  if (isNaN(monto) || monto < 0) return alert('Ingresá un monto válido');
-	
-
-  try {
-    const res = await fetchConToken('/montos-mensuales', {
-      method: 'POST',
-      body: JSON.stringify({ mes, anio, monto })
+      try {
+        await crearItem('tiposGasto', nombre);
+        input.value = '';
+        await cargarLista('tiposGasto');
+        alert('✅ Tipo de gasto agregado');
+      } catch (err) {
+        alert('❌ ' + (err.message || 'No se pudo agregar'));
+      }
     });
-    if (!res.ok) throw new Error();
-    alert('✅ Monto guardado correctamente');
-  } catch {
-    alert('❌ No se pudo guardar el monto');
-  }
-}
 
-function toggleMontos() {
-  const contenedor = document.getElementById('contenedorMontos');
-  const boton = event.target;
+    document.getElementById('formResponsableGasto').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('nuevoResponsableGasto');
+      const nombre = input.value.trim();
+      if (!nombre) return;
 
-  if (contenedor.style.display === 'none') {
-    contenedor.style.display = 'block';
-    boton.textContent = '🔼 Ocultar';
-  } else {
-    contenedor.style.display = 'none';
-    boton.textContent = '🔽 Mostrar';
-  }
-}
+      try {
+        await crearItem('responsablesGasto', nombre);
+        input.value = '';
+        await cargarLista('responsablesGasto');
+        alert('✅ Responsable agregado');
+      } catch (err) {
+        alert('❌ ' + (err.message || 'No se pudo agregar'));
+      }
+    });
 
-</script>
+    // =========================
+    // 3) Botones Guardar / Eliminar (delegación)
+    // =========================
+    document.body.addEventListener('click', async (e) => {
+      const btn = e.target;
+      const id = btn?.dataset?.id;
+      const entityKey = btn?.dataset?.entity;
+      if (!id || !entityKey) return;
+
+      // Guardar
+      if (btn.classList.contains('btn-guardar')) {
+        const input = document.querySelector(`input[data-entity="${entityKey}"][data-id="${id}"]`);
+        if (!input) return;
+
+        const nuevoNombre = input.value.trim();
+        const original = input.dataset.original;
+
+        if (!nuevoNombre || nuevoNombre === original) return;
+
+        try {
+          await actualizarItem(entityKey, id, nuevoNombre);
+          await cargarLista(entityKey);
+          alert('✅ Actualizado');
+        } catch (err) {
+          alert('❌ ' + (err.message || 'No se pudo actualizar'));
+        }
+      }
+
+      // Eliminar
+      if (btn.classList.contains('btn-eliminar')) {
+        if (!confirm('¿Eliminar este elemento?')) return;
+
+        try {
+          await eliminarItem(entityKey, id);
+          await cargarLista(entityKey);
+          alert('✅ Eliminado');
+        } catch (err) {
+          alert('❌ ' + (err.message || 'No se pudo eliminar'));
+        }
+      }
+    });
+
+    // =========================
+    // Init
+    // =========================
+    document.addEventListener('DOMContentLoaded', async () => {
+      await cargarMontosMensuales();
+      await cargarLista('categorias');
+      await cargarLista('tiposGasto');
+      await cargarLista('responsablesGasto');
+    });
+  </script>
 </body>
 </html>
-
