@@ -207,12 +207,20 @@ function logout() {
 
 function fetchConToken(url, options = {}) {
   const token = localStorage.getItem('token');
+
+  const headers = {
+    Authorization: 'Bearer ' + token,
+    ...(options.headers || {}),
+  };
+
+  // Si mandás body y todavía no seteaste Content-Type, asumimos JSON
+  if (options.body && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   return fetch(url, {
     ...options,
-    headers: {
-      Authorization: 'Bearer ' + token,
-      ...(options.headers || {}),
-    },
+    headers,
   }).then(res => {
     if (res.status === 401) {
       alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
@@ -223,7 +231,6 @@ function fetchConToken(url, options = {}) {
     return res;
   });
 }
-
 async function cargarCategorias() {
   try {
     const res = await fetchConToken('/config/categorias');
