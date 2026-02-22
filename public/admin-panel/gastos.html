@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestión de Gastos - Flores Jrs</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    body {
+      background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .sidebar {
+      width: 200px;
+      background-color: #002f6c;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      padding-top: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      z-index: 1040;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar .btn-outline-light {
+      border-color: #FFD500 !important;
+      font-weight: normal !important;
+      color: white;
+      text-align: left;
+      justify-content: flex-start;
+    }
+
+    .sidebar .btn-outline-light:hover {
+      background-color: #FFD500 !important;
+      color: black !important;
+    }
+
+    .main-content {
+      margin-left: 200px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: margin-left 0.3s ease;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1050;
+      display: none;
+    }
+
+    .contenedor {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 900px;
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    .titulo {
+      color: #ffd500;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-yellow {
+      background-color: #ffd500;
+      color: black;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    .table th {
+      color: white;
+      background-color: #002f6c;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .table td {
+      color: #004aad;
+      font-weight: bold;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .badge-periodo {
+      background-color: rgba(255, 213, 0, 0.15);
+      border: 1px solid #ffd500;
+      color: #ffd500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.show { transform: translateX(0); }
+      .toggle-btn { display: block; }
+      .main-content { margin-left: 0; padding-top: 4rem; }
+      .contenedor { padding: 1rem; }
+      .table td, .table th { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
+
+    <a href="/admin-panel/pendientes.html" class="btn btn-outline-light d-flex justify-content-between align-items-center">
+      📥 Pendientes
+      <span id="contadorPendientes" class="badge bg-warning text-dark ms-2" style="display:none;">0</span>
+    </a>
+
+    <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
+    <a href="/admin-panel/gastos.html" class="btn btn-outline-light">🧾 Gastos</a>
+    <a href="/admin-panel/noticias.html" class="btn btn-outline-light">📢 Noticias</a>
+    <a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
+    <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
+    <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+    <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
+
+    <button class="btn btn-outline-light mt-4" onclick="logout()">Cerrar sesión</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="contenedor">
+      <h2 class="titulo">
+        <img src="flores_jrs_logo.png" alt="Logo" style="height: 40px;">
+        Gestión de Gastos
+      </h2>
+
+      <div class="d-flex flex-column flex-md-row gap-2 justify-content-between align-items-md-center mb-3">
+        <button class="btn btn-yellow" id="btnNuevoGasto">+ Registrar nuevo gasto</button>
+
+        <div class="d-flex gap-2 align-items-center">
+          <span class="text-white">Período:</span>
+          <input type="month" id="filtroDesde" class="form-control form-control-sm" />
+          <span class="text-white">a</span>
+          <input type="month" id="filtroHasta" class="form-control form-control-sm" />
+          <button class="btn btn-sm btn-outline-light" id="btnFiltrar">Filtrar</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered table-striped bg-white">
+          <thead>
+            <tr>
+              <th>Período</th>
+              <th>Tipo de gasto</th>
+              <th>Quién lo hizo</th>
+              <th>Monto</th>
+              <th style="width:80px;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaGastos"></tbody>
+        </table>
+      </div>
+
+      <div class="text-end mt-3">
+        <span class="text-white me-2">Total período:</span>
+        <span id="totalPeriodo" class="badge bg-warning text-dark" style="font-size: 1rem;">$0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nuevo Gasto -->
+  <div class="modal fade" id="modalNuevoGasto" tabindex="-1">
+    <div class="modal-dialog">
+      <form class="modal-content" id="formGasto">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Registrar Gasto</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body text-black">
+          <div class="mb-3">
+            <label class="form-label">Tipo de gasto</label>
+            <select id="tipoGasto" class="form-select" required>
+              <option value="">Cargando...</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Mes y año del gasto</label>
+            <input type="month" id="periodoGasto" class="form-control" required />
+            <small class="text-muted">Seleccioná el mes y el año (ej: 2026-02).</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Quién hizo el gasto</label>
+            <select id="responsableGasto" class="form-select" required>
+              <option value="">Cargando...</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Monto (ARS)</label>
+            <input type="text" id="montoGasto" class="form-control" placeholder="$ 0,00" inputmode="decimal" required />
+            <small class="text-muted">Formato moneda pesos argentinos.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-success" type="submit">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Seguridad: sesión
+    if (!localStorage.getItem('token')) {
+      window.location.href = '/admin-panel/login.html';
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/admin-panel/login.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('show');
+    }
+
+    // Fetch con token (igual patrón que tus páginas)
+    function fetchConToken(url, options = {}) {
+      const token = localStorage.getItem('token');
+
+      const headers = {
+        Authorization: 'Bearer ' + token,
+        ...(options.headers || {})
+      };
+
+      // Si enviamos body y no especificaron content-type, asumimos JSON
+      if (options.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+
+      return fetch(url, { ...options, headers }).then(res => {
+        if (res.status === 401) {
+          alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
+          localStorage.removeItem('token');
+          window.location.href = '/admin-panel/login.html';
+          throw new Error('Sesión expirada');
+        }
+        return res;
+      });
+    }
+
+    // Helpers moneda ARS
+    const formateadorARS = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+
+    function parseMontoARS(valor) {
+      // Soporta "$ 1.234,56" -> 1234.56
+      if (!valor) return NaN;
+      const limpio = valor
+        .toString()
+        .replace(/[^\d,.-]/g, '')  // deja números, coma, punto, signo
+        .replace(/\./g, '')        // quita separador de miles
+        .replace(',', '.');        // coma decimal -> punto
+      const num = parseFloat(limpio);
+      return isNaN(num) ? NaN : num;
+    }
+
+    function setMontoInputFormateado(input, num) {
+      if (isNaN(num)) {
+        input.value = '';
+        return;
+      }
+      input.value = formateadorARS.format(num);
+    }
+
+    // Estado
+    let tiposGasto = [];
+    let responsables = [];
+
+    function ahoraYYYYMM() {
+      const d = new Date();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      return `${d.getFullYear()}-${m}`;
+    }
+
+    async function cargarCombosConfiguracion() {
+      // Estos endpoints los vas a crear en "configuración"
+      const [resTipos, resResp] = await Promise.all([
+        fetchConToken('/config/tipos-gasto'),
+        fetchConToken('/config/responsables-gasto')
+      ]);
+
+      if (!resTipos.ok) throw new Error('No se pudieron cargar los tipos de gasto');
+      if (!resResp.ok) throw new Error('No se pudieron cargar los responsables');
+
+      tiposGasto = await resTipos.json();
+      responsables = await resResp.json();
+
+      const selTipo = document.getElementById('tipoGasto');
+      selTipo.innerHTML = `<option value="">Seleccionar...</option>` +
+        tiposGasto.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('');
+
+      const selResp = document.getElementById('responsableGasto');
+      selResp.innerHTML = `<option value="">Seleccionar...</option>` +
+        responsables.map(r => `<option value="${r.id}">${r.nombre}</option>`).join('');
+    }
+
+    function nombreTipo(id) {
+      return tiposGasto.find(t => String(t.id) === String(id))?.nombre ?? '-';
+    }
+
+    function nombreResponsable(id) {
+      return responsables.find(r => String(r.id) === String(id))?.nombre ?? '-';
+    }
+
+    async function cargarGastos(desde, hasta) {
+      const tbody = document.getElementById('tablaGastos');
+      const totalEl = document.getElementById('totalPeriodo');
+      tbody.innerHTML = '';
+
+      const qs = new URLSearchParams();
+      if (desde) qs.set('desde', desde);
+      if (hasta) qs.set('hasta', hasta);
+
+      const res = await fetchConToken('/gastos' + (qs.toString() ? `?${qs}` : ''));
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data?.error || '❌ Error al cargar gastos');
+        return;
+      }
+
+      let total = 0;
+
+      data.forEach(g => {
+        total += Number(g.monto || 0);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="badge-periodo">${g.periodo || '-'}</span></td>
+          <td>${g.tipo_nombre || nombreTipo(g.tipo_id)}</td>
+          <td>${g.responsable_nombre || nombreResponsable(g.responsable_id)}</td>
+          <td>${formateadorARS.format(Number(g.monto || 0))}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-danger" onclick="eliminarGasto(${g.id})">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      totalEl.textContent = formateadorARS.format(total);
+    }
+
+    async function eliminarGasto(id) {
+      if (!confirm('¿Eliminar este gasto?')) return;
+      try {
+        const res = await fetchConToken(`/gastos/${id}`, { method: 'DELETE' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || 'No se pudo eliminar');
+        aplicarFiltro();
+      } catch (err) {
+        console.error(err);
+        alert('❌ Error al eliminar gasto');
+      }
+    }
+
+    function aplicarFiltro() {
+      const desde = document.getElementById('filtroDesde').value;
+      const hasta = document.getElementById('filtroHasta').value;
+      cargarGastos(desde, hasta);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const modal = new bootstrap.Modal(document.getElementById('modalNuevoGasto'));
+      const btnNuevo = document.getElementById('btnNuevoGasto');
+      const form = document.getElementById('formGasto');
+      const inputMonto = document.getElementById('montoGasto');
+
+      // Defaults filtros
+      document.getElementById('filtroDesde').value = ahoraYYYYMM();
+      document.getElementById('filtroHasta').value = ahoraYYYYMM();
+
+      document.getElementById('btnFiltrar').addEventListener('click', aplicarFiltro);
+
+      // Formateo en vivo del monto
+      inputMonto.addEventListener('blur', () => {
+        const num = parseMontoARS(inputMonto.value);
+        if (!isNaN(num)) setMontoInputFormateado(inputMonto, num);
+      });
+
+      inputMonto.addEventListener('focus', () => {
+        // al enfocar, dejamos "editable" sacando símbolos
+        const num = parseMontoARS(inputMonto.value);
+        inputMonto.value = isNaN(num) ? '' : String(num).replace('.', ',');
+      });
+
+      try {
+        await cargarCombosConfiguracion();
+        aplicarFiltro();
+      } catch (err) {
+        console.error(err);
+        alert('❌ No se pudieron cargar listas desde configuración (tipos / responsables).');
+      }
+
+      btnNuevo.addEventListener('click', () => {
+        // valores por defecto
+        document.getElementById('tipoGasto').value = '';
+        document.getElementById('responsableGasto').value = '';
+        document.getElementById('periodoGasto').value = ahoraYYYYMM();
+        document.getElementById('montoGasto').value = '';
+        modal.show();
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const tipo_id = document.getElementById('tipoGasto').value;
+        const responsable_id = document.getElementById('responsableGasto').value;
+        const periodo = document.getElementById('periodoGasto').value; // YYYY-MM
+        const montoNum = parseMontoARS(document.getElementById('montoGasto').value);
+
+        if (!tipo_id || !responsable_id || !periodo || isNaN(montoNum) || montoNum < 0) {
+          alert('⚠️ Completá todos los campos con valores válidos.');
+          return;
+        }
+
+        try {
+          const res = await fetchConToken('/gastos', {
+            method: 'POST',
+            body: JSON.stringify({
+              tipo_id: parseInt(tipo_id),
+              responsable_id: parseInt(responsable_id),
+              periodo,
+              monto: montoNum
+            })
+          });
+
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.error || 'Error al guardar gasto');
+
+          alert('✅ Gasto registrado correctamente');
+          modal.hide();
+          aplicarFiltro();
+        } catch (err) {
+          console.error(err);
+          alert(err.message || '❌ No se pudo registrar el gasto');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
