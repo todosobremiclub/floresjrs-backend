@@ -313,7 +313,7 @@
 
       try {
         const res = await fetchConToken('/montos-mensuales');
-        const datos = await res.json();
+        const datos = await safeJson(res);
 
         const montosPorMes = {};
         datos.forEach(m => {
@@ -340,30 +340,30 @@
       }
     }
 
-    async function guardarMontoMensual(mes) {
-      const anio = new Date().getFullYear();
-      const input = document.getElementById(`monto-${mes}`);
-      const monto = parseFloat(input.value);
+  async function guardarMontoMensual(mes) {
+  const anio = new Date().getFullYear();
+  const input = document.getElementById(`monto-${mes}`);
+  const monto = parseFloat(input.value);
 
-      if (isNaN(monto) || monto < 0) {
-        return alert('Ingresá un monto válido');
-      }
+  if (isNaN(monto) || monto < 0) {
+    return alert('Ingresá un monto válido');
+  }
 
-      try {
-        const res = await fetchConToken('/montos-mensuales', {
-          method: 'POST',
-          body: JSON.stringify({ mes, anio, monto })
-        });
+  try {
+    const res = await fetchConToken('/montos-mensuales', {
+      method: 'POST',
+      body: JSON.stringify({ mes, anio, monto })
+    });
 
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || 'Error al guardar');
+    const data = await safeJson(res).catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Error al guardar');
 
-        alert('✅ Monto guardado correctamente');
-      } catch (e) {
-        console.error(e);
-        alert('❌ No se pudo guardar el monto');
-      }
-    }
+    alert('✅ Monto guardado correctamente');
+  } catch (e) {
+    console.error(e);
+    alert('❌ No se pudo guardar el monto');
+  }
+}
 
     // =========================
     // Helpers CRUD de listas
@@ -420,50 +420,59 @@
       }
     };
 
-    async function cargarLista(entityKey) {
-      try {
-        const res = await fetchConToken(endpoints[entityKey].list);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al cargar');
+   async function cargarLista(entityKey) {
+  try {
+    const res = await fetchConToken(endpoints[entityKey].list);
+    const data = await safeJson(res);
 
-        // opcional: mostrar solo activos si querés
-        const activos = Array.isArray(data) ? data.filter(x => x.activo !== false) : [];
-        renderTablaSimple(endpoints[entityKey].tbody, activos, entityKey);
-      } catch (e) {
-        console.error(e);
-        alert(`❌ Error al cargar ${entityKey}`);
-      }
-    }
+    if (!res.ok) throw new Error(data.error || 'Error al cargar');
 
-    async function crearItem(entityKey, nombre) {
-      const res = await fetchConToken(endpoints[entityKey].post, {
-        method: 'POST',
-        body: JSON.stringify({ nombre })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'No se pudo crear');
-      return data;
-    }
+    const activos = Array.isArray(data) ? data.filter(x => x.activo !== false) : [];
+    renderTablaSimple(endpoints[entityKey].tbody, activos, entityKey);
+  } catch (e) {
+    console.error(e);
+    alert(`❌ Error al cargar ${entityKey}`);
+  }
+}
 
-    async function actualizarItem(entityKey, id, nombre) {
-      const res = await fetchConToken(endpoints[entityKey].update(id), {
-        method: 'PUT',
-        body: JSON.stringify({ id, nombre })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'No se pudo actualizar');
-      return data;
-    }
+async function safeJson(res) {
+  const ct = res.headers.get('content-type') || '';
+  if (!ct.includes('application/json')) {
+    const text = await res.text();
+    throw new Error(`Respuesta no JSON (${res.status}). ${text.slice(0, 120)}`);
+  }
+  return res.json();
+}
 
-    async function eliminarItem(entityKey, id) {
-      const res = await fetchConToken(endpoints[entityKey].del, {
-        method: 'DELETE',
-        body: JSON.stringify({ id })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'No se pudo eliminar');
-      return data;
-    }
+   async function crearItem(entityKey, nombre) {
+  const res = await fetchConToken(endpoints[entityKey].post, {
+    method: 'POST',
+    body: JSON.stringify({ nombre })
+  });
+  const data = await safeJson(res).catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'No se pudo crear');
+  return data;
+}
+
+async function actualizarItem(entityKey, id, nombre) {
+  const res = await fetchConToken(endpoints[entityKey].update(id), {
+    method: 'PUT',
+    body: JSON.stringify({ id, nombre })
+  });
+  const data = await safeJson(res).catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'No se pudo actualizar');
+  return data;
+}
+
+async function eliminarItem(entityKey, id) {
+  const res = await fetchConToken(endpoints[entityKey].del, {
+    method: 'DELETE',
+    body: JSON.stringify({ id })
+  });
+  const data = await safeJson(res).catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'No se pudo eliminar');
+  return data;
+}
 
     // =========================
     // 2) Formularios Alta
@@ -519,30 +528,45 @@
     // =========================
     // 3) Botones Guardar / Eliminar (delegación)
     // =========================
-    document.body.addEventListener('click', async (e) => {
-      const btn = e.target;
-      const id = btn?.dataset?.id;
-      const entityKey = btn?.dataset?.entity;
-      if (!id || !entityKey) return;
+   document.body.addEventListener('click', async (e) => {
+  const btn = e.target;
+  const id = btn?.dataset?.id;
+  const entityKey = btn?.dataset?.entity;
 
-      // Guardar
-      if (btn.classList.contains('btn-guardar')) {
-        const input = document.querySelector(`input[data-entity="${entityKey}"][data-id="${id}"]`);
-        if (!input) return;
+  if (!id || !entityKey) return;
 
-        const nuevoNombre = input.value.trim();
-        const original = input.dataset.original;
+  // Guardar
+  if (btn.classList.contains('btn-guardar')) {
+    const input = document.querySelector(`input[data-entity="${entityKey}"][data-id="${id}"]`);
+    if (!input) return;
 
-        if (!nuevoNombre || nuevoNombre === original) return;
+    const nuevoNombre = input.value.trim();
+    const original = input.dataset.original;
 
-        try {
-          await actualizarItem(entityKey, id, nuevoNombre);
-          await cargarLista(entityKey);
-          alert('✅ Actualizado');
-        } catch (err) {
-          alert('❌ ' + (err.message || 'No se pudo actualizar'));
-        }
-      }
+    if (!nuevoNombre || nuevoNombre === original) return;
+
+    try {
+      await actualizarItem(entityKey, id, nuevoNombre);
+      await cargarLista(entityKey);
+      alert('✅ Actualizado');
+    } catch (err) {
+      alert('❌ ' + (err.message || 'No se pudo actualizar'));
+    }
+  }
+
+  // Eliminar
+  if (btn.classList.contains('btn-eliminar')) {
+    if (!confirm('¿Eliminar este elemento?')) return;
+
+    try {
+      await eliminarItem(entityKey, id);
+      await cargarLista(entityKey);
+      alert('✅ Eliminado');
+    } catch (err) {
+      alert('❌ ' + (err.message || 'No se pudo eliminar'));
+    }
+  }
+});
 
       // Eliminar
       if (btn.classList.contains('btn-eliminar')) {
