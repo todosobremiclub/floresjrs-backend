@@ -249,7 +249,10 @@ body {
   </div>
 </div>
 
-<button id="btnExportarExcel" class="btn btn-yellow mb-3">📥 Descargar Excel</button>
+<div class="d-flex align-items-center gap-2 mb-3">
+  <button id="btnExportarExcel" class="btn btn-yellow">📥 Descargar Excel</button>
+  <span id="contadorActivos" class="badge bg-warning text-dark" style="font-size: 0.95rem;">
+
 
 <div class="table-responsive">
   <table class="table table-striped table-bordered text-center bg-white tabla-socios">
@@ -326,6 +329,14 @@ async function obtenerProximoNumeroSocio() {
 
    let sociosOriginales = [];
 let ordenActual = { campo: null, asc: true };
+
+function actualizarContadorActivos() {
+  const el = document.getElementById('contadorActivos');
+  if (!el) return;
+
+  const activos = sociosOriginales.filter(s => !!s.activo).length;
+  el.textContent = `Socios activos: ${activos}`;
+}
 
 
 function poblarFiltros(socios) {
@@ -508,11 +519,10 @@ async function cargarSocios() {
 
     const socios = await res.json();
 sociosOriginales = socios;
+actualizarContadorActivos();
 ordenActual = { campo: null, asc: true };
-
-
-    poblarFiltros(socios);
-    mostrarFiltrados();
+poblarFiltros(socios);
+mostrarFiltrados();
   } catch (err) {
     alert('❌ Error al cargar socios: ' + err.message);
   }
@@ -639,6 +649,28 @@ modal.show();
   // Cambios en switches de activo/becado
   document.body.addEventListener('change', async (e) => {
     if (e.target.classList.contains('check-activo') || e.target.classList.contains('check-becado')) {
+  const id = e.target.dataset.id;
+  const campo = e.target.classList.contains('check-activo') ? 'activo' : 'becado';
+  const valor = e.target.checked;
+
+  // 🔥 Reflejar en memoria para que el contador sea inmediato
+  const socio = sociosOriginales.find(s => String(s.numero) === String(id));
+  if (socio) socio[campo] = valor;
+
+  // ✅ actualizar badge si cambió "activo"
+  if (campo === 'activo') actualizarContadorActivos();
+
+  try {
+    const res = await fetchConToken(`/socio/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [campo]: valor })
+    });
+    if (!res.ok) throw new Error();
+  } catch {
+    alert(`❌ No se pudo actualizar el estado de ${campo}`);
+  }
+}
       const id = e.target.dataset.id;
       const campo = e.target.classList.contains('check-activo') ? 'activo' : 'becado';
       const valor = e.target.checked;
