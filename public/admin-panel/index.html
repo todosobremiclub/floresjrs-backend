@@ -252,6 +252,9 @@ body {
 <div class="d-flex align-items-center gap-2 mb-3">
   <button id="btnExportarExcel" class="btn btn-yellow">📥 Descargar Excel</button>
   <span id="contadorActivos" class="badge bg-warning text-dark" style="font-size: 0.95rem;">
+    Socios activos: 0
+  </span>
+</div>
 
 
 <div class="table-responsive">
@@ -647,30 +650,30 @@ modal.show();
   });
 
   // Cambios en switches de activo/becado
-  document.body.addEventListener('change', async (e) => {
-    if (e.target.classList.contains('check-activo') || e.target.classList.contains('check-becado')) {
-  const id = e.target.dataset.id;
-  const campo = e.target.classList.contains('check-activo') ? 'activo' : 'becado';
-  const valor = e.target.checked;
+document.body.addEventListener('change', async (e) => {
+  if (e.target.classList.contains('check-activo') || e.target.classList.contains('check-becado')) {
+    const id = e.target.dataset.id;
+    const campo = e.target.classList.contains('check-activo') ? 'activo' : 'becado';
+    const valor = e.target.checked;
 
-  // 🔥 Reflejar en memoria para que el contador sea inmediato
-  const socio = sociosOriginales.find(s => String(s.numero) === String(id));
-  if (socio) socio[campo] = valor;
+    // Reflejar en memoria para que el contador sea inmediato
+    const socio = sociosOriginales.find(s => String(s.numero) === String(id));
+    if (socio) socio[campo] = valor;
 
-  // ✅ actualizar badge si cambió "activo"
-  if (campo === 'activo') actualizarContadorActivos();
+    if (campo === 'activo') actualizarContadorActivos();
 
-  try {
-    const res = await fetchConToken(`/socio/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [campo]: valor })
-    });
-    if (!res.ok) throw new Error();
-  } catch {
-    alert(`❌ No se pudo actualizar el estado de ${campo}`);
+    try {
+      const res = await fetchConToken(`/socio/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [campo]: valor })
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      alert(`❌ No se pudo actualizar el estado de ${campo}`);
+    }
   }
-}
+});
       const id = e.target.dataset.id;
       const campo = e.target.classList.contains('check-activo') ? 'activo' : 'becado';
       const valor = e.target.checked;
@@ -799,7 +802,7 @@ document.getElementById('btnExportarExcel').addEventListener('click', async () =
 
 
 
-  </script>
+  
 <div class="modal fade" id="modalNuevoSocio" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-primary text-white">
