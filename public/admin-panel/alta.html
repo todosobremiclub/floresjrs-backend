@@ -129,8 +129,8 @@
           throw new Error(error.error || 'Error al enviar la solicitud');
         }
 
-        mensaje.innerHTML = '<div class="alert alert-success">✅ Solicitud enviada correctamente. ¡Gracias!</div>';
-        form.reset();
+        window.location.replace('/solicitud-enviada.html');
+
       } catch (err) {
         console.error(err);
         mensaje.innerHTML = '<div class="alert alert-danger">❌ Ocurrió un error al enviar la solicitud.</div>';
