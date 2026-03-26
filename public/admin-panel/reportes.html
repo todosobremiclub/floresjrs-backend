@@ -73,24 +73,29 @@
     padding: 2rem;
   }
 
-  /* ========================= GRID SYNC ALTURA ===================== */
+  /* ========================= GRID / CARDS ======================== */
 
-  /* Las columnas adoptan la altura del card más alto */
+  /* Las columnas se estiran según el card más alto */
   .row.row-cols-md-3 > .col {
     display: flex;
   }
 
-  /* Los cards se estiran para igualar altura */
   .dashboard-card {
     flex: 1;
     background: white;
     color: #004aad;
+    margin-bottom: 2rem;
     border-radius: 16px;
     padding: 20px;
-    margin-bottom: 2rem;
     box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
     display: flex;
     flex-direction: column;
+  }
+
+  .modulo-superior {
+    display: flex;
+    flex-direction: column;
+    height: 100%;      /* ocupa toda la altura disponible de la columna */
   }
 
   /* ========================= TITULOS ============================= */
@@ -99,27 +104,27 @@
     font-weight: bold;
     margin-bottom: 5px;
     color: #1c4e80;
+    text-align: left;
   }
   .card-subtitle-tsmc {
     font-size: 0.85rem;
     color: #666;
     margin-bottom: 10px;
+    text-align: left;
   }
 
-  /* ========================= SOCIOS - DONUT ====================== */
+  /* ========================= DONUT SOCIOS ======================= */
   .donut-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 4px;
   }
-
   .donut-container {
     position: relative;
     width: 180px;
     height: 180px;
   }
-
   .donut-center-text {
     position: absolute;
     top: 50%;
@@ -130,7 +135,7 @@
     color: #333;
   }
 
-  /* ========================= LEYENDA ============================= */
+  /* ========================= LEYENDA SOCIOS ====================== */
   .legend-grid-2cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -139,12 +144,12 @@
     font-size: 12px;
     color: #004aad;
   }
-  .legend-item {
+  .legend-grid-2cols .legend-item {
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .legend-color {
+  .legend-grid-2cols .legend-color {
     width: 10px;
     height: 10px;
     border-radius: 2px;
@@ -155,17 +160,18 @@
   #impagas-numero:hover { transform: scale(1.05); }
 
   .cuotas-numero-area {
-    margin-top: 4px;
-    margin-bottom: 6px;
+    margin-top: 0;
+    margin-bottom: 4px;
   }
 
   .cuotas-tabla-wrapper {
     flex: 1;
     overflow-y: auto;
     margin-top: 10px;
+    max-height: 190px;   /* 👈 visible hasta ~Agosto 2025, resto con scroll */
   }
-
 </style>
+
 </head>
 
 <body>
