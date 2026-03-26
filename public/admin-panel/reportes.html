@@ -11,159 +11,160 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-    }
+ <style>
+  body {
+    margin: 0;
+    background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+  }
 
-    /* ========================= SIDEBAR ============================= */
-    .sidebar {
-      width: 200px;
-      background-color: #002f6c;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      padding-top: 4rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      overflow-y: auto;
-      z-index: 1040;
-      transition: transform 0.3s ease;
-    }
-    .sidebar a {
-      color: white;
-      text-decoration: none;
-    }
-    .btn-outline-light {
-      border-color: #FFD500 !important;
-    }
-    .btn-outline-light:hover {
-      background-color: #FFD500 !important;
-      color: black !important;
-    }
+  /* ========================= SIDEBAR ============================= */
+  .sidebar {
+    width: 200px;
+    background-color: #002f6c;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 1rem;
+    padding-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    z-index: 1040;
+    transition: transform 0.3s ease;
+  }
+  .sidebar a {
+    color: white;
+    text-decoration: none;
+  }
+  .btn-outline-light {
+    border-color: #FFD500 !important;
+  }
+  .btn-outline-light:hover {
+    background-color: #FFD500 !important;
+    color: black !important;
+  }
 
-    .toggle-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 1050;
-      display: none;
-    }
-    @media (max-width: 767px) {
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.show { transform: translateX(0); }
-      .toggle-btn { display: block; }
-      .main-content { margin-left: 0 !important; }
-    }
+  .toggle-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1050;
+    display: none;
+  }
+  @media (max-width: 767px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.show { transform: translateX(0); }
+    .toggle-btn { display: block; }
+    .main-content { margin-left: 0 !important; }
+  }
 
-    /* ========================= MAIN CONTENT ======================== */
-    .main-content {
-      margin-left: 200px;
-      padding: 2rem;
-    }
+  /* ========================= MAIN CONTENT ======================== */
+  .main-content {
+    margin-left: 200px;
+    padding: 2rem;
+  }
 
-    /* ========================= CARDS ============================== */
-    .dashboard-card {
-      background: white;
-      color: #004aad;
-      margin-bottom: 2rem;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
-    }
+  /* ========================= CARDS ============================== */
+  .dashboard-card {
+    background: white;
+    color: #004aad;
+    margin-bottom: 2rem;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+  }
 
-    /* ALTURA FIJA PARA TODOS LOS MÓDULOS SUPERIORES */
-    .modulo-superior {
-      height: 400px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
+  /* ========================= ALTURA UNIFICADA ==================== */
+  .modulo-superior {
+    height: 400px;           /* 👈 altura fija igual para los 3 módulos */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
 
-    .card-title-tsmc {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #1c4e80;
-      text-align: left;
-    }
-    .card-subtitle-tsmc {
-      font-size: 0.85rem;
-      color: #666;
-      margin-bottom: 10px;
-      text-align: left;
-    }
+  /* ========================= TITULOS ============================= */
+  .card-title-tsmc {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #1c4e80;
+    text-align: left;
+  }
+  .card-subtitle-tsmc {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 10px;
+    text-align: left;
+  }
 
-    /* ========================= DONUT SOCIOS ======================= */
-    .donut-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 4px 0 4px 0;
-    }
-    .donut-container {
-      position: relative;
-      width: 180px;
-      height: 180px;
-    }
-    .donut-center-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 28px;
-      font-weight: 700;
-      color: #333;
-    }
+  /* ========================= DONUT SOCIOS ======================= */
+  .donut-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 0 4px 0;
+  }
+  .donut-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+  }
+  .donut-center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+  }
 
-    /* Leyenda compacta abajo en 2 columnas */
-    .legend-grid-2cols {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px 10px;
-      margin-top: 4px;
-      font-size: 12px;
-      color: #004aad;
-    }
-    .legend-grid-2cols .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .legend-grid-2cols .legend-color {
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-    }
+  /* ========================= LEYENDA SOCIOS ======================= */
+  .legend-grid-2cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #004aad;
+  }
+  .legend-grid-2cols .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-grid-2cols .legend-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
 
-    /* ========================= CUOTAS IMPAGAS ====================== */
-    #impagas-numero { transition: 0.2s ease; }
-    #impagas-numero:hover { transform: scale(1.05); }
+  /* ========================= CUOTAS IMPAGAS ======================= */
+  #impagas-numero { transition: 0.2s ease; }
+  #impagas-numero:hover { transform: scale(1.05); }
 
-    .cuotas-numero-area {
-      margin-top: 0;
-      margin-bottom: 4px;
-    }
+  .cuotas-numero-area {
+    margin-top: 0;
+    margin-bottom: 4px;
+  }
 
-    .cuotas-tabla-wrapper {
-      flex: 1;
-      max-height: 170px;
-      overflow-y: auto;
-      margin-top: 6px;
-    }
+  .cuotas-tabla-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 10px;
+    max-height: none !important;   /* Permite expandirse dentro de los 400px */
+  }
 
-  </style>
+</style>
 </head>
 
 <body>
