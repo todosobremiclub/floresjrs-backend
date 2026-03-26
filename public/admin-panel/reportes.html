@@ -83,35 +83,29 @@
     box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
   }
 
-  /* ========================= ALTURA UNIFICADA ==================== */
+  /* ========================= ALTURA ADAPTATIVA =================== */
   .modulo-superior {
-    height: 400px;           /* 👈 altura fija igual para los 3 módulos */
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    height: 100%;
   }
 
-  /* ========================= TITULOS ============================= */
-  .card-title-tsmc {
-    font-size: 1.1rem;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #1c4e80;
-    text-align: left;
-  }
-  .card-subtitle-tsmc {
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 10px;
-    text-align: left;
+  /* Para que las 3 columnas se igualen automáticamente */
+  .row-cols-md-3 > .col {
+    display: flex;
   }
 
-  /* ========================= DONUT SOCIOS ======================= */
+  .dashboard-card {
+    flex: 1;          /* 💥 los 3 cards toman misma altura según el más alto */
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ========================= SOCIOS DONUT ======================== */
   .donut-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 4px 0 4px 0;
   }
   .donut-container {
     position: relative;
@@ -128,21 +122,21 @@
     color: #333;
   }
 
-  /* ========================= LEYENDA SOCIOS ======================= */
+  /* ========================= LEYENDA ============================= */
   .legend-grid-2cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 4px 10px;
-    margin-top: 8px;
+    margin-top: 10px;
     font-size: 12px;
     color: #004aad;
   }
-  .legend-grid-2cols .legend-item {
+  .legend-item {
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .legend-grid-2cols .legend-color {
+  .legend-color {
     width: 10px;
     height: 10px;
     border-radius: 2px;
@@ -161,10 +155,9 @@
     flex: 1;
     overflow-y: auto;
     margin-top: 10px;
-    max-height: none !important;   /* Permite expandirse dentro de los 400px */
   }
-
 </style>
+
 </head>
 
 <body>
