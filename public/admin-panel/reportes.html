@@ -190,6 +190,13 @@
   overflow-y: auto;
 }
 
+/* Forzar que Cuotas Impagas tenga la misma altura que Socios por Categoría */
+.card-cuotas-impagas-mismo-tamano {
+  min-height: 520px;   /* Ajustás acá si hace falta */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
 
 
   </style>
@@ -302,7 +309,7 @@
     <!-- 3) INGRESOS VS GASTOS (SE COMPLETA LUEGO)                -->
     <!-- ========================================================= -->
     <div class="col">
-      <div class="dashboard-card">
+      <div class="dashboard-card card-cuotas-impagas-mismo-tamano">
         <div style="font-size:1.1rem;color:#999;text-align:center;padding:40px 0;">
           (Próximo módulo: Ingresos vs Gastos)
         </div>
