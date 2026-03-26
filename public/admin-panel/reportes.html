@@ -254,22 +254,63 @@
 
 
 <!-- ========================= MODAL DETALLE ============================== -->
-<div id="modalDetalleIngresos" 
-     style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;
-            background-color:rgba(0,0,0,.5);z-index:9999;
-            justify-content:center;align-items:center;">
-  <div style="background:#fff;padding:24px;border-radius:10px;width:90%;max-width:720px;
-              max-height:90vh;overflow-y:auto;position:relative;color:black;">
+<div id="modalDetalleIngresos"
+     style="
+       display:none;
+       position:fixed;
+       top:0;
+       left:0;
+       width:100vw;
+       height:100vh;
+       background-color:rgba(0,0,0,.45);
+       z-index:9999;
+       justify-content:center;
+       align-items:center;
+     ">
+
+  <div style="
+       background:#fff;
+       padding:20px 24px;
+       border-radius:14px;
+       width:95%;
+       max-width:1100px;       /* 👉 MÁS ANCHO */
+       max-height:75vh;         /* 👉 MÁS BAJO */
+       overflow-y:auto;
+       position:relative;
+       color:black;
+       box-shadow:0 4px 25px rgba(0,0,0,0.25);
+     ">
+
+    <!-- BOTÓN CERRAR -->
     <button onclick="cerrarDetalleIngresos()" 
-            style="position:absolute;top:10px;right:10px;border:none;background:none;
-                   font-size:20px;cursor:pointer">✖</button>
+            style="
+              position:absolute;
+              top:8px;
+              right:12px;
+              border:none;
+              background:none;
+              font-size:22px;
+              font-weight:bold;
+              cursor:pointer;
+              color:#333;
+            ">✖</button>
 
-    <h3 id="tituloDetalleIngreso" style="color:#1c4e80;margin-top:0;"></h3>
+    <!-- TÍTULO -->
+    <h3 id="tituloDetalleIngreso" 
+        style="
+          color:#1c4e80;
+          margin-top:0;
+          margin-bottom:20px;
+          font-size:22px;
+          text-align:left;
+        ">
+    </h3>
 
+    <!-- CONTENIDO TABLA -->
     <div id="contenidoDetalleIngreso"></div>
+
   </div>
 </div>
-
 
 <!-- ========================= SCRIPT ============================== -->
 <script>
