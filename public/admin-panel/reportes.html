@@ -12,6 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
   body {
     margin: 0;
     background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
@@ -37,13 +38,16 @@
     z-index: 1040;
     transition: transform 0.3s ease;
   }
+
   .sidebar a {
     color: white;
     text-decoration: none;
   }
+
   .btn-outline-light {
     border-color: #FFD500 !important;
   }
+
   .btn-outline-light:hover {
     background-color: #FFD500 !important;
     color: black !important;
@@ -60,6 +64,7 @@
     z-index: 1050;
     display: none;
   }
+
   @media (max-width: 767px) {
     .sidebar { transform: translateX(-100%); }
     .sidebar.show { transform: translateX(0); }
@@ -73,9 +78,7 @@
     padding: 2rem;
   }
 
-  /* ========================= GRID / CARDS ======================== */
-
-  /* Las columnas se estiran según el card más alto */
+  /* ========================= GRID ======================== */
   .row.row-cols-md-3 > .col {
     display: flex;
   }
@@ -84,9 +87,9 @@
     flex: 1;
     background: white;
     color: #004aad;
-    margin-bottom: 2rem;
     border-radius: 16px;
     padding: 20px;
+    margin-bottom: 2rem;
     box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
     display: flex;
     flex-direction: column;
@@ -95,10 +98,9 @@
   .modulo-superior {
     display: flex;
     flex-direction: column;
-    height: 100%;      /* ocupa toda la altura disponible de la columna */
+    height: 100%;
   }
 
-  /* ========================= TITULOS ============================= */
   .card-title-tsmc {
     font-size: 1.1rem;
     font-weight: bold;
@@ -106,6 +108,7 @@
     color: #1c4e80;
     text-align: left;
   }
+
   .card-subtitle-tsmc {
     font-size: 0.85rem;
     color: #666;
@@ -113,18 +116,20 @@
     text-align: left;
   }
 
-  /* ========================= DONUT SOCIOS ======================= */
+  /* DONUT */
   .donut-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 4px;
   }
+
   .donut-container {
     position: relative;
     width: 180px;
     height: 180px;
   }
+
   .donut-center-text {
     position: absolute;
     top: 50%;
@@ -135,7 +140,7 @@
     color: #333;
   }
 
-  /* ========================= LEYENDA SOCIOS ====================== */
+  /* Leyenda */
   .legend-grid-2cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -144,18 +149,20 @@
     font-size: 12px;
     color: #004aad;
   }
-  .legend-grid-2cols .legend-item {
+
+  .legend-item {
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .legend-grid-2cols .legend-color {
+
+  .legend-color {
     width: 10px;
     height: 10px;
     border-radius: 2px;
   }
 
-  /* ========================= CUOTAS IMPAGAS ======================= */
+  /* CUOTAS */
   #impagas-numero { transition: 0.2s ease; }
   #impagas-numero:hover { transform: scale(1.05); }
 
@@ -168,15 +175,23 @@
     flex: 1;
     overflow-y: auto;
     margin-top: 10px;
-    max-height: 190px;   /* 👈 visible hasta ~Agosto 2025, resto con scroll */
+    max-height: 190px;
   }
+
+  /* NUEVOS SOCIOS */
+  #nuevos-numero {
+    transition: .2s ease;
+  }
+  #nuevos-numero:hover {
+    transform: scale(1.05);
+  }
+
 </style>
 
 </head>
 
 <body>
 
-<!-- ========================= SIDEBAR ============================== -->
 <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
 <div class="sidebar" id="sidebar">
@@ -192,27 +207,20 @@
   <button class="btn btn-outline-light" onclick="logout()">Cerrar sesión</button>
 </div>
 
-<!-- ========================= CONTENT ============================== -->
 <div class="main-content">
   <div class="text-center mb-4">
     <img src="flores_jrs_logo.png" alt="Escudo" height="50">
     <h2 class="text-warning">Reportes - Flores Juniors</h2>
   </div>
 
-  <!-- GRID 3 x 2 -->
   <div class="row row-cols-1 row-cols-md-3 g-4">
 
-    <!-- ========================================================= -->
-    <!-- 1) SOCIOS POR CATEGORÍA                                  -->
-    <!-- ========================================================= -->
+    <!-- SOCIOS POR CATEGORÍA -->
     <div class="col">
       <div class="dashboard-card modulo-superior">
         <div class="card-title-tsmc">Socios por Categoría</div>
-        <div class="card-subtitle-tsmc">
-          Distribución de socios activos por categoría.
-        </div>
+        <div class="card-subtitle-tsmc">Distribución de socios activos por categoría.</div>
 
-        <!-- Donut centrado -->
         <div class="donut-wrapper">
           <div class="donut-container">
             <canvas id="chartCategorias"></canvas>
@@ -220,21 +228,15 @@
           </div>
         </div>
 
-        <!-- Leyenda abajo -->
         <div id="legendCategorias" class="legend-grid-2cols"></div>
       </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- 2) CUOTAS IMPAGAS                                         -->
-    <!-- ========================================================= -->
+    <!-- CUOTAS IMPAGAS -->
     <div class="col">
       <div class="dashboard-card modulo-superior">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <div style="font-size:1.1rem;font-weight:bold;color:#1c4e80;">
-            Cuotas Impagas
-          </div>
-
+          <div style="font-size:1.1rem;font-weight:bold;color:#1c4e80;">Cuotas Impagas</div>
           <div class="d-flex align-items-center" style="gap:6px;">
             <button class="btn btn-sm btn-primary" onclick="cambiarMesImpagas('prev')">◀</button>
             <span id="titulo-mes-impagas" style="min-width:90px;text-align:center;">-</span>
@@ -242,25 +244,20 @@
           </div>
         </div>
 
-        <div style="font-size:0.85rem;color:#555;margin-bottom:8px;">
+        <div style="font-size:0.85rem;color:#555;margin-bottom:6px;">
           Morosidad mensual de socios activos. Considera la fecha de ingreso.
         </div>
 
-        <!-- Número principal -->
-        <div class="text-center cuotas-numero-area" style="cursor:pointer;" onclick="abrirDetalleImpagas()">
+        <div class="text-center cuotas-numero-area" onclick="abrirDetalleImpagas()" style="cursor:pointer;">
           <div style="font-size:0.9rem;color:#666;">Socios sin pago</div>
           <div id="impagas-numero" style="font-size:32px;font-weight:700;color:#c62828;">0</div>
           <div id="impagas-anio" style="font-size:0.9rem;color:#666;"></div>
         </div>
 
-        <!-- Tabla -->
         <div class="cuotas-tabla-wrapper">
           <table class="table table-sm table-striped" style="font-size:13px;color:#004aad;">
             <thead class="table-light" style="position:sticky;top:0;">
-              <tr>
-                <th>Mes</th>
-                <th>Socios sin pago</th>
-              </tr>
+              <tr><th>Mes</th><th>Socios sin pago</th></tr>
             </thead>
             <tbody id="tabla-impagas"></tbody>
           </table>
@@ -268,23 +265,38 @@
       </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- 3) INGRESOS VS GASTOS (PLACEHOLDER)                      -->
-    <!-- ========================================================= -->
+    <!-- SOCIOS NUEVOS POR MES -->
     <div class="col">
       <div class="dashboard-card modulo-superior">
-        <div style="font-size:1.1rem;color:#999;text-align:center;padding:40px 0;">
-          (Próximo módulo: Ingresos vs Gastos)
+        <div class="card-title-tsmc">Socios nuevos por mes</div>
+
+        <div class="d-flex justify-content-center align-items-center mb-2" style="gap:6px;">
+          <button class="btn btn-sm btn-primary" onclick="cambiarMesNuevos('prev')">◀</button>
+          <span id="titulo-mes-nuevos" style="min-width:110px;text-align:center;">Mes Año</span>
+          <button class="btn btn-sm btn-primary" onclick="cambiarMesNuevos('next')">▶</button>
+        </div>
+
+        <div class="text-center" style="font-size:0.85rem;color:#666;margin-bottom:4px;">Socios nuevos</div>
+
+        <div class="text-center" style="cursor:default;margin-bottom:8px;">
+          <div id="nuevos-numero" style="font-size:32px;font-weight:700;color:#0057ff;">0</div>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;margin-top:6px;">
+          <table class="table table-sm table-striped" style="font-size:13px;color:#004aad;">
+            <thead class="table-light" style="position:sticky;top:0;">
+              <tr><th>Mes</th><th>Nuevos</th></tr>
+            </thead>
+            <tbody id="tabla-nuevos"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-  </div> <!-- row -->
+  </div>
+</div>
 
-</div> <!-- main-content -->
-
-
-<!-- ========================= MODAL DETALLE ============================== -->
+<!-- MODAL DETALLE -->
 <div id="modalDetalleIngresos"
      style="
        display:none;
@@ -298,7 +310,6 @@
        justify-content:center;
        align-items:center;
      ">
-
   <div style="
        background:#fff;
        padding:20px 24px;
@@ -312,7 +323,6 @@
        box-shadow:0 4px 25px rgba(0,0,0,0.25);
      ">
 
-    <!-- BOTÓN CERRAR -->
     <button onclick="cerrarDetalleIngresos()" 
             style="
               position:absolute;
@@ -323,29 +333,20 @@
               font-size:22px;
               font-weight:bold;
               cursor:pointer;
-              color:#333;
             ">✖</button>
 
-    <!-- TÍTULO -->
     <h3 id="tituloDetalleIngreso" 
-        style="
-          color:#1c4e80;
-          margin-top:0;
-          margin-bottom:20px;
-          font-size:22px;
-          text-align:left;
-        ">
+        style="color:#1c4e80;margin-top:0;margin-bottom:20px;font-size:22px;">
     </h3>
 
-    <!-- CONTENIDO TABLA -->
     <div id="contenidoDetalleIngreso"></div>
 
   </div>
 </div>
 
-<!-- ========================= SCRIPT ============================== -->
 <script>
-/* ================================ AUTH ================================== */
+
+/* ================= AUTH ================= */
 if (!localStorage.getItem('token')) {
   window.location.href = "/admin-panel/login.html";
 }
@@ -357,7 +358,7 @@ function toggleSidebar() {
   document.querySelector('.sidebar').classList.toggle('show');
 }
 
-/* =========================== FETCH CON TOKEN ============================ */
+/* FETCH */
 function fetchConToken(url, opciones = {}) {
   const token = localStorage.getItem("token");
   return fetch(url, {
@@ -377,7 +378,7 @@ function fetchConToken(url, opciones = {}) {
   });
 }
 
-/* ======================= SOCIOS POR CATEGORÍA ========================== */
+/* ================= SOCIOS POR CATEGORIA ================= */
 async function cargarSociosPorCategoria() {
   try {
     const res = await fetchConToken("/reportes/socios-por-categoria");
@@ -389,7 +390,7 @@ async function cargarSociosPorCategoria() {
     const labels = data.map(x => x.categoria || "Sin categoría");
     const valores = data.map(x => Number(x.cantidad));
 
-    const colores = ["#1c8c5a", "#1c4e80", "#d7263d", "#ff9f1c", "#9b5de5", "#00bbf9"];
+    const colores = ["#1c8c5a","#1c4e80","#d7263d","#ff9f1c","#9b5de5","#00bbf9","#2ec4b6","#ff6b6b"];
 
     const legend = document.getElementById("legendCategorias");
     legend.innerHTML = "";
@@ -404,16 +405,19 @@ async function cargarSociosPorCategoria() {
     const ctx = document.getElementById("chartCategorias").getContext("2d");
     new Chart(ctx, {
       type: "doughnut",
-      data: { labels, datasets: [{ data: valores, backgroundColor: colores }] },
+      data: { 
+        labels, 
+        datasets: [{ data: valores, backgroundColor: colores }] 
+      },
       options: { plugins: { legend: { display:false } }, cutout: "60%" }
     });
 
   } catch (err) {
-    console.error("Error soc. categoría:", err);
+    console.error("Error categoría:", err);
   }
 }
 
-/* ============================= CUOTAS IMPAGAS ========================== */
+/* ================= CUOTAS IMPAGAS ================= */
 
 let resumenImpagas = [];
 let idxMesImpagas = 0;
@@ -429,15 +433,11 @@ async function cargarCuotasImpagas() {
     refrescarCardImpagas();
     llenarTablaImpagas();
 
-  } catch (err) {
-    console.error("Error impagas:", err);
-  }
+  } catch (err) { console.error("Error impagas:", err); }
 }
 
 function refrescarCardImpagas() {
-  if (!resumenImpagas.length) return;
   const row = resumenImpagas[idxMesImpagas];
-
   document.getElementById("titulo-mes-impagas").textContent = formatearMesYYYYMM(row.mes);
   document.getElementById("impagas-numero").textContent = row.sin_pago;
   document.getElementById("impagas-anio").textContent = "Año " + row.mes.slice(0,4);
@@ -459,20 +459,13 @@ function llenarTablaImpagas() {
 }
 
 function cambiarMesImpagas(dir){
-  if (!resumenImpagas.length) return;
   const len = resumenImpagas.length;
-
-  idxMesImpagas = (dir === 'prev')
-    ? (idxMesImpagas + 1) % len
-    : (idxMesImpagas - 1 + len) % len;
-
+  if (dir === 'prev') idxMesImpagas = (idxMesImpagas + 1) % len;
+  else idxMesImpagas = (idxMesImpagas - 1 + len) % len;
   refrescarCardImpagas();
 }
 
-async function abrirDetalleImpagas(mesOverride){
-  const mes = mesOverride || (resumenImpagas[idxMesImpagas]?.mes);
-  if (!mes) return;
-
+async function abrirDetalleImpagas(mes) {
   document.getElementById("modalDetalleIngresos").style.display='flex';
   document.getElementById("tituloDetalleIngreso").textContent =
     `Cuotas impagas — ${formatearMesYYYYMM(mes)}`;
@@ -497,44 +490,92 @@ function cerrarDetalleIngresos(){
   document.getElementById("contenidoDetalleIngreso").innerHTML="";
 }
 
-/* ============================= UTILS =============================== */
-function formatearMesYYYYMM(yyyyMM){
-  const [a,m] = String(yyyyMM||'').split('-');
-  const meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto',
-                 'Septiembre','Octubre','Noviembre','Diciembre'];
-  return `${meses[parseInt(m,10)]} ${a}`;
+/* ================= SOCIOS NUEVOS POR MES ================= */
+
+let sociosNuevosPorMes = [];
+let idxMesNuevos = 0;
+
+async function cargarSociosNuevosPorMes(){
+  try {
+    const r = await fetchConToken("/reportes/socios-nuevos-por-mes");
+    sociosNuevosPorMes = await r.json();
+
+    sociosNuevosPorMes.sort((a,b)=> a.mes.localeCompare(b.mes));
+    idxMesNuevos = sociosNuevosPorMes.length - 1;
+
+    refrescarCardNuevos();
+
+  } catch(err){
+    console.error("Error nuevos:", err);
+  }
 }
 
-function renderTabla(idContenedor, columnas, datos){
-  const cont = document.getElementById(idContenedor);
-  cont.innerHTML = "";
+function refrescarCardNuevos(){
+  const row = sociosNuevosPorMes[idxMesNuevos];
+  document.getElementById("titulo-mes-nuevos").textContent = formatearMesYYYYMM(row.mes);
+  document.getElementById("nuevos-numero").textContent = row.cantidad;
 
-  if (!datos || !datos.length){
+  const [anio, mes] = row.mes.split("-");
+  const mesSel = parseInt(mes,10);
+
+  const tb = document.getElementById("tabla-nuevos");
+  tb.innerHTML = "";
+
+  sociosNuevosPorMes
+    .filter(r => r.mes.startsWith(anio + "-"))
+    .filter(r => parseInt(r.mes.split("-")[1],10) <= mesSel)
+    .sort((a,b)=> a.mes.localeCompare(b.mes))
+    .forEach(r => {
+      const nombreMes = formatearMesYYYYMM(r.mes).split(" ")[0];
+      tb.innerHTML += `<tr><td>${nombreMes}</td><td>${r.cantidad}</td></tr>`;
+    });
+}
+
+function cambiarMesNuevos(dir){
+  const len = sociosNuevosPorMes.length;
+  if (dir === 'prev') idxMesNuevos = (idxMesNuevos - 1 + len) % len;
+  else idxMesNuevos = (idxMesNuevos + 1) % len;
+
+  refrescarCardNuevos();
+}
+
+/* ================= UTIL ================= */
+function formatearMesYYYYMM(m){
+  const [a,mo] = m.split("-");
+  const meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return `${meses[parseInt(mo,10)]} ${a}`;
+}
+
+function renderTabla(id, columnas, datos){
+  const cont = document.getElementById(id);
+  if (!datos.length){
     cont.innerHTML = "<p>No hay datos.</p>";
     return;
   }
 
   let html = `
     <table class="table table-sm table-striped">
-    <thead><tr>
-      ${columnas.map(c=>`<th>${c}</th>`).join("")}
-    </tr></thead>
-    <tbody>
+      <thead>
+        <tr>${columnas.map(c=>`<th>${c}</th>`).join("")}</tr>
+      </thead>
+      <tbody>
   `;
 
   datos.forEach(row => {
-    html += `<tr>${columnas.map(col => `<td>${row[col] ?? '-'}</td>`).join("")}</tr>`;
+    html += `<tr>${columnas.map(c=>`<td>${row[c] ?? '-'}</td>`).join("")}</tr>`;
   });
 
   html += "</tbody></table>";
   cont.innerHTML = html;
 }
 
-/* ============================= AUTOLOAD ============================ */
+/* ================= LOAD ================= */
 document.addEventListener("DOMContentLoaded", async () => {
   await cargarSociosPorCategoria();
   await cargarCuotasImpagas();
+  await cargarSociosNuevosPorMes();
 });
+
 </script>
 
 </body>

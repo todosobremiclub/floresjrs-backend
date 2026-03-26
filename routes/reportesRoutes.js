@@ -131,89 +131,28 @@ router.get('/cuotas-impagas-resumen', verificarToken, async (req, res) => {
 });
 
 
-// ============================================================
-// 📌 3) CUOTAS IMPAGAS — DETALLE POR MES
-// ============================================================
-//
-// Devuelve:
-// [
-//  { "N° Socio": 10, "DNI": "...", "Apellido": "...", ... },
-//  ...
-// ]
-//
-// Usado para el popup al hacer click en un número del dashboard
-// ============================================================
-
-router.get('/cuotas-impagas-detalle', verificarToken, async (req, res) => {
-  const { mes } = req.query;
-
-  if (!mes)
-    return res.status(400).json({ error: "Falta mes (YYYY-MM)" });
-
+// 3) Socios nuevos por mes (según fecha_ingreso)
+router.get('/socios-nuevos-por-mes', verificarToken, async (req, res) => {
   try {
     const q = `
-      WITH socios_activos AS (
-        SELECT 
-          id,
-          numero_socio,
-          dni,
-          nombre,
-          apellido,
-          subcategoria,
-          telefono,
-          fecha_ingreso::date
-        FROM socios
-        WHERE activo = true
-          AND becado = false
-          AND fecha_ingreso IS NOT NULL
-      ),
-
-      mes_obj AS (
-        SELECT to_date($1 || '-01','YYYY-MM-DD')::date AS mes
-      ),
-
-      cuotas AS (
-        SELECT
-          s.*,
-          (SELECT mes FROM mes_obj) AS mes
-        FROM socios_activos s,
-             mes_obj
-        WHERE date_trunc('month', (SELECT mes FROM mes_obj))
-              >= date_trunc('month', s.fecha_ingreso)
-      ),
-
-      pagos_norm AS (
-        SELECT
-          socio_numero,
-          make_date(anio, mes, 1) AS mes
-        FROM pagos_mensuales
-      )
-
       SELECT
-        c.numero_socio AS "N° Socio",
-        c.dni AS "DNI",
-        c.apellido AS "Apellido",
-        c.nombre AS "Nombre",
-        c.subcategoria AS "Categoría",
-        c.telefono AS "Teléfono",
-        to_char(c.fecha_ingreso,'DD/MM/YYYY') AS "Fecha ingreso"
-      FROM cuotas c
-      LEFT JOIN pagos_norm p
-        ON p.socio_numero = c.numero_socio
-       AND p.mes = date_trunc('month', c.mes)
-      WHERE p.socio_numero IS NULL
-      ORDER BY c.apellido, c.nombre;
+        TO_CHAR(fecha_ingreso, 'YYYY-MM') AS mes,
+        COUNT(*) AS cantidad
+      FROM socios
+      WHERE fecha_ingreso IS NOT NULL
+        AND activo = true
+      GROUP BY 1
+      ORDER BY 1;
     `;
 
-    const { rows } = await db.query(q, [mes]);
+    const { rows } = await db.query(q);
     res.json(rows);
 
   } catch (err) {
-    console.error("❌ Error cuotas impagas detalle:", err);
-    res.status(500).json({ error: "Error al obtener detalle" });
+    console.error('❌ Error en /socios-nuevos-por-mes:', err);
+    res.status(500).json({ error: 'Error al obtener socios nuevos por mes' });
   }
 });
-
 
 // ============================================================
 // 🔚 EXPORT
