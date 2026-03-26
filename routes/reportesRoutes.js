@@ -6,28 +6,17 @@ const verificarToken = require('../middlewares/verificarToken');
 
 /*
  |------------------------------------------------------------|
- |   FLORES JUNIORS - REPORTES (VERSION INICIAL LIMPIA)       |
- |   Solo incluye: SOCIOS POR CATEGORÍA                       |
- |   Se agregarán progresivamente los demás reportes TSMC     |
+ |   FLORES JUNIORS - REPORTES (VERSION ORDENADA)             |
+ |   Incluye:                                                 |
+ |     1) Socios por Categoría                                |
+ |     2) Cuotas Impagas (resumen + detalle)                  |
  |------------------------------------------------------------|
 */
 
 
 // ============================================================
-// 📊 1) SOCIOS POR CATEGORÍA  (DONUT TSMC)
+// 📊 1) SOCIOS POR CATEGORÍA
 // ============================================================
-//
-// Devuelve:
-// [
-//   { categoria: 'Fútbol', cantidad: 40 },
-//   { categoria: 'Patín',  cantidad: 22 },
-//   ...
-// ]
-//
-// Backend real de Flores: usa tabla "socios" con columna
-// "subcategoria" para la categoría del socio.
-// ============================================================
-
 router.get('/socios-por-categoria', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(`
@@ -51,20 +40,182 @@ router.get('/socios-por-categoria', verificarToken, async (req, res) => {
 });
 
 
+// ============================================================
+// 📌 2) CUOTAS IMPAGAS — RESUMEN POR MES
+// ============================================================
+//
+// Devuelve:
+// [
+//   { mes: "2026-03", sin_pago: 13 },
+//   { mes: "2026-02", sin_pago: 3 },
+//   ...
+// ]
+//
+// Lógica: igual a TSMC pero usando pagos_mensuales + socios de FLORES
+// ============================================================
+
+router.get('/cuotas-impagas-resumen', verificarToken, async (req, res) => {
+  try {
+
+    const q = `
+      WITH socios_activos AS (
+        SELECT 
+          numero_socio,
+          fecha_ingreso::date
+        FROM socios
+        WHERE activo = true
+          AND becado = false
+          AND fecha_ingreso IS NOT NULL
+      ),
+
+      limites AS (
+        SELECT
+          date_trunc('month', MIN(fecha_ingreso))::date AS min_mes,
+          date_trunc('month', NOW())::date AS max_mes
+        FROM socios_activos
+      ),
+
+      serie_meses AS (
+        SELECT generate_series(
+          (SELECT min_mes FROM limites),
+          (SELECT max_mes FROM limites),
+          interval '1 month'
+        )::date AS mes
+      ),
+
+      cuotas AS (
+        SELECT 
+          s.numero_socio,
+          m.mes
+        FROM socios_activos s
+        JOIN serie_meses m
+          ON m.mes >= date_trunc('month', s.fecha_ingreso)
+      ),
+
+      pagos_norm AS (
+        SELECT 
+          socio_numero,
+          make_date(anio, mes, 1) AS mes
+        FROM pagos_mensuales
+      ),
+
+      cuotas_con_pagos AS (
+        SELECT
+          c.mes,
+          c.numero_socio,
+          EXISTS (
+            SELECT 1
+            FROM pagos_norm p
+            WHERE p.socio_numero = c.numero_socio
+              AND p.mes = c.mes
+          ) AS pagado
+        FROM cuotas c
+      )
+
+      SELECT
+        to_char(mes, 'YYYY-MM') AS mes,
+        COUNT(*) FILTER (WHERE NOT pagado) AS sin_pago
+      FROM cuotas_con_pagos
+      GROUP BY mes
+      HAVING COUNT(*) FILTER (WHERE NOT pagado) > 0
+      ORDER BY mes DESC;
+    `;
+
+    const { rows } = await db.query(q);
+    res.json(rows);
+
+  } catch (err) {
+    console.error("❌ Error cuotas impagas resumen:", err);
+    res.status(500).json({ error: "Error al obtener cuotas impagas" });
+  }
+});
+
 
 // ============================================================
-// ⚠️ IMPORTANTE
-// A partir de aquí iremos agregando:
+// 📌 3) CUOTAS IMPAGAS — DETALLE POR MES
+// ============================================================
 //
-// - cuotas impagas
-// - ingresos vs gastos
-// - socios nuevos por mes
-// - ranking ingresos/gastos
-// - ingresos por responsable
-// - gastos por responsable
+// Devuelve:
+// [
+//  { "N° Socio": 10, "DNI": "...", "Apellido": "...", ... },
+//  ...
+// ]
 //
-// Todo con estilo TSMC adaptado a Flores.
+// Usado para el popup al hacer click en un número del dashboard
 // ============================================================
 
+router.get('/cuotas-impagas-detalle', verificarToken, async (req, res) => {
+  const { mes } = req.query;
 
+  if (!mes)
+    return res.status(400).json({ error: "Falta mes (YYYY-MM)" });
+
+  try {
+    const q = `
+      WITH socios_activos AS (
+        SELECT 
+          id,
+          numero_socio,
+          dni,
+          nombre,
+          apellido,
+          subcategoria,
+          telefono,
+          fecha_ingreso::date
+        FROM socios
+        WHERE activo = true
+          AND becado = false
+          AND fecha_ingreso IS NOT NULL
+      ),
+
+      mes_obj AS (
+        SELECT to_date($1 || '-01','YYYY-MM-DD')::date AS mes
+      ),
+
+      cuotas AS (
+        SELECT
+          s.*,
+          (SELECT mes FROM mes_obj) AS mes
+        FROM socios_activos s,
+             mes_obj
+        WHERE date_trunc('month', (SELECT mes FROM mes_obj))
+              >= date_trunc('month', s.fecha_ingreso)
+      ),
+
+      pagos_norm AS (
+        SELECT
+          socio_numero,
+          make_date(anio, mes, 1) AS mes
+        FROM pagos_mensuales
+      )
+
+      SELECT
+        c.numero_socio AS "N° Socio",
+        c.dni AS "DNI",
+        c.apellido AS "Apellido",
+        c.nombre AS "Nombre",
+        c.subcategoria AS "Categoría",
+        c.telefono AS "Teléfono",
+        to_char(c.fecha_ingreso,'DD/MM/YYYY') AS "Fecha ingreso"
+      FROM cuotas c
+      LEFT JOIN pagos_norm p
+        ON p.socio_numero = c.numero_socio
+       AND p.mes = date_trunc('month', c.mes)
+      WHERE p.socio_numero IS NULL
+      ORDER BY c.apellido, c.nombre;
+    `;
+
+    const { rows } = await db.query(q, [mes]);
+    res.json(rows);
+
+  } catch (err) {
+    console.error("❌ Error cuotas impagas detalle:", err);
+    res.status(500).json({ error: "Error al obtener detalle" });
+  }
+});
+
+
+// ============================================================
+// 🔚 EXPORT
+// ============================================================
 module.exports = router;
