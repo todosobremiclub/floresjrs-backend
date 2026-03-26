@@ -139,6 +139,34 @@
     #impagas-numero { transition: 0.2s ease; }
     #impagas-numero:hover { transform: scale(1.05); }
 
+/* Leyenda compacta abajo en 2 columnas */
+.legend-grid-2cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #004aad;
+}
+
+.legend-grid-2cols .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-grid-2cols .legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.donut-container-small {
+  width: 180px !important;
+  height: 180px !important;
+}
+
+
   </style>
 </head>
 
@@ -177,22 +205,30 @@
     <!-- 1) SOCIOS POR CATEGORÍA                                  -->
     <!-- ========================================================= -->
     <div class="col">
-      <div class="dashboard-card">
-        <div class="card-title-tsmc">Socios por Categoría</div>
-        <div class="card-subtitle-tsmc">
-          Distribución de socios activos por categoría.
-        </div>
+  <div class="dashboard-card">
 
-        <div class="donut-wrapper">
-          <div class="donut-container">
-            <canvas id="chartCategorias"></canvas>
-            <div id="totalCategorias" class="donut-center">0</div>
-          </div>
+    <div class="card-title-tsmc">Socios por Categoría</div>
+    <div class="card-subtitle-tsmc">
+      Distribución de socios activos por categoría.
+    </div>
 
-          <div id="legendCategorias" class="donut-legend"></div>
+    <!-- DONUT CENTRADO -->
+    <div class="d-flex justify-content-center mb-3">
+      <div style="position:relative;width:180px;height:180px;">
+        <canvas id="chartCategorias"></canvas>
+        <div id="totalCategorias" 
+             style="position:absolute;top:50%;left:50%;
+                    transform:translate(-50%,-50%);
+                    font-size:28px;font-weight:700;color:#333;">
         </div>
       </div>
     </div>
+
+    <!-- LEYENDA ABAJO EN 2 COLUMNAS -->
+    <div id="legendCategorias" class="legend-grid-2cols"></div>
+
+  </div>
+</div>
 
     <!-- ========================================================= -->
     <!-- 2) CUOTAS IMPAGAS (ESTILO FLORES)                        -->
