@@ -198,6 +198,43 @@
   justify-content: flex-start;
 }
 
+/* ALTURA UNIFICADA PARA LOS 3 MÓDULOS SUPERIORES */
+.modulo-superior {
+  min-height: 400px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Achicar el donut y ajustar leyenda para entrar en altura fija */
+.donut-wrapper {
+  padding: 0px 0 10px 0 !important;
+  gap: 20px !important;
+}
+
+.donut-container {
+  width: 160px !important;
+  height: 160px !important;
+}
+
+.legend-grid-2cols {
+  margin-top: 0 !important;
+  font-size: 12px;
+  gap: 4px 8px !important;
+}
+
+/* Compactar Cuotas Impagas para altura fija */
+.cuotas-numero-area {
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+}
+
+.cuotas-tabla-wrapper {
+  max-height: 120px !important;
+}
+
+
 
   </style>
 </head>
