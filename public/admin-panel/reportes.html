@@ -1,365 +1,304 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reportes - Flores Jrs</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reportes - Flores Juniors</title>
+
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-  body {
-  background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
-  background-size: cover;
-  color: white;
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-}
+    body {
+      margin: 0;
+      background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
+    /* SIDEBAR */
+    .sidebar {
+      width: 200px;
+      background-color: #002f6c;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      padding-top: 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow-y: auto;
+      z-index: 1040;
+      transition: transform 0.3s ease;
+    }
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+    }
+    .btn-outline-light {
+      border-color: #FFD500 !important;
+    }
+    .btn-outline-light:hover {
+      background-color: #FFD500 !important;
+      color: black !important;
+    }
 
-  .sidebar {
-    width: 200px;
-    background-color: #002f6c;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 1rem;
-    padding-top: 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    overflow-y: auto;
-    z-index: 1040;
-    transition: transform 0.3s ease; /* 👈 transiciones para móviles */
-  }
+    /* TOGGLE MOBILE */
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1050;
+      display: none;
+    }
 
-  .sidebar a {
-    color: white;
-    text-decoration: none;
-    font-weight: normal;
-  }
+    @media (max-width: 767px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      .toggle-btn {
+        display: block;
+      }
+      .main-content {
+        margin-left: 0 !important;
+      }
+    }
 
-/* 🔧 Borde amarillo para todos los botones outline-light del sidebar */
-.sidebar .btn-outline-light {
-  border-color: #FFD500 !important;
-}
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: 200px;
+      padding: 2rem;
+    }
 
-/* Opcional: efecto hover */
-.sidebar .btn-outline-light:hover {
-  background-color: #FFD500 !important;
-  color: black !important;
-}
+    /* CARD (TSMC STYLE) */
+    .dashboard-card {
+      background: white;
+      color: #004aad;
+      margin-bottom: 2rem;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
+    }
 
-  .main-content {
-    margin-left: 200px;
-    padding: 2rem;
-  }
+    .card-title-tsmc {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #1c4e80;
+      text-align: left;
+    }
+    .card-subtitle-tsmc {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 10px;
+      text-align: left;
+    }
 
-  .card {
-    background: white;
-    color: #004aad;
-    margin-bottom: 2rem;
-    border-radius: 16px;
-    padding: 1rem;
-    text-align: center;
-    position: relative;
-  }
+    /* DONUT */
+    .donut-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 35px;
+      padding: 10px 0 20px 0;
+    }
 
-  .titulo {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: black;
-    text-align: left;
-  }
+    .donut-container {
+      position: relative;
+      width: 240px;
+      height: 240px;
+    }
 
-  .monto-total {
-    font-weight: bold;
-    color: green;
-    font-size: 1.1rem;
-    text-align: right;
-    margin-top: 0.5rem;
-}
+    .donut-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+    }
 
-
-  .mes-control {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-
-  .monto-mes {
-    font-size: 2rem;
-    font-weight: bold;
-    color: green;
-    margin-top: 1rem;
-  }
-
-  /* ✅ Botón hamburguesa */
-  .toggle-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1050;
-    display: none;
-  }
-
- /* ✅ Estilos móviles */
-@media (max-width: 767px) {
-  .sidebar {
-    transform: translateX(-100%);
-  }
-
-  .sidebar.show {
-    transform: translateX(0);
-  }
-
-  .toggle-btn {
-    display: block;
-  }
-
-  .main-content {
-    margin-left: 0 !important;
-    padding: 1rem;
-  }
-
-  /* 🔧 FIX superposición reportes */
-  .card {
-    padding: 1.5rem 1rem 2rem 1rem !important; /* más espacio en mobile */
-  }
-
-  .monto-total {
-    font-weight: bold;
-    color: green;
-    font-size: 1.1rem;
-    text-align: right;
-    margin-top: 0.5rem;
-}
-
-
-
-  .monto-mes {
-    font-size: 1.5rem !important; /* monto mensual más chico */
-  }
-
-  .titulo {
-    font-size: 1rem !important; /* título más chico para evitar que colisione */
-  }
-}
-
-</style>
-
+    /* Leyenda */
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+  </style>
 </head>
+
 <body>
 
+<!-- BOTÓN HAMBURGUESA -->
 <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
-  <a href="/admin-panel/index.html" class="btn btn-outline-light">👤 Socios</a>
-<a href="/admin-panel/pendientes.html" class="btn btn-outline-light d-flex justify-content-between align-items-center">
-  📥 Pendientes
-  <span id="contadorPendientes" class="badge bg-warning text-dark ms-2" style="display:none;">0</span>
-</a>
-<a href="/admin-panel/pagos.html" class="btn btn-outline-light">💰 Pagos</a>
-<a href="/admin-panel/gastos.html" class="btn btn-outline-light">🧾 Gastos</a>
-<a href="/admin-panel/noticias.html" class="btn btn-outline-light">📢 Noticias</a>
-<a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
-<a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
-<a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
-<a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
-<button class="btn btn-outline-light mt-4" onclick="logout()">Cerrar sesión</button>
-
-
+  <a href="/admin-panel/index.html" class="btn btn-outline-light">👥 Socios</a>
+  <a href="/admin-panel/pendientes.html" class="btn btn-outline-light">📥 Pendientes</a>
+  <a href="/admin-panel/pagos.html" class="btn btn-outline-light">💳 Pagos</a>
+  <a href="/admin-panel/gastos.html" class="btn btn-outline-light">🧾 Gastos</a>
+  <a href="/admin-panel/noticias.html" class="btn btn-outline-light">📰 Noticias</a>
+  <a href="/admin-panel/notificaciones.html" class="btn btn-outline-light">🔔 Notificaciones</a>
+  <a href="/admin-panel/cumpleanios.html" class="btn btn-outline-light">🎂 Cumpleaños</a>
+  <a href="/admin-panel/configuracion.html" class="btn btn-outline-light">⚙️ Configuración</a>
+  <a href="/admin-panel/reportes.html" class="btn btn-outline-light">📊 Reportes</a>
+  <button class="btn btn-outline-light" onclick="logout()">Cerrar sesión</button>
 </div>
 
+<!-- CONTENIDO -->
 <div class="main-content">
   <div class="text-center mb-4">
     <img src="flores_jrs_logo.png" alt="Escudo" height="50">
-    <h2 class="text-warning">Reportes - Flores Jrs</h2>
+    <h2 class="text-warning">Reportes - Flores Juniors</h2>
   </div>
 
-    <!-- Reporte 1 -->
-<div class="card">
-  <div class="titulo">1. Total recaudado por mes pagado</div>
-  <div class="mes-control">
-    <button class="btn btn-primary" onclick="cambiarMes(-1)">◀</button>
-    <div id="mesActual">Mes</div>
-    <button class="btn btn-primary" onclick="cambiarMes(1)">▶</button>
-  </div>
-  <div id="montoMes" class="monto-mes">$ 0</div>
-  <div id="acumuladoAnual" class="monto-total">$ 0</div>
-</div>
+  <!-- ============================================================== -->
+  <!-- ███ 1) SOCIOS POR CATEGORÍA (DONUT TSMC)                    ███ -->
+  <!-- ============================================================== -->
+  <div class="dashboard-card">
+    <div class="card-title-tsmc">Socios por Categoría</div>
+    <div class="card-subtitle-tsmc">
+      Distribución de socios activos por categoría.
+    </div>
 
-<!-- Reporte 2 -->
-<div class="card">
-  <div class="titulo">2. Total recaudado por fecha real de pago</div>
-  <div class="mes-control">
-    <button class="btn btn-primary" onclick="cambiarMes2(-1)">◀</button>
-    <div id="mesActual2">Mes</div>
-    <button class="btn btn-primary" onclick="cambiarMes2(1)">▶</button>
-  </div>
-  <div id="montoMes2" class="monto-mes">$ 0</div>
-  <div id="acumuladoAnual2" class="monto-total">$ 0</div>
-</div>
+    <div class="donut-wrapper">
 
-    <!-- Reporte 3 -->
-    <div class="card">
-      <div class="titulo">3. Socios por categoría</div>
-      <canvas id="graficoCategorias" height="400"></canvas>
+      <!-- Gráfico -->
+      <div class="donut-container">
+        <canvas id="chartCategorias"></canvas>
+        <div id="totalCategorias" class="donut-center">0</div>
+      </div>
+
+      <!-- Leyenda -->
+      <div id="legendCategorias" class="donut-legend"></div>
+
     </div>
   </div>
 
+</div> <!-- main-content -->
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-
+<script>
+/* ================================
+   AUTH / LOGOUT
+================================ */
 if (!localStorage.getItem('token')) {
-    window.location.href = '/admin-panel/login.html';
-  }
+  window.location.href = "/admin-panel/login.html";
+}
 
-  // Wrapper con Authorization y manejo de 401
-  function fetchConToken(url, opciones = {}) {
-    const token = localStorage.getItem('token');
-    return fetch(url, {
-      ...opciones,
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        ...(opciones.headers || {})
-      }
-    }).then(res => {
-      if (res.status === 401) {
-        alert('⚠️ Sesión expirada. Por favor, inicie sesión nuevamente.');
-        localStorage.removeItem('token');
-        window.location.href = '/admin-panel/login.html';
-        throw new Error('Sesión expirada');
-      }
-      return res;
+function logout() {
+  localStorage.removeItem('token');
+  window.location.href = "/admin-panel/login.html";
+}
+
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('show');
+}
+
+/* Fetch con token */
+function fetchConToken(url, opciones = {}) {
+  const token = localStorage.getItem("token");
+  return fetch(url, {
+    ...opciones,
+    headers: {
+      "Authorization": "Bearer " + token,
+      ...(opciones.headers || {})
+    }
+  }).then(res => {
+    if (res.status === 401) {
+      alert("⚠️ Sesión expirada");
+      localStorage.removeItem("token");
+      window.location.href = "/admin-panel/login.html";
+      throw new Error("Sesión expirada");
+    }
+    return res;
+  });
+}
+
+/* ================================
+   1) Socios por Categoría
+================================ */
+
+async function cargarSociosPorCategoria() {
+  try {
+    const res = await fetchConToken("/reportes/socios-por-categoria");
+    const data = await res.json();
+
+    const total = data.reduce((acc, x) => acc + Number(x.cantidad), 0);
+    document.getElementById("totalCategorias").textContent = total;
+
+    const labels = data.map(x => x.categoria || "Sin categoría");
+    const valores = data.map(x => Number(x.cantidad));
+
+    const colores = ["#1c8c5a", "#1c4e80", "#d7263d", "#ff9f1c", "#9b5de5", "#00bbf9"];
+
+    // LEYENDA
+    const legend = document.getElementById("legendCategorias");
+    legend.innerHTML = "";
+    data.forEach((x, i) => {
+      const item = document.createElement("div");
+      item.className = "legend-item";
+      item.innerHTML = `
+        <div class="legend-color" style="background:${colores[i % colores.length]}"></div>
+        <span>${x.categoria} (${x.cantidad})</span>
+      `;
+      legend.appendChild(item);
     });
-  }
 
-  const token = localStorage.getItem('token');
-  if (!token) window.location.href = '/admin-panel/login.html';
-
-  const nombresMeses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
-  // Reporte 1
-  let mesActual = new Date().getMonth();
-  let anioActual = new Date().getFullYear();
-  let datosPorMes = [];
-
- async function cargarDatos() {
-  try {
-    const res = await fetchConToken('/reportes/recaudado-por-fecha');
-    const data = await res.json();
-    datosPorMes = data.meses;
-    document.getElementById('acumuladoAnual').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
-    actualizarMes();
-  } catch (err) {
-    console.error('❌ Error reporte 1:', err);
-  }
-}
-
-  function actualizarMes() {
-    document.getElementById('mesActual').textContent = nombresMeses[mesActual];
-    const mesBuscado = `${anioActual}-${String(mesActual + 1).padStart(2, '0')}`;
-    const fila = datosPorMes.find(f => f.mes === mesBuscado);
-    document.getElementById('montoMes').textContent = fila ? `$ ${fila.total.toLocaleString('es-AR')}` : '$ 0';
-  }
-
-  function cambiarMes(dir) {
-    mesActual += dir;
-    if (mesActual < 0) { mesActual = 11; anioActual--; }
-    else if (mesActual > 11) { mesActual = 0; anioActual++; }
-    actualizarMes();
-  }
-
-  // Reporte 2
-  let mesActual2 = new Date().getMonth();
-  let anioActual2 = new Date().getFullYear();
-  let datosPorMes2 = [];
-
-  async function cargarDatosFechaPago() {
-  try {
-    const res = await fetchConToken('/reportes/recaudado-por-fecha-pago');
-    const data = await res.json();
-    datosPorMes2 = data.meses;
-    document.getElementById('acumuladoAnual2').textContent = `$ ${data.totalAnual.toLocaleString('es-AR')}`;
-    actualizarMes2();
-  } catch (err) {
-    console.error('❌ Error reporte 2:', err);
-  }
-}
-
-  function actualizarMes2() {
-    document.getElementById('mesActual2').textContent = nombresMeses[mesActual2];
-    const mesBuscado = `${anioActual2}-${String(mesActual2 + 1).padStart(2, '0')}`;
-    const fila = datosPorMes2.find(f => f.mes === mesBuscado);
-    document.getElementById('montoMes2').textContent = fila ? `$ ${fila.total.toLocaleString('es-AR')}` : '$ 0';
-  }
-
-  function cambiarMes2(dir) {
-    mesActual2 += dir;
-    if (mesActual2 < 0) { mesActual2 = 11; anioActual2--; }
-    else if (mesActual2 > 11) { mesActual2 = 0; anioActual2++; }
-    actualizarMes2();
-  }
-
-  // Reporte 3: socios por categoría
-  async function cargarReporteCategorias() {
-  try {
-    const res = await fetchConToken('/reportes/socios-por-categoria');
-    const data = await res.json();
-
-    const categorias = data.map(d => d.categoria || 'Sin categoría');
-    const cantidades = data.map(d => parseInt(d.cantidad));
-
-    const ctx = document.getElementById('graficoCategorias').getContext('2d');
+    // DONUT
+    const ctx = document.getElementById("chartCategorias").getContext("2d");
     new Chart(ctx, {
-      type: 'bar',
+      type: "doughnut",
       data: {
-        labels: categorias,
+        labels,
         datasets: [{
-          label: 'Cantidad de socios',
-          data: cantidades,
-          backgroundColor: 'rgba(255, 206, 86, 0.7)',
-          borderColor: 'rgba(255, 206, 86, 1)',
-          borderWidth: 1
+          data: valores,
+          backgroundColor: colores
         }]
       },
       options: {
-        indexAxis: 'y',
-        responsive: true,
-        scales: { x: { beginAtZero: true } },
-        plugins: { legend: { display: false } }
+        plugins: {
+          legend: { display: false }
+        },
+        cutout: "60%"
       }
     });
+
   } catch (err) {
-    console.error('❌ Error reporte 3:', err);
+    console.error("❌ Error cargando Socios por Categoría:", err);
   }
 }
 
-  function logout() {
-    localStorage.removeItem('token');
-    window.location.href = '/admin-panel/login.html';
-  }
-
-  function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('show');
-  }
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    await cargarDatos();
-    await cargarDatosFechaPago();
-    await cargarReporteCategorias();
-  });
+/* AUTOLOAD */
+document.addEventListener("DOMContentLoaded", async () => {
+  await cargarSociosPorCategoria();
+});
 </script>
-
-
 
 </body>
 </html>
-

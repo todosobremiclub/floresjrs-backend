@@ -4,66 +4,36 @@ const router = express.Router();
 const db = require('../config/db');
 const verificarToken = require('../middlewares/verificarToken');
 
-// ✅ Recaudado por mes pagado (de pagos_mensuales)
-router.get('/recaudado-por-fecha', verificarToken, async (req, res) => {
-  try {
-    const resultado = await db.query(`
-      SELECT anio, mes, SUM(monto) AS total
-      FROM pagos_mensuales
-      GROUP BY anio, mes
-      ORDER BY anio, mes
-    `);
+/*
+ |------------------------------------------------------------|
+ |   FLORES JUNIORS - REPORTES (VERSION INICIAL LIMPIA)       |
+ |   Solo incluye: SOCIOS POR CATEGORÍA                       |
+ |   Se agregarán progresivamente los demás reportes TSMC     |
+ |------------------------------------------------------------|
+*/
 
-    const datos = resultado.rows.map(r => ({
-      mes: `${r.anio}-${String(r.mes).padStart(2, '0')}`,
-      total: parseInt(r.total)
-    }));
 
-    const anioActual = new Date().getFullYear();
-    const totalAnual = datos
-      .filter(d => d.mes.startsWith(`${anioActual}-`))
-      .reduce((acum, d) => acum + d.total, 0);
+// ============================================================
+// 📊 1) SOCIOS POR CATEGORÍA  (DONUT TSMC)
+// ============================================================
+//
+// Devuelve:
+// [
+//   { categoria: 'Fútbol', cantidad: 40 },
+//   { categoria: 'Patín',  cantidad: 22 },
+//   ...
+// ]
+//
+// Backend real de Flores: usa tabla "socios" con columna
+// "subcategoria" para la categoría del socio.
+// ============================================================
 
-    res.json({ meses: datos, totalAnual });
-  } catch (err) {
-    console.error('❌ Error al obtener recaudado por mes:', err);
-    res.status(500).json({ error: 'Error al obtener reporte de recaudación mensual' });
-  }
-});
-
-// 👉 Recaudado según la fecha real en que se pagó (sin importar el mes abonado)
-router.get('/recaudado-por-fecha-pago', verificarToken, async (req, res) => {
-  try {
-    const resultado = await db.query(`
-      SELECT
-        EXTRACT(YEAR FROM fecha_pago) AS anio,
-        EXTRACT(MONTH FROM fecha_pago) AS mes,
-        SUM(monto) AS total
-      FROM pagos_mensuales
-      GROUP BY EXTRACT(YEAR FROM fecha_pago), EXTRACT(MONTH FROM fecha_pago)
-      ORDER BY anio, mes
-    `);
-
-    const meses = resultado.rows.map(r => ({
-      mes: `${r.anio}-${String(r.mes).padStart(2, '0')}`,
-      total: parseFloat(r.total)
-    }));
-
-    const totalAnual = meses.reduce((acum, r) => acum + r.total, 0);
-
-    res.json({ meses, totalAnual });
-  } catch (err) {
-    console.error('❌ Error al obtener recaudado por fecha de pago:', err);
-    console.error(err.stack);
-    res.status(500).json({ error: 'Error al obtener reporte por fecha de pago' });
-  }
-});
-
-// 📊 Socios por categoría
 router.get('/socios-por-categoria', verificarToken, async (req, res) => {
   try {
     const resultado = await db.query(`
-      SELECT subcategoria AS categoria, COUNT(*) AS cantidad
+      SELECT 
+        COALESCE(subcategoria, 'Sin categoría') AS categoria,
+        COUNT(*) AS cantidad
       FROM socios
       WHERE activo = true
       GROUP BY subcategoria
@@ -71,12 +41,30 @@ router.get('/socios-por-categoria', verificarToken, async (req, res) => {
     `);
 
     res.json(resultado.rows);
+
   } catch (err) {
     console.error('❌ Error al obtener socios por categoría:', err);
-    res.status(500).json({ error: 'Error al obtener reporte de socios por categoría' });
+    res.status(500).json({ 
+      error: 'Error al obtener reporte de socios por categoría' 
+    });
   }
 });
 
+
+
+// ============================================================
+// ⚠️ IMPORTANTE
+// A partir de aquí iremos agregando:
+//
+// - cuotas impagas
+// - ingresos vs gastos
+// - socios nuevos por mes
+// - ranking ingresos/gastos
+// - ingresos por responsable
+// - gastos por responsable
+//
+// Todo con estilo TSMC adaptado a Flores.
+// ============================================================
+
+
 module.exports = router;
-
-
