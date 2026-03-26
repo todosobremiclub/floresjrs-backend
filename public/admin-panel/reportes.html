@@ -82,6 +82,15 @@
       padding: 20px;
       box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
     }
+
+    /* ALTURA FIJA PARA TODOS LOS MÓDULOS SUPERIORES */
+    .modulo-superior {
+      height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
     .card-title-tsmc {
       font-size: 1.1rem;
       font-weight: bold;
@@ -96,145 +105,63 @@
       text-align: left;
     }
 
-    /* ========================= DONUT ============================== */
+    /* ========================= DONUT SOCIOS ======================= */
     .donut-wrapper {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 35px;
-      padding: 10px 0 20px 0;
+      padding: 4px 0 4px 0;
     }
     .donut-container {
       position: relative;
-      width: 240px;
-      height: 240px;
+      width: 180px;
+      height: 180px;
     }
-    .donut-center {
+    .donut-center-text {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 32px;
-      font-weight: bold;
+      font-size: 28px;
+      font-weight: 700;
       color: #333;
     }
-    .donut-legend {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 14px;
+
+    /* Leyenda compacta abajo en 2 columnas */
+    .legend-grid-2cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 10px;
+      margin-top: 4px;
+      font-size: 12px;
+      color: #004aad;
     }
-    .legend-item {
+    .legend-grid-2cols .legend-item {
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .legend-color {
-      width: 12px;
-      height: 12px;
+    .legend-grid-2cols .legend-color {
+      width: 10px;
+      height: 10px;
       border-radius: 2px;
     }
 
-    /* ========================= CUOTAS IMPAGAS ============================== */
+    /* ========================= CUOTAS IMPAGAS ====================== */
     #impagas-numero { transition: 0.2s ease; }
     #impagas-numero:hover { transform: scale(1.05); }
 
-/* Leyenda compacta abajo en 2 columnas */
-.legend-grid-2cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 12px;
-  margin-top: 10px;
-  font-size: 13px;
-  color: #004aad;
-}
+    .cuotas-numero-area {
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
 
-.legend-grid-2cols .legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.legend-grid-2cols .legend-color {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-}
-
-.donut-container-small {
-  width: 180px !important;
-  height: 180px !important;
-}
-
-/* Igualar altura de los módulos superiores */
-.modulo-superior {
-  min-height: 430px;          /* ← Ajusta aquí si quieres más/menos */
-  max-height: 430px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Ajustes visuales para compactar Cuotas Impagas */
-.cuotas-compact {
-  padding-top: 10px !important;
-  padding-bottom: 10px !important;
-}
-
-.cuotas-numero-area {
-  margin-top: 0px !important;
-  margin-bottom: 6px !important;
-}
-
-.cuotas-tabla-wrapper {
-  max-height: 140px !important;   /* ← Antes era ~180 */
-  overflow-y: auto;
-}
-
-/* Forzar que Cuotas Impagas tenga la misma altura que Socios por Categoría */
-.card-cuotas-impagas-mismo-tamano {
-  min-height: 520px;   /* Ajustás acá si hace falta */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-/* ALTURA UNIFICADA PARA LOS 3 MÓDULOS SUPERIORES */
-.modulo-superior {
-  min-height: 400px;
-  max-height: 400px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-/* Achicar el donut y ajustar leyenda para entrar en altura fija */
-.donut-wrapper {
-  padding: 0px 0 10px 0 !important;
-  gap: 20px !important;
-}
-
-.donut-container {
-  width: 160px !important;
-  height: 160px !important;
-}
-
-.legend-grid-2cols {
-  margin-top: 0 !important;
-  font-size: 12px;
-  gap: 4px 8px !important;
-}
-
-/* Compactar Cuotas Impagas para altura fija */
-.cuotas-numero-area {
-  margin-top: 0 !important;
-  margin-bottom: 4px !important;
-}
-
-.cuotas-tabla-wrapper {
-  max-height: 120px !important;
-}
-
-
+    .cuotas-tabla-wrapper {
+      flex: 1;
+      max-height: 170px;
+      overflow-y: auto;
+      margin-top: 6px;
+    }
 
   </style>
 </head>
@@ -264,46 +191,37 @@
     <h2 class="text-warning">Reportes - Flores Juniors</h2>
   </div>
 
-  <!-- ============================================================= -->
-  <!-- GRID DE LOS 6 MÓDULOS (3 ARRIBA + 3 ABAJO)                   -->
-  <!-- ============================================================= -->
-
+  <!-- GRID 3 x 2 -->
   <div class="row row-cols-1 row-cols-md-3 g-4">
 
     <!-- ========================================================= -->
     <!-- 1) SOCIOS POR CATEGORÍA                                  -->
     <!-- ========================================================= -->
     <div class="col">
-  <div class="dashboard-card modulo-superior">
-
-    <div class="card-title-tsmc">Socios por Categoría</div>
-    <div class="card-subtitle-tsmc">
-      Distribución de socios activos por categoría.
-    </div>
-
-    <!-- DONUT CENTRADO -->
-    <div class="d-flex justify-content-center mb-3">
-      <div style="position:relative;width:180px;height:180px;">
-        <canvas id="chartCategorias"></canvas>
-        <div id="totalCategorias" 
-             style="position:absolute;top:50%;left:50%;
-                    transform:translate(-50%,-50%);
-                    font-size:28px;font-weight:700;color:#333;">
+      <div class="dashboard-card modulo-superior">
+        <div class="card-title-tsmc">Socios por Categoría</div>
+        <div class="card-subtitle-tsmc">
+          Distribución de socios activos por categoría.
         </div>
+
+        <!-- Donut centrado -->
+        <div class="donut-wrapper">
+          <div class="donut-container">
+            <canvas id="chartCategorias"></canvas>
+            <div id="totalCategorias" class="donut-center-text">0</div>
+          </div>
+        </div>
+
+        <!-- Leyenda abajo -->
+        <div id="legendCategorias" class="legend-grid-2cols"></div>
       </div>
     </div>
 
-    <!-- LEYENDA ABAJO EN 2 COLUMNAS -->
-    <div id="legendCategorias" class="legend-grid-2cols"></div>
-
-  </div>
-</div>
-
     <!-- ========================================================= -->
-    <!-- 2) CUOTAS IMPAGAS (ESTILO FLORES)                        -->
+    <!-- 2) CUOTAS IMPAGAS                                         -->
     <!-- ========================================================= -->
     <div class="col">
-      <div class="dashboard-card modulo-superior cuotas-compact">
+      <div class="dashboard-card modulo-superior">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <div style="font-size:1.1rem;font-weight:bold;color:#1c4e80;">
             Cuotas Impagas
@@ -343,10 +261,10 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- 3) INGRESOS VS GASTOS (SE COMPLETA LUEGO)                -->
+    <!-- 3) INGRESOS VS GASTOS (PLACEHOLDER)                      -->
     <!-- ========================================================= -->
     <div class="col">
-      <div class="dashboard-card card-cuotas-impagas-mismo-tamano">
+      <div class="dashboard-card modulo-superior">
         <div style="font-size:1.1rem;color:#999;text-align:center;padding:40px 0;">
           (Próximo módulo: Ingresos vs Gastos)
         </div>
@@ -378,8 +296,8 @@
        padding:20px 24px;
        border-radius:14px;
        width:95%;
-       max-width:1100px;       /* 👉 MÁS ANCHO */
-       max-height:75vh;         /* 👉 MÁS BAJO */
+       max-width:1100px;
+       max-height:75vh;
        overflow-y:auto;
        position:relative;
        color:black;
