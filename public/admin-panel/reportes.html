@@ -11,7 +11,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
- <style>
+<style>
   body {
     margin: 0;
     background: url('/admin-panel/cancha.jpg') no-repeat center center fixed;
@@ -73,45 +73,53 @@
     padding: 2rem;
   }
 
-  /* ========================= CARDS ============================== */
+  /* ========================= GRID SYNC ALTURA ===================== */
+
+  /* Las columnas adoptan la altura del card más alto */
+  .row.row-cols-md-3 > .col {
+    display: flex;
+  }
+
+  /* Los cards se estiran para igualar altura */
   .dashboard-card {
+    flex: 1;
     background: white;
     color: #004aad;
-    margin-bottom: 2rem;
     border-radius: 16px;
     padding: 20px;
+    margin-bottom: 2rem;
     box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
-  }
-
-  /* ========================= ALTURA ADAPTATIVA =================== */
-  .modulo-superior {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
-  /* Para que las 3 columnas se igualen automáticamente */
-  .row-cols-md-3 > .col {
-    display: flex;
-  }
-
-  .dashboard-card {
-    flex: 1;          /* 💥 los 3 cards toman misma altura según el más alto */
     display: flex;
     flex-direction: column;
   }
 
-  /* ========================= SOCIOS DONUT ======================== */
+  /* ========================= TITULOS ============================= */
+  .card-title-tsmc {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #1c4e80;
+  }
+  .card-subtitle-tsmc {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 10px;
+  }
+
+  /* ========================= SOCIOS - DONUT ====================== */
   .donut-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 4px;
   }
+
   .donut-container {
     position: relative;
     width: 180px;
     height: 180px;
   }
+
   .donut-center-text {
     position: absolute;
     top: 50%;
@@ -127,7 +135,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 4px 10px;
-    margin-top: 10px;
+    margin-top: 12px;
     font-size: 12px;
     color: #004aad;
   }
@@ -147,8 +155,8 @@
   #impagas-numero:hover { transform: scale(1.05); }
 
   .cuotas-numero-area {
-    margin-top: 0;
-    margin-bottom: 4px;
+    margin-top: 4px;
+    margin-bottom: 6px;
   }
 
   .cuotas-tabla-wrapper {
@@ -156,8 +164,8 @@
     overflow-y: auto;
     margin-top: 10px;
   }
-</style>
 
+</style>
 </head>
 
 <body>
