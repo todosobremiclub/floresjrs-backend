@@ -275,5 +275,28 @@ router.get('/mensuales', verificarToken, async (req, res) => {
   }
 });
 
+// 👉 Obtener otros ingresos (no cuotas)
+router.get('/otros-ingresos', verificarToken, async (req, res) => {
+  try {
+    const r = await db.query(`
+      SELECT
+        p.id,
+        to_char(p.fecha_pago, 'YYYY-MM') AS mes,
+        to_char(p.fecha_pago, 'DD/MM/YYYY') AS fecha,
+        p.monto,
+        p.observaciones,
+        ti.nombre AS tipo
+      FROM pagos p
+      JOIN tipos_ingreso ti ON ti.id = p.tipo_ingreso_id
+      ORDER BY p.fecha_pago DESC
+    `);
+
+    res.json(r.rows);
+  } catch (err) {
+    console.error('❌ Error al obtener otros ingresos:', err);
+    res.status(500).json({ error: 'Error al obtener otros ingresos' });
+  }
+});
+
 module.exports = router;
 	
