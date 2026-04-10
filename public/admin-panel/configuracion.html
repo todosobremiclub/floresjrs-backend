@@ -206,6 +206,36 @@
 
       <hr class="border-light"/>
 
+<hr class="border-light"/>
+
+<!-- 💵 Tipos de ingreso -->
+<div class="config-item">
+  <details>
+    <summary>💵 Tipos de ingreso</summary>
+
+    <div class="table-responsive mt-2">
+      <table class="table table-sm table-bordered table-striped bg-white">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th style="width:55px;">💾</th>
+            <th style="width:55px;">🗑️</th>
+          </tr>
+        </thead>
+        <tbody id="tablaTiposIngreso"></tbody>
+      </table>
+    </div>
+
+    <form id="formTipoIngreso" class="d-flex gap-2 mt-2">
+      <input type="text" id="nuevoTipoIngreso"
+             class="form-control"
+             placeholder="Nuevo tipo (ej: Donación, Sponsor, Evento)"
+             required />
+      <button type="submit" class="btn btn-yellow">Agregar</button>
+    </form>
+  </details>
+</div>
+
       <!-- 🧾 Tipos de gasto -->
       <div class="config-item">
         <details>
@@ -385,6 +415,15 @@
         post: '/config/tipos-gasto',
         tbody: 'tablaTiposGasto'
       },
+
+tiposIngreso: {
+  list: '/config/tipos-ingreso',
+  update: (id) => `/config/tipos-ingreso/${id}`,
+  del: '/config/tipos-ingreso',
+  post: '/config/tipos-ingreso',
+  tbody: 'tablaTiposIngreso'
+},
+
       responsablesGasto: {
         list: '/config/responsables-gasto',
         update: (id) => `/config/responsables-gasto/${id}`,
@@ -493,6 +532,23 @@
       }
     });
 
+document.getElementById('formTipoIngreso').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('nuevoTipoIngreso');
+  const nombre = input.value.trim();
+  if (!nombre) return;
+
+  try {
+    await crearItem('tiposIngreso', nombre);
+    input.value = '';
+    await cargarLista('tiposIngreso');
+    alert('✅ Tipo de ingreso agregado');
+  } catch (err) {
+    alert('❌ ' + (err.message || 'No se pudo agregar'));
+  }
+});
+
+
     document.getElementById('formResponsableGasto').addEventListener('submit', async (e) => {
       e.preventDefault();
       const input = document.getElementById('nuevoResponsableGasto');
@@ -548,6 +604,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
       await cargarMontosMensuales();
       await cargarLista('categorias');
+await cargarLista('tiposIngreso');
       await cargarLista('tiposGasto');
       await cargarLista('responsablesGasto');
     });

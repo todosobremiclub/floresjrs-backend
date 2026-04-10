@@ -17,6 +17,8 @@ const notificacionesRoutes = require('./routes/notificacionesRoutes');
 const solicitudRoutes = require('./routes/solicitudRoutes');
 const configGastosRoutes = require('./routes/configGastosRoutes');
 const gastosRoutes = require('./routes/gastosRoutes');
+const configIngresosRoutes = require('./routes/configIngresosRoutes');
+
 
 
 
@@ -47,6 +49,7 @@ app.use('/montos-mensuales', montosMensualesRoutes);
 app.use('/notificaciones', notificacionesRoutes);
 app.use('/solicitud', solicitudRoutes);
 app.use('/config', configGastosRoutes);
+app.use('/config', configIngresosRoutes);
 app.use('/gastos', gastosRoutes);
 
 
