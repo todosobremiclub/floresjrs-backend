@@ -195,34 +195,6 @@
 </div>
 
 
-/* === Flechas para <details> (Otros Ingresos por mes) === */
-details.mes-ingreso > summary {
-  list-style: none;            /* sacamos el marker nativo */
-  cursor: pointer;
-  user-select: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-}
-
-/* flecha cerrada */
-details.mes-ingreso > summary::before {
-  content: "▶";
-  color: #FFD500;
-  font-size: 12px;
-  transform: translateY(1px);
-}
-
-/* flecha abierta */
-details.mes-ingreso[open] > summary::before {
-  content: "▼";
-}
-
-/* opcional: hover */
-details.mes-ingreso > summary:hover {
-  opacity: 0.9;
-}
 
 
   <style>
@@ -272,6 +244,31 @@ details.mes-ingreso > summary:hover {
   background-color: #e6c200 !important;
   border-color: #e6c200 !important;
 }
+
+/* === Flechas para <details> (Otros Ingresos por mes) === */
+details.mes-ingreso > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+/* flecha cerrada */
+details.mes-ingreso > summary::before {
+  content: "▶";
+  color: #FFD500;
+  font-size: 12px;
+  transform: translateY(1px);
+}
+
+/* flecha abierta */
+details.mes-ingreso[open] > summary::before {
+  content: "▼";
+}
+
   </style>
 
   <script>
@@ -374,8 +371,10 @@ async function cargarOtrosIngresos() {
   div.className = 'mb-3';
 
   div.innerHTML = `
-    <details class="mes-ingreso">
-      <summary class="fw-bold text-warning">${mes}</summary>
+    
+<details class="mes-ingreso">
+  <summary class="fw-bold text-warning">2026-05</summary>
+
 
       <table class="table table-sm table-bordered bg-white text-dark mt-2">
         <thead>
