@@ -10,6 +10,8 @@ const verificarToken = require('../middlewares/verificarToken');
  |   Incluye:                                                 |
  |     1) Socios por Categoría                                |
  |     2) Cuotas Impagas (resumen + detalle)                  |
+ |     3) Socios nuevos por mes                               |
+ |     4) Ingresos vs Gastos (mensual + anual)                |
  |------------------------------------------------------------|
 */
 
@@ -51,12 +53,10 @@ router.get('/socios-por-categoria', verificarToken, async (req, res) => {
 //   ...
 // ]
 //
-// Lógica: igual a TSMC pero usando pagos_mensuales + socios de FLORES
+// Lógica: usando pagos_mensuales + socios
 // ============================================================
-
 router.get('/cuotas-impagas-resumen', verificarToken, async (req, res) => {
   try {
-
     const q = `
       WITH socios_activos AS (
         SELECT 
@@ -130,10 +130,10 @@ router.get('/cuotas-impagas-resumen', verificarToken, async (req, res) => {
   }
 });
 
+
 // ============================================================
 // 📌 2b) CUOTAS IMPAGAS — DETALLE POR MES
 // GET /reportes/cuotas-impagas-detalle?mes=YYYY-MM
-// Devuelve listado de socios activos (no becados) SIN pago en ese mes
 // ============================================================
 router.get('/cuotas-impagas-detalle', verificarToken, async (req, res) => {
   try {
@@ -183,6 +183,7 @@ router.get('/cuotas-impagas-detalle', verificarToken, async (req, res) => {
 
     const { rows } = await db.query(q, [mes]);
     res.json(rows);
+
   } catch (err) {
     console.error('❌ Error cuotas impagas detalle:', err);
     res.status(500).json({ error: 'Error al obtener detalle de cuotas impagas' });
@@ -190,8 +191,10 @@ router.get('/cuotas-impagas-detalle', verificarToken, async (req, res) => {
 });
 
 
-
-// 3) Socios nuevos por mes (según fecha_ingreso)
+// ============================================================
+// 👤 3) SOCIOS NUEVOS POR MES (según fecha_ingreso)
+// GET /reportes/socios-nuevos-por-mes
+// ============================================================
 router.get('/socios-nuevos-por-mes', verificarToken, async (req, res) => {
   try {
     const q = `
@@ -214,9 +217,14 @@ router.get('/socios-nuevos-por-mes', verificarToken, async (req, res) => {
   }
 });
 
+
 // ============================================================
-// 💰 INGRESOS VS GASTOS — RESUMEN MENSUAL
+// 💰 4) INGRESOS VS GASTOS — RESUMEN MENSUAL (ÚLTIMOS 6 MESES)
 // GET /reportes/ingresos-vs-gastos-mensual
+//
+// ✅ Ajustado a tu BBDD:
+// - pagos: fecha_pago (date), monto (numeric)
+// - gastos: anio (int), mes (int), monto (numeric)
 // ============================================================
 router.get('/ingresos-vs-gastos-mensual', verificarToken, async (req, res) => {
   try {
@@ -231,14 +239,14 @@ router.get('/ingresos-vs-gastos-mensual', verificarToken, async (req, res) => {
       ingresos AS (
         SELECT
           date_trunc('month', fecha_pago)::date AS mes,
-          SUM(monto) AS total_ingresos
+          SUM(monto)::numeric AS total_ingresos
         FROM pagos
         GROUP BY 1
       ),
-      gastos AS (
+      gastos_norm AS (
         SELECT
-          date_trunc('month', fecha)::date AS mes,
-          SUM(monto) AS total_gastos
+          make_date(anio, mes, 1)::date AS mes,
+          SUM(monto)::numeric AS total_gastos
         FROM gastos
         GROUP BY 1
       )
@@ -248,17 +256,92 @@ router.get('/ingresos-vs-gastos-mensual', verificarToken, async (req, res) => {
         COALESCE(g.total_gastos, 0) AS gastos
       FROM meses m
       LEFT JOIN ingresos i ON i.mes = m.mes
-      LEFT JOIN gastos g ON g.mes = m.mes
+      LEFT JOIN gastos_norm g ON g.mes = m.mes
       ORDER BY m.mes;
     `;
 
     const { rows } = await db.query(q);
     res.json(rows);
+
   } catch (err) {
     console.error('❌ Error ingresos vs gastos mensual:', err);
-    res.status(500).json({ error: 'Error al obtener ingresos vs gastos' });
+    res.status(500).json({ error: 'Error al obtener ingresos vs gastos mensual' });
   }
 });
+
+
+// ============================================================
+// 💰 4b) INGRESOS VS GASTOS — POR AÑO (12 meses) + TOTALES
+// GET /reportes/ingresos-vs-gastos-anio?anio=2026
+//
+// ✅ Ajustado a tu BBDD:
+// - pagos: fecha_pago, monto
+// - gastos: anio, mes, monto
+// ============================================================
+router.get('/ingresos-vs-gastos-anio', verificarToken, async (req, res) => {
+  try {
+    const anio = parseInt(req.query.anio || new Date().getFullYear(), 10);
+
+    const q = `
+      WITH meses AS (
+        SELECT generate_series(1, 12) AS mes_num
+      ),
+      ingresos AS (
+        SELECT
+          EXTRACT(MONTH FROM fecha_pago)::int AS mes_num,
+          SUM(monto)::numeric AS ingresos
+        FROM pagos
+        WHERE EXTRACT(YEAR FROM fecha_pago)::int = $1
+        GROUP BY 1
+      ),
+      gastos_norm AS (
+        SELECT
+          mes::int AS mes_num,
+          SUM(monto)::numeric AS gastos
+        FROM gastos
+        WHERE anio = $1
+        GROUP BY 1
+      ),
+      base AS (
+        SELECT
+          $1::int AS anio,
+          m.mes_num,
+          COALESCE(i.ingresos, 0) AS ingresos,
+          COALESCE(g.gastos, 0)   AS gastos
+        FROM meses m
+        LEFT JOIN ingresos i   ON i.mes_num = m.mes_num
+        LEFT JOIN gastos_norm g ON g.mes_num = m.mes_num
+        ORDER BY m.mes_num
+      )
+      SELECT
+        json_build_object(
+          'anio', $1::int,
+          'meses', json_agg(
+            json_build_object(
+              'mes', to_char(make_date($1::int, base.mes_num, 1), 'YYYY-MM'),
+              'ingresos', base.ingresos,
+              'gastos', base.gastos
+            )
+            ORDER BY base.mes_num
+          ),
+          'totales', json_build_object(
+            'ingresos', SUM(base.ingresos),
+            'gastos', SUM(base.gastos),
+            'resultado', SUM(base.ingresos) - SUM(base.gastos)
+          )
+        ) AS data
+      FROM base;
+    `;
+
+    const { rows } = await db.query(q, [anio]);
+    res.json(rows[0]?.data || { anio, meses: [], totales: { ingresos: 0, gastos: 0, resultado: 0 } });
+
+  } catch (err) {
+    console.error('❌ Error ingresos vs gastos año:', err);
+    res.status(500).json({ error: 'Error al obtener Ingresos vs Gastos por año' });
+  }
+});
+
 
 // ============================================================
 // 🔚 EXPORT

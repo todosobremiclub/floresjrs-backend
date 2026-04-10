@@ -204,6 +204,24 @@
     color: #1c4e80;
   }
   #ivg-resultado { font-weight: 800; }
+
+/* ========================= INGRESOS VS GASTOS (NUEVO) ======================== */
+.ivg-metric-card {
+  background: #f6f8fb;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e6eaf0;
+}
+.ivg-metric-title {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 2px;
+}
+.ivg-metric-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1c4e80;
+}
 </style>
 
 </head>
@@ -352,6 +370,27 @@
         </div>
 
         <canvas id="chartIVG" height="110"></canvas>
+<!-- TARJETAS AÑO -->
+<div class="row g-2 mt-3">
+  <div class="col-12 col-md-4">
+    <div class="ivg-metric-card text-center">
+      <div class="ivg-metric-title">Ingresos año</div>
+      <div id="ivg-ingresos-anio" class="ivg-metric-value">$ 0,00</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4">
+    <div class="ivg-metric-card text-center">
+      <div class="ivg-metric-title">Gastos año</div>
+      <div id="ivg-gastos-anio" class="ivg-metric-value">$ 0,00</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4">
+    <div class="ivg-metric-card text-center">
+      <div class="ivg-metric-title">Resultado año</div>
+      <div id="ivg-resultado-anio" class="ivg-metric-value">$ 0,00</div>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   </div>
@@ -635,12 +674,20 @@ let chartIVG = null;
 
 async function cargarIngresosVsGastos() {
   try {
-    const r = await fetchConToken("/reportes/ingresos-vs-gastos-mensual");
-    ivgData = await r.json();
+    const anio = new Date().getFullYear();
 
-    // Aseguramos orden asc para el gráfico
+    const r = await fetchConToken(`/reportes/ingresos-vs-gastos-anio?anio=${anio}`);
+    const data = await r.json();
+
+    ivgData = data.meses || [];
     ivgData.sort((a,b) => a.mes.localeCompare(b.mes));
-    idxMesIVG = ivgData.length - 1;
+
+    idxMesIVG = new Date().getMonth();
+
+    // Totales del año
+    document.getElementById("ivg-ingresos-anio").textContent = formatoMoneda(data.totales.ingresos);
+    document.getElementById("ivg-gastos-anio").textContent   = formatoMoneda(data.totales.gastos);
+    document.getElementById("ivg-resultado-anio").textContent= formatoMoneda(data.totales.resultado);
 
     refrescarIVG();
     renderChartIVG();
@@ -654,31 +701,28 @@ function cambiarMesIVG(dir) {
   const len = ivgData.length;
   if (!len) return;
 
-  if (dir === 'prev') idxMesIVG = Math.max(0, idxMesIVG - 1);
-  else idxMesIVG = Math.min(len - 1, idxMesIVG + 1);
-
+  idxMesIVG = Math.max(0, Math.min(len - 1, idxMesIVG + (dir === 'prev' ? -1 : 1)));
   refrescarIVG();
 }
 
+
 function refrescarIVG() {
   const row = ivgData?.[idxMesIVG];
-  if (!row) {
-    document.getElementById("titulo-mes-ivg").textContent = "-";
-    document.getElementById("ivg-ingresos").textContent = "$ 0,00";
-    document.getElementById("ivg-gastos").textContent = "$ 0,00";
-    document.getElementById("ivg-resultado").textContent = "$ 0,00";
-    return;
-  }
+  if (!row) return;
 
   document.getElementById("titulo-mes-ivg").textContent = formatearMesYYYYMM(row.mes);
 
   const ingresos = Number(row.ingresos || 0);
-  const gastos = Number(row.gastos || 0);
+  const gastos   = Number(row.gastos || 0);
   const resultado = ingresos - gastos;
 
   document.getElementById("ivg-ingresos").textContent = formatoMoneda(ingresos);
-  document.getElementById("ivg-gastos").textContent = formatoMoneda(gastos);
-  document.getElementById("ivg-resultado").textContent = formatoMoneda(resultado);
+  document.getElementById("ivg-gastos").textContent   = formatoMoneda(gastos);
+  document.getElementById("ivg-resultado").textContent= formatoMoneda(resultado);
+
+  document.getElementById("ivg-resultado").style.color =
+    resultado >= 0 ? "#1c8c5a" : "#c62828";
+}
 
   // Color del resultado (verde si positivo, rojo si negativo)
   document.getElementById("ivg-resultado").style.color = (resultado >= 0) ? "#1c8c5a" : "#c62828";
@@ -716,6 +760,8 @@ function renderChartIVG() {
     }
   });
 }
+
+
 
 /* ================= UTIL ================= */
 function formatearMesYYYYMM(m) {
