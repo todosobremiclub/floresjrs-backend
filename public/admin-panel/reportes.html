@@ -186,6 +186,24 @@
     transform: scale(1.05);
   }
 
+  /* ========================= INGRESOS VS GASTOS (NUEVO) ======================== */
+  .ivg-metric-card {
+    background: #f6f8fb;
+    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid #e6eaf0;
+  }
+  .ivg-metric-title {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 2px;
+  }
+  .ivg-metric-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1c4e80;
+  }
+  #ivg-resultado { font-weight: 800; }
 </style>
 
 </head>
@@ -295,6 +313,49 @@
     </div>
 
   </div>
+
+  <!-- ========================= NUEVO REPORTE: INGRESOS VS GASTOS (MENSUAL) ========================= -->
+  <div class="row mt-2">
+    <div class="col-12">
+      <div class="dashboard-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <div class="card-title-tsmc">Ingresos vs Gastos</div>
+            <div class="card-subtitle-tsmc">Comparativo mensual</div>
+          </div>
+          <div class="d-flex align-items-center" style="gap:6px;">
+            <button class="btn btn-sm btn-primary" onclick="cambiarMesIVG('prev')">◀</button>
+            <span id="titulo-mes-ivg" style="min-width:120px;text-align:center;">-</span>
+            <button class="btn btn-sm btn-primary" onclick="cambiarMesIVG('next')">▶</button>
+          </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-12 col-md-4">
+            <div class="ivg-metric-card text-center">
+              <div class="ivg-metric-title">Ingresos mes</div>
+              <div id="ivg-ingresos" class="ivg-metric-value">$ 0,00</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="ivg-metric-card text-center">
+              <div class="ivg-metric-title">Gastos mes</div>
+              <div id="ivg-gastos" class="ivg-metric-value">$ 0,00</div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="ivg-metric-card text-center">
+              <div class="ivg-metric-title">Resultado mes</div>
+              <div id="ivg-resultado" class="ivg-metric-value">$ 0,00</div>
+            </div>
+          </div>
+        </div>
+
+        <canvas id="chartIVG" height="110"></canvas>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- MODAL DETALLE -->
@@ -324,7 +385,7 @@
        box-shadow:0 4px 25px rgba(0,0,0,0.25);
      ">
 
-    <button onclick="cerrarDetalleIngresos()" 
+    <button onclick="cerrarDetalleIngresos()"
             style="
               position:absolute;
               top:8px;
@@ -336,7 +397,7 @@
               cursor:pointer;
             ">✖</button>
 
-    <h3 id="tituloDetalleIngreso" 
+    <h3 id="tituloDetalleIngreso"
         style="color:#1c4e80;margin-top:0;margin-bottom:20px;font-size:22px;">
     </h3>
 
@@ -406,9 +467,9 @@ async function cargarSociosPorCategoria() {
     const ctx = document.getElementById("chartCategorias").getContext("2d");
     new Chart(ctx, {
       type: "doughnut",
-      data: { 
-        labels, 
-        datasets: [{ data: valores, backgroundColor: colores }] 
+      data: {
+        labels,
+        datasets: [{ data: valores, backgroundColor: colores }]
       },
       options: { plugins: { legend: { display:false } }, cutout: "60%" }
     });
@@ -469,18 +530,17 @@ function llenarTablaImpagas() {
 
 function cambiarMesImpagas(dir){
   const len = resumenImpagas.length;
+  if (!len) return;
   if (dir === 'prev') idxMesImpagas = (idxMesImpagas + 1) % len;
   else idxMesImpagas = (idxMesImpagas - 1 + len) % len;
   refrescarCardImpagas();
 }
 
 async function abrirDetalleImpagas(mes) {
-  // 1) Si no viene mes (ej: click en el número grande), usamos el mes seleccionado en la card
   if (!mes) {
     mes = resumenImpagas?.[idxMesImpagas]?.mes;
   }
 
-  // 2) Si aún así no hay mes (por ejemplo, todavía no cargó el resumen), salimos sin romper
   if (!mes) {
     alert("No hay mes seleccionado todavía (esperá a que cargue el reporte).");
     return;
@@ -532,6 +592,13 @@ async function cargarSociosNuevosPorMes(){
 
 function refrescarCardNuevos(){
   const row = sociosNuevosPorMes[idxMesNuevos];
+  if (!row) {
+    document.getElementById("titulo-mes-nuevos").textContent = "-";
+    document.getElementById("nuevos-numero").textContent = "0";
+    document.getElementById("tabla-nuevos").innerHTML = "";
+    return;
+  }
+
   document.getElementById("titulo-mes-nuevos").textContent = formatearMesYYYYMM(row.mes);
   document.getElementById("nuevos-numero").textContent = row.cantidad;
 
@@ -553,10 +620,101 @@ function refrescarCardNuevos(){
 
 function cambiarMesNuevos(dir){
   const len = sociosNuevosPorMes.length;
+  if (!len) return;
   if (dir === 'prev') idxMesNuevos = (idxMesNuevos - 1 + len) % len;
   else idxMesNuevos = (idxMesNuevos + 1) % len;
 
   refrescarCardNuevos();
+}
+
+/* ================= INGRESOS VS GASTOS (NUEVO) ================= */
+
+let ivgData = [];
+let idxMesIVG = 0;
+let chartIVG = null;
+
+async function cargarIngresosVsGastos() {
+  try {
+    const r = await fetchConToken("/reportes/ingresos-vs-gastos-mensual");
+    ivgData = await r.json();
+
+    // Aseguramos orden asc para el gráfico
+    ivgData.sort((a,b) => a.mes.localeCompare(b.mes));
+    idxMesIVG = ivgData.length - 1;
+
+    refrescarIVG();
+    renderChartIVG();
+
+  } catch (err) {
+    console.error("Error IVG:", err);
+  }
+}
+
+function cambiarMesIVG(dir) {
+  const len = ivgData.length;
+  if (!len) return;
+
+  if (dir === 'prev') idxMesIVG = Math.max(0, idxMesIVG - 1);
+  else idxMesIVG = Math.min(len - 1, idxMesIVG + 1);
+
+  refrescarIVG();
+}
+
+function refrescarIVG() {
+  const row = ivgData?.[idxMesIVG];
+  if (!row) {
+    document.getElementById("titulo-mes-ivg").textContent = "-";
+    document.getElementById("ivg-ingresos").textContent = "$ 0,00";
+    document.getElementById("ivg-gastos").textContent = "$ 0,00";
+    document.getElementById("ivg-resultado").textContent = "$ 0,00";
+    return;
+  }
+
+  document.getElementById("titulo-mes-ivg").textContent = formatearMesYYYYMM(row.mes);
+
+  const ingresos = Number(row.ingresos || 0);
+  const gastos = Number(row.gastos || 0);
+  const resultado = ingresos - gastos;
+
+  document.getElementById("ivg-ingresos").textContent = formatoMoneda(ingresos);
+  document.getElementById("ivg-gastos").textContent = formatoMoneda(gastos);
+  document.getElementById("ivg-resultado").textContent = formatoMoneda(resultado);
+
+  // Color del resultado (verde si positivo, rojo si negativo)
+  document.getElementById("ivg-resultado").style.color = (resultado >= 0) ? "#1c8c5a" : "#c62828";
+}
+
+function renderChartIVG() {
+  const ctx = document.getElementById("chartIVG");
+  if (!ctx) return;
+
+  const labels = ivgData.map(x => formatearMesYYYYMM(x.mes));
+  const ingresos = ivgData.map(x => Number(x.ingresos || 0));
+  const gastos = ivgData.map(x => Number(x.gastos || 0));
+
+  if (chartIVG) chartIVG.destroy();
+
+  chartIVG = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        { label: "Ingresos", data: ingresos, backgroundColor: "#2ecc71" },
+        { label: "Gastos", data: gastos, backgroundColor: "#e74c3c" }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "top" } },
+      scales: {
+        y: {
+          ticks: {
+            callback: (value) => value.toLocaleString("es-AR")
+          }
+        }
+      }
+    }
+  });
 }
 
 /* ================= UTIL ================= */
@@ -565,6 +723,10 @@ function formatearMesYYYYMM(m) {
   const [a, mo] = m.split("-");
   const meses = ['', 'Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   return `${meses[parseInt(mo, 10)]} ${a}`;
+}
+
+function formatoMoneda(n) {
+  return "$ " + Number(n || 0).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function renderTabla(id, columnas, datos){
@@ -595,6 +757,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarSociosPorCategoria();
   await cargarCuotasImpagas();
   await cargarSociosNuevosPorMes();
+
+  // NUEVO
+  await cargarIngresosVsGastos();
 });
 
 </script>

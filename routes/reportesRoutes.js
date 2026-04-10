@@ -215,6 +215,52 @@ router.get('/socios-nuevos-por-mes', verificarToken, async (req, res) => {
 });
 
 // ============================================================
+// 💰 INGRESOS VS GASTOS — RESUMEN MENSUAL
+// GET /reportes/ingresos-vs-gastos-mensual
+// ============================================================
+router.get('/ingresos-vs-gastos-mensual', verificarToken, async (req, res) => {
+  try {
+    const q = `
+      WITH meses AS (
+        SELECT generate_series(
+          date_trunc('month', now()) - interval '5 months',
+          date_trunc('month', now()),
+          interval '1 month'
+        )::date AS mes
+      ),
+      ingresos AS (
+        SELECT
+          date_trunc('month', fecha_pago)::date AS mes,
+          SUM(monto) AS total_ingresos
+        FROM pagos
+        GROUP BY 1
+      ),
+      gastos AS (
+        SELECT
+          date_trunc('month', fecha)::date AS mes,
+          SUM(monto) AS total_gastos
+        FROM gastos
+        GROUP BY 1
+      )
+      SELECT
+        to_char(m.mes, 'YYYY-MM') AS mes,
+        COALESCE(i.total_ingresos, 0) AS ingresos,
+        COALESCE(g.total_gastos, 0) AS gastos
+      FROM meses m
+      LEFT JOIN ingresos i ON i.mes = m.mes
+      LEFT JOIN gastos g ON g.mes = m.mes
+      ORDER BY m.mes;
+    `;
+
+    const { rows } = await db.query(q);
+    res.json(rows);
+  } catch (err) {
+    console.error('❌ Error ingresos vs gastos mensual:', err);
+    res.status(500).json({ error: 'Error al obtener ingresos vs gastos' });
+  }
+});
+
+// ============================================================
 // 🔚 EXPORT
 // ============================================================
 module.exports = router;
