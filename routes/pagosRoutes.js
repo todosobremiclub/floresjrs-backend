@@ -70,6 +70,33 @@ router.post('/', verificarToken, async (req, res) => {
   }
 });
 
+// 👉 Registrar OTRO INGRESO (no cuota)
+router.post('/otros-ingresos', verificarToken, async (req, res) => {
+  const { fecha_pago, monto, tipo_ingreso_id, observaciones } = req.body;
+
+  if (!fecha_pago || !monto || !tipo_ingreso_id) {
+    return res.status(400).json({ error: 'Datos incompletos' });
+  }
+
+  try {
+    await db.query(
+      `INSERT INTO pagos (fecha_pago, monto, tipo_ingreso_id, observaciones)
+       VALUES ($1, $2, $3, $4)`,
+      [
+        fecha_pago,
+        monto,
+        tipo_ingreso_id,
+        observaciones || null
+      ]
+    );
+
+    res.status(201).json({ mensaje: 'Ingreso registrado correctamente' });
+  } catch (err) {
+    console.error('❌ Error al registrar otro ingreso:', err);
+    res.status(500).json({ error: 'Error al registrar otro ingreso' });
+  }
+});
+
 // 👉 Registrar pagos mensuales (evita duplicados)
 router.post('/mensuales', verificarToken, async (req, res) => {
   const { numeroSocio, meses } = req.body;

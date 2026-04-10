@@ -82,11 +82,17 @@
 
     <div class="d-flex justify-content-between mb-3">
       <button class="btn btn-success" id="btnNuevoPago">+ Registrar Pago</button>
+<button class="btn btn-warning ms-2" id="btnNuevoIngreso">
+  + Registrar Otro Ingreso
+</button>
     </div>
 
     <div class="mb-3">
       <input type="text" id="buscadorPagos" class="form-control" placeholder="Buscar por apellido o DNI" />
     </div>
+
+<details open>
+  <summary class="mb-2 fw-bold text-white">📅 Pagos de Cuotas</summary>
 
     <table class="table table-bordered tabla-pagos text-white bg-white text-dark">
   <thead class="table-primary">
@@ -97,6 +103,7 @@
     </tr>
   </thead>
   <tbody id="tablaPagos"></tbody>
+</details>
 </table>
 
   </div>
@@ -139,6 +146,47 @@
       </form>
     </div>
   </div>
+
+<div class="modal fade" id="modalOtroIngreso" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" id="formOtroIngreso">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">Registrar Otro Ingreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body text-black">
+
+        <div class="mb-3">
+          <label class="form-label">Tipo de ingreso</label>
+          <select id="tipoIngreso" class="form-select" required></select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Fecha</label>
+          <input type="date" id="fechaIngreso" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Monto</label>
+          <input type="text" id="montoIngreso" class="form-control" placeholder="$ 0,00" required />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Comentario</label>
+          <textarea id="comentarioIngreso" class="form-control" rows="2"></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-warning" type="submit">Guardar Ingreso</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 
 
@@ -251,6 +299,22 @@ function fetchConToken(url, opciones = {}) {
   });
 }
 
+async function cargarTiposIngreso() {
+  const res = await fetchConToken('/config/tipos-ingreso');
+  const tipos = await res.json();
+
+  const select = document.getElementById('tipoIngreso');
+  select.innerHTML = '<option value="">Seleccionar...</option>';
+
+  tipos.filter(t => t.activo !== false).forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = t.nombre;
+    select.appendChild(opt);
+  });
+}
+
+
 
   async function cargarPagos() {
     try {
@@ -321,6 +385,17 @@ function fetchConToken(url, opciones = {}) {
     const formPago = document.getElementById('formPago');
     const inputFecha = document.getElementById('fecha_pago');
     const btnNuevoPago = document.getElementById('btnNuevoPago');
+
+const btnNuevoIngreso = document.getElementById('btnNuevoIngreso');
+const modalOtroIngreso = new bootstrap.Modal(
+  document.getElementById('modalOtroIngreso')
+);
+
+btnNuevoIngreso.addEventListener('click', async () => {
+  await cargarTiposIngreso();
+  document.getElementById('fechaIngreso').valueAsDate = new Date();
+  modalOtroIngreso.show();
+});
 
 btnNuevoPago.addEventListener('click', async () => {
   listaSocios.innerHTML = '';
@@ -443,6 +518,48 @@ formPago.addEventListener('submit', async (e) => {
     alert(err.message || '❌ Error al registrar el pago');
   }
 });
+
+document.getElementById('formOtroIngreso').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const tipo_ingreso_id = document.getElementById('tipoIngreso').value;
+  const fecha_pago = document.getElementById('fechaIngreso').value;
+
+  const montoRaw = document.getElementById('montoIngreso').value
+    .replace(/\./g, '')
+    .replace(',', '.')
+    .replace('$', '')
+    .trim();
+
+  const monto = parseFloat(montoRaw);
+  const observaciones = document.getElementById('comentarioIngreso').value;
+
+  if (!tipo_ingreso_id || !fecha_pago || isNaN(monto)) {
+    return alert('⚠️ Completá todos los datos correctamente');
+  }
+
+  try {
+    const res = await fetchConToken('/pagos/otros-ingresos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tipo_ingreso_id,
+        fecha_pago,
+        monto,
+        observaciones
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error');
+
+    alert('✅ Ingreso registrado');
+    modalOtroIngreso.hide();
+  } catch (err) {
+    alert('❌ ' + err.message);
+  }
+});
+
 
 cargarPagos();
 });
