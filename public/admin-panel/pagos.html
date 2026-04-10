@@ -215,26 +215,36 @@
       color: green;
     }
 
-/* === Modal Otro Ingreso (amarillo institucional) === */
-#modalOtroIngreso .modal-header {
-  background-color: #FFD500;
-  color: #000;
-}
-
+/* === Modal Otro Ingreso (amarillo real) === */
 #modalOtroIngreso .modal-content {
+  background-color: #FFD500 !important;
   border: 2px solid #FFD500;
 }
 
+#modalOtroIngreso .modal-header {
+  background-color: #FFD500 !important;
+  color: #000 !important;
+  border-bottom: 1px solid #e6c200;
+}
+
+#modalOtroIngreso .modal-body {
+  background-color: #fff;
+}
+
+#modalOtroIngreso .modal-footer {
+  background-color: #fff;
+}
+
 #modalOtroIngreso .btn-warning {
-  background-color: #FFD500;
-  border-color: #FFD500;
-  color: #000;
+  background-color: #FFD500 !important;
+  border-color: #FFD500 !important;
+  color: #000 !important;
   font-weight: 700;
 }
 
 #modalOtroIngreso .btn-warning:hover {
-  background-color: #e6c200;
-  border-color: #e6c200;
+  background-color: #e6c200 !important;
+  border-color: #e6c200 !important;
 }
   </style>
 
@@ -474,6 +484,60 @@ async function cargarTiposIngreso() {
     });
   }
 
+async function cargarOtrosIngresos() {
+  const cont = document.getElementById('contenedorOtrosIngresos');
+  if (!cont) return;
+
+  const res = await fetchConToken('/pagos/otros-ingresos');
+  const data = await res.json();
+
+  cont.innerHTML = '';
+
+  if (!data.length) {
+    cont.innerHTML = '<p class="text-white">No hay otros ingresos registrados.</p>';
+    return;
+  }
+
+  const porMes = {};
+  data.forEach(i => {
+    porMes[i.mes] = porMes[i.mes] || [];
+    porMes[i.mes].push(i);
+  });
+
+  Object.keys(porMes).forEach(mes => {
+    const div = document.createElement('div');
+    div.className = 'mb-3';
+
+    div.innerHTML = `
+      <h6 class="text-warning">${mes}</h6>
+      <table class="table table-sm table-bordered bg-white text-dark">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Monto</th>
+            <th>Comentario</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${porMes[mes].map(i => `
+            <tr>
+              <td>${i.fecha}</td>
+              <td>${i.tipo}</td>
+              <td>$ ${Number(i.monto).toLocaleString('es-AR')}</td>
+              <td>${i.observaciones ?? ''}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" onclick="eliminarOtroIngreso(${i.id})">🗑️</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    cont.appendChild(div);
+  });
+}
  
 
   document.addEventListener('DOMContentLoaded', () => {
