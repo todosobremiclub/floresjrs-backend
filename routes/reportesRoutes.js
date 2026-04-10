@@ -287,13 +287,28 @@ router.get('/ingresos-vs-gastos-anio', verificarToken, async (req, res) => {
         SELECT generate_series(1, 12) AS mes_num
       ),
       ingresos AS (
-        SELECT
-          EXTRACT(MONTH FROM fecha_pago)::int AS mes_num,
-          SUM(monto)::numeric AS ingresos
-        FROM pagos
-        WHERE EXTRACT(YEAR FROM fecha_pago)::int = $1
-        GROUP BY 1
-      ),
+  SELECT
+    mes_num,
+    SUM(ingresos)::numeric AS ingresos
+  FROM (
+    -- Pagos manuales
+    SELECT
+      EXTRACT(MONTH FROM fecha_pago)::int AS mes_num,
+      monto AS ingresos
+    FROM pagos
+    WHERE EXTRACT(YEAR FROM fecha_pago)::int = $1
+
+    UNION ALL
+
+    -- Cuotas mensuales
+    SELECT
+      mes::int AS mes_num,
+      monto AS ingresos
+    FROM pagos_mensuales
+    WHERE anio = $1
+  ) t
+  GROUP BY mes_num
+),
       gastos_norm AS (
         SELECT
           mes::int AS mes_num,
