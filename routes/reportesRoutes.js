@@ -130,6 +130,66 @@ router.get('/cuotas-impagas-resumen', verificarToken, async (req, res) => {
   }
 });
 
+// ============================================================
+// 📌 2b) CUOTAS IMPAGAS — DETALLE POR MES
+// GET /reportes/cuotas-impagas-detalle?mes=YYYY-MM
+// Devuelve listado de socios activos (no becados) SIN pago en ese mes
+// ============================================================
+router.get('/cuotas-impagas-detalle', verificarToken, async (req, res) => {
+  try {
+    const { mes } = req.query; // "YYYY-MM"
+
+    if (!mes || typeof mes !== 'string' || !/^\d{4}-\d{2}$/.test(mes)) {
+      return res.status(400).json({ error: 'Parámetro mes inválido. Use formato YYYY-MM' });
+    }
+
+    const q = `
+      WITH mes_sel AS (
+        SELECT to_date($1 || '-01', 'YYYY-MM-DD')::date AS mes
+      ),
+      socios_activos AS (
+        SELECT
+          numero_socio,
+          dni,
+          apellido,
+          nombre,
+          COALESCE(subcategoria, 'Sin categoría') AS categoria,
+          telefono,
+          fecha_ingreso::date AS fecha_ingreso
+        FROM socios
+        WHERE activo = true
+          AND becado = false
+          AND fecha_ingreso IS NOT NULL
+      )
+      SELECT
+        s.numero_socio AS "N° Socio",
+        s.dni          AS "DNI",
+        s.apellido     AS "Apellido",
+        s.nombre       AS "Nombre",
+        s.categoria    AS "Categoría",
+        s.telefono     AS "Teléfono",
+        to_char(s.fecha_ingreso, 'YYYY-MM-DD') AS "Fecha ingreso"
+      FROM socios_activos s
+      CROSS JOIN mes_sel m
+      WHERE date_trunc('month', s.fecha_ingreso) <= m.mes
+        AND NOT EXISTS (
+          SELECT 1
+          FROM pagos_mensuales p
+          WHERE p.socio_numero = s.numero_socio
+            AND make_date(p.anio, p.mes, 1) = m.mes
+        )
+      ORDER BY s.apellido, s.nombre;
+    `;
+
+    const { rows } = await db.query(q, [mes]);
+    res.json(rows);
+  } catch (err) {
+    console.error('❌ Error cuotas impagas detalle:', err);
+    res.status(500).json({ error: 'Error al obtener detalle de cuotas impagas' });
+  }
+});
+
+
 
 // 3) Socios nuevos por mes (según fecha_ingreso)
 router.get('/socios-nuevos-por-mes', verificarToken, async (req, res) => {

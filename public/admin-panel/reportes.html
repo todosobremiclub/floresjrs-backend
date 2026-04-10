@@ -249,6 +249,7 @@
         </div>
 
         <div class="text-center cuotas-numero-area" onclick="abrirDetalleImpagas()" style="cursor:pointer;">
+
           <div style="font-size:0.9rem;color:#666;">Socios sin pago</div>
           <div id="impagas-numero" style="font-size:32px;font-weight:700;color:#c62828;">0</div>
           <div id="impagas-anio" style="font-size:0.9rem;color:#666;"></div>
@@ -437,7 +438,15 @@ async function cargarCuotasImpagas() {
 }
 
 function refrescarCardImpagas() {
-  const row = resumenImpagas[idxMesImpagas];
+  const row = resumenImpagas?.[idxMesImpagas];
+
+  if (!row) {
+    document.getElementById("titulo-mes-impagas").textContent = "-";
+    document.getElementById("impagas-numero").textContent = "0";
+    document.getElementById("impagas-anio").textContent = "";
+    return;
+  }
+
   document.getElementById("titulo-mes-impagas").textContent = formatearMesYYYYMM(row.mes);
   document.getElementById("impagas-numero").textContent = row.sin_pago;
   document.getElementById("impagas-anio").textContent = "Año " + row.mes.slice(0,4);
@@ -466,25 +475,36 @@ function cambiarMesImpagas(dir){
 }
 
 async function abrirDetalleImpagas(mes) {
-  document.getElementById("modalDetalleIngresos").style.display='flex';
+  // 1) Si no viene mes (ej: click en el número grande), usamos el mes seleccionado en la card
+  if (!mes) {
+    mes = resumenImpagas?.[idxMesImpagas]?.mes;
+  }
+
+  // 2) Si aún así no hay mes (por ejemplo, todavía no cargó el resumen), salimos sin romper
+  if (!mes) {
+    alert("No hay mes seleccionado todavía (esperá a que cargue el reporte).");
+    return;
+  }
+
+  document.getElementById("modalDetalleIngresos").style.display = 'flex';
   document.getElementById("tituloDetalleIngreso").textContent =
     `Cuotas impagas — ${formatearMesYYYYMM(mes)}`;
 
   try {
-    const r = await fetchConToken(`/reportes/cuotas-impagas-detalle?mes=${mes}`);
+    const r = await fetchConToken(`/reportes/cuotas-impagas-detalle?mes=${encodeURIComponent(mes)}`);
     const data = await r.json();
 
-    renderTabla("contenidoDetalleIngreso",
+    renderTabla(
+      "contenidoDetalleIngreso",
       ["N° Socio","DNI","Apellido","Nombre","Categoría","Teléfono","Fecha ingreso"],
       data
     );
-
   } catch (err) {
+    console.error(err);
     document.getElementById("contenidoDetalleIngreso").innerHTML =
       "<p>Error al cargar detalle.</p>";
   }
 }
-
 function cerrarDetalleIngresos(){
   document.getElementById("modalDetalleIngresos").style.display="none";
   document.getElementById("contenidoDetalleIngreso").innerHTML="";
@@ -540,10 +560,11 @@ function cambiarMesNuevos(dir){
 }
 
 /* ================= UTIL ================= */
-function formatearMesYYYYMM(m){
-  const [a,mo] = m.split("-");
-  const meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  return `${meses[parseInt(mo,10)]} ${a}`;
+function formatearMesYYYYMM(m) {
+  if (!m || typeof m !== "string" || !m.includes("-")) return "-";
+  const [a, mo] = m.split("-");
+  const meses = ['', 'Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return `${meses[parseInt(mo, 10)]} ${a}`;
 }
 
 function renderTabla(id, columnas, datos){
