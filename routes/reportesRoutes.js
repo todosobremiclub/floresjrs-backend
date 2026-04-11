@@ -381,16 +381,37 @@ router.get('/ingresos-gastos-por-tipo', verificarToken, async (req, res) => {
     let gastosTipoExpr = `'Sin tipo'::text`;
     let gastosJoin = '';
 
-    if (cols.has('tipo_gasto_id')) {
-      gastosJoin = `LEFT JOIN tipos_gasto tg ON tg.id = g.tipo_gasto_id`;
-      gastosTipoExpr = `COALESCE(tg.nombre, 'Sin tipo')`;
-    } else if (cols.has('tipo_gasto')) {
-      gastosTipoExpr = `COALESCE(g.tipo_gasto::text, 'Sin tipo')`;
-    } else if (cols.has('tipo')) {
-      gastosTipoExpr = `COALESCE(g.tipo::text, 'Sin tipo')`;
-    } else if (cols.has('concepto')) {
-      gastosTipoExpr = `COALESCE(g.concepto::text, 'Sin tipo')`;
-    }
+    // Preferimos FK si existe; pero si el FK está NULL, usamos texto como fallback
+let gastosTipoExpr = `'Sin tipo'::text`;
+let gastosJoin = '';
+
+const tieneTipoGastoTexto = cols.has('tipo_gasto');
+const tieneTipoTexto = cols.has('tipo');
+const tieneConceptoTexto = cols.has('concepto');
+
+if (cols.has('tipo_gasto_id')) {
+  gastosJoin = `LEFT JOIN tipos_gasto tg ON tg.id = g.tipo_gasto_id`;
+
+  // Armamos fallback a columnas texto si existen (evita "Sin tipo" cuando el FK está vacío)
+  const fallbacks = [];
+  if (tieneTipoGastoTexto) fallbacks.push(`g.tipo_gasto::text`);
+  if (tieneTipoTexto) fallbacks.push(`g.tipo::text`);
+  if (tieneConceptoTexto) fallbacks.push(`g.concepto::text`);
+
+  if (fallbacks.length > 0) {
+    gastosTipoExpr = `COALESCE(tg.nombre, ${fallbacks.join(', ')}, 'Sin tipo')`;
+  } else {
+    gastosTipoExpr = `COALESCE(tg.nombre, 'Sin tipo')`;
+  }
+
+} else if (tieneTipoGastoTexto) {
+  gastosTipoExpr = `COALESCE(g.tipo_gasto::text, 'Sin tipo')`;
+} else if (tieneTipoTexto) {
+  gastosTipoExpr = `COALESCE(g.tipo::text, 'Sin tipo')`;
+} else if (tieneConceptoTexto) {
+  gastosTipoExpr = `COALESCE(g.concepto::text, 'Sin tipo')`;
+}
+
 
     // --- Detectar si pagos tiene tipo_ingreso_id (otros ingresos) ---
     const colPagosRes = await db.query(`
