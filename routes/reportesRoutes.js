@@ -369,73 +369,104 @@ router.get('/ingresos-gastos-por-tipo', verificarToken, async (req, res) => {
       return res.status(400).json({ error: 'Mes inválido (YYYY-MM)' });
     }
 
-    const q = `
+    // --- Detectar columnas existentes en gastos ---
+    const colRes = await db.query(`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='gastos'
+    `);
+    const cols = new Set(colRes.rows.map(r => r.column_name));
+
+    // Preferimos FK si existe; si no, probamos texto; si no, "Sin tipo"
+    let gastosTipoExpr = `'Sin tipo'::text`;
+    let gastosJoin = '';
+
+    if (cols.has('tipo_gasto_id')) {
+      gastosJoin = `LEFT JOIN tipos_gasto tg ON tg.id = g.tipo_gasto_id`;
+      gastosTipoExpr = `COALESCE(tg.nombre, 'Sin tipo')`;
+    } else if (cols.has('tipo_gasto')) {
+      gastosTipoExpr = `COALESCE(g.tipo_gasto::text, 'Sin tipo')`;
+    } else if (cols.has('tipo')) {
+      gastosTipoExpr = `COALESCE(g.tipo::text, 'Sin tipo')`;
+    } else if (cols.has('concepto')) {
+      gastosTipoExpr = `COALESCE(g.concepto::text, 'Sin tipo')`;
+    }
+
+    // --- Detectar si pagos tiene tipo_ingreso_id (otros ingresos) ---
+    const colPagosRes = await db.query(`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='pagos'
+    `);
+    const pagosCols = new Set(colPagosRes.rows.map(r => r.column_name));
+    const pagosTieneTipoIngreso = pagosCols.has('tipo_ingreso_id');
+
+    // ======================
+    // INGRESOS (Cuotas + Otros ingresos)
+    // ======================
+    const qIngresos = `
       WITH mes_sel AS (
         SELECT to_date($1 || '-01', 'YYYY-MM-DD')::date AS mes
       ),
-
-      -- Ingresos por cuotas (pagos_mensuales)
-      ingresos_cuotas AS (
+      cuotas AS (
         SELECT
           'Cuotas'::text AS tipo,
           COALESCE(SUM(pm.monto), 0)::numeric AS monto
         FROM pagos_mensuales pm
         JOIN mes_sel m ON make_date(pm.anio, pm.mes, 1) = m.mes
       ),
-
-      -- Otros ingresos (pagos con tipo_ingreso_id)
-      ingresos_otros AS (
+      otros AS (
         SELECT
-          COALESCE(ti.nombre, 'Sin tipo') AS tipo,
+          ${pagosTieneTipoIngreso ? "COALESCE(ti.nombre, 'Otros ingresos')" : "'Otros ingresos'::text"} AS tipo,
           COALESCE(SUM(p.monto), 0)::numeric AS monto
         FROM pagos p
-        LEFT JOIN tipos_ingreso ti ON ti.id = p.tipo_ingreso_id
         JOIN mes_sel m ON date_trunc('month', p.fecha_pago) = m.mes
-        GROUP BY 1
-      ),
-
-      ingresos AS (
-        SELECT * FROM ingresos_cuotas
-        UNION ALL
-        SELECT * FROM ingresos_otros
-      ),
-
-      -- Gastos por tipo
-      gastos AS (
-        SELECT
-          COALESCE(tg.nombre, 'Sin tipo') AS tipo,
-          COALESCE(SUM(g.monto), 0)::numeric AS monto
-        FROM gastos g
-        LEFT JOIN tipos_gasto tg ON tg.id = g.tipo_gasto_id
-        JOIN mes_sel m ON make_date(g.anio, g.mes, 1) = m.mes
+        ${pagosTieneTipoIngreso ? "LEFT JOIN tipos_ingreso ti ON ti.id = p.tipo_ingreso_id" : ""}
+        ${pagosTieneTipoIngreso ? "" : ""}
         GROUP BY 1
       )
-
-      SELECT
-        $1::text AS mes,
-        COALESCE(
-          (SELECT json_agg(json_build_object('tipo', tipo, 'monto', monto) ORDER BY monto DESC)
-           FROM ingresos
-           WHERE monto <> 0),
-          '[]'::json
-        ) AS ingresos,
-        COALESCE(
-          (SELECT json_agg(json_build_object('tipo', tipo, 'monto', monto) ORDER BY monto DESC)
-           FROM gastos
-           WHERE monto <> 0),
-          '[]'::json
-        ) AS gastos;
+      SELECT tipo, monto
+      FROM (
+        SELECT * FROM cuotas
+        UNION ALL
+        SELECT * FROM otros
+      ) x
+      WHERE monto <> 0
+      ORDER BY monto DESC;
     `;
 
-    const { rows } = await db.query(q, [mes]);
-    res.json(rows[0] || { mes, ingresos: [], gastos: [] });
+    // ======================
+    // GASTOS (por tipo)
+    // ======================
+    const qGastos = `
+      WITH mes_sel AS (
+        SELECT to_date($1 || '-01', 'YYYY-MM-DD')::date AS mes
+      )
+      SELECT
+        ${gastosTipoExpr} AS tipo,
+        COALESCE(SUM(g.monto), 0)::numeric AS monto
+      FROM gastos g
+      ${gastosJoin}
+      JOIN mes_sel m ON make_date(g.anio, g.mes, 1) = m.mes
+      GROUP BY 1
+      HAVING COALESCE(SUM(g.monto),0) <> 0
+      ORDER BY monto DESC;
+    `;
+
+    const ingresosRes = await db.query(qIngresos, [mes]);
+    const gastosRes = await db.query(qGastos, [mes]);
+
+    return res.json({
+      mes,
+      ingresos: ingresosRes.rows || [],
+      gastos: gastosRes.rows || []
+    });
 
   } catch (err) {
     console.error('❌ Error ingresos-gastos-por-tipo:', err);
     res.status(500).json({ error: 'Error al obtener ingresos/gastos por tipo' });
   }
 });
-
 
 // ============================================================
 // 🔚 EXPORT
