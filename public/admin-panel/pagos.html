@@ -111,7 +111,7 @@
 <details>
   <summary class="mb-2 fw-bold text-white">💰 Otros Ingresos</summary>
   <div id="contenedorOtrosIngresos"></div>
-</details></table>
+</details>
 
   </div>
 
@@ -407,6 +407,8 @@ async function cargarOtrosIngresos() {
 });
 }
 
+window.cargarOtrosIngresos = cargarOtrosIngresos;
+
 async function eliminarOtroIngreso(id) {
   if (!confirm('¿Eliminar este ingreso?')) return;
 
@@ -566,6 +568,28 @@ async function cargarOtrosIngresos() {
     cont.appendChild(div);
   });
 }
+
+// ✅ GLOBAL: necesario para onclick="eliminarOtroIngreso(id)"
+window.eliminarOtroIngreso = async function eliminarOtroIngreso(id) {
+  if (!confirm('¿Eliminar este ingreso?')) return;
+
+  try {
+    const res = await fetchConToken(`/pagos/${id}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error');
+
+    // refresca listado
+    if (typeof cargarOtrosIngresos === 'function') {
+      cargarOtrosIngresos();
+    } else if (typeof window.cargarOtrosIngresos === 'function') {
+      window.cargarOtrosIngresos();
+    }
+  } catch (err) {
+    alert('❌ ' + err.message);
+  }
+};
  
 
   document.addEventListener('DOMContentLoaded', () => {
