@@ -357,6 +357,79 @@ router.get('/ingresos-vs-gastos-anio', verificarToken, async (req, res) => {
   }
 });
 
+// ============================================================
+// 📊 5) INGRESOS Y GASTOS POR TIPO (MENSUAL)
+// GET /reportes/ingresos-gastos-por-tipo?mes=YYYY-MM
+// ============================================================
+router.get('/ingresos-gastos-por-tipo', verificarToken, async (req, res) => {
+  try {
+    const mes = req.query.mes; // YYYY-MM
+    if (!mes || !/^\d{4}-\d{2}$/.test(mes)) {
+      return res.status(400).json({ error: 'Mes inválido (YYYY-MM)' });
+    }
+
+    const q = `
+    WITH mes_sel AS (
+      SELECT to_date($1 || '-01', 'YYYY-MM-DD') AS mes
+    ),
+
+    ingresos AS (
+      -- Cuotas
+      SELECT
+        'Cuotas' AS tipo,
+        SUM(pm.monto)::numeric AS monto
+      FROM pagos_mensuales pm
+      JOIN mes_sel m
+        ON make_date(pm.anio, pm.mes, 1) = m.mes
+
+      UNION ALL
+
+      -- Otros ingresos
+      SELECT
+        ti.nombre AS tipo,
+        SUM(p.monto)::numeric AS monto
+      FROM pagos p
+      JOIN tipos_ingreso ti ON ti.id = p.tipo_ingreso_id
+      JOIN mes_sel m
+        ON date_trunc('month', p.fecha_pago) = m.mes
+      GROUP BY ti.nombre
+    ),
+
+    gastos AS (
+      SELECT
+        tg.nombre AS tipo,
+        SUM(g.monto)::numeric AS monto
+      FROM gastos g
+      JOIN tipos_gasto tg ON tg.id = g.tipo_gasto_id
+      JOIN mes_sel m
+        ON make_date(g.anio, g.mes, 1) = m.mes
+      GROUP BY tg.nombre
+    )
+
+    SELECT json_build_object(
+      'mes', $1,
+      'ingresos', COALESCE(
+        json_agg(json_build_object('tipo', i.tipo, 'monto', i.monto))
+          FILTER (WHERE i.monto IS NOT NULL),
+        '[]'
+      ),
+      'gastos', COALESCE(
+        (SELECT json_agg(json_build_object('tipo', g.tipo, 'monto', g.monto)) FROM gastos g),
+        '[]'
+      )
+    ) AS data
+    FROM ingresos i;
+    `;
+
+    const { rows } = await db.query(q, [mes]);
+    res.json(rows[0].data);
+
+  } catch (err) {
+    console.error('❌ Error ingresos/gastos por tipo:', err);
+    res.status(500).json({ error: 'Error al obtener reporte por tipo' });
+  }
+});
+
 
 // ============================================================
 // 🔚 EXPORT

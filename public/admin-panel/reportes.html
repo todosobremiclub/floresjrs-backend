@@ -332,68 +332,101 @@
 
   </div>
 
-  <!-- ========================= NUEVO REPORTE: INGRESOS VS GASTOS (MENSUAL) ========================= -->
-  <div class="row mt-2">
-    <div class="col-12">
-      <div class="dashboard-card">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div>
-            <div class="card-title-tsmc">Ingresos vs Gastos</div>
-            <div class="card-subtitle-tsmc">Comparativo mensual</div>
-          </div>
-          <div class="d-flex align-items-center" style="gap:6px;">
-            <button class="btn btn-sm btn-primary" onclick="cambiarMesIVG('prev')">◀</button>
-            <span id="titulo-mes-ivg" style="min-width:120px;text-align:center;">-</span>
-            <button class="btn btn-sm btn-primary" onclick="cambiarMesIVG('next')">▶</button>
-          </div>
-        </div>
+ <!-- ========================= REPORTES FINANCIEROS ========================= -->
+<div class="row mt-2">
 
-        <div class="row g-2 mb-3">
-          <div class="col-12 col-md-4">
-            <div class="ivg-metric-card text-center">
-              <div class="ivg-metric-title">Ingresos mes</div>
-              <div id="ivg-ingresos" class="ivg-metric-value">$ 0,00</div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="ivg-metric-card text-center">
-              <div class="ivg-metric-title">Gastos mes</div>
-              <div id="ivg-gastos" class="ivg-metric-value">$ 0,00</div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="ivg-metric-card text-center">
-              <div class="ivg-metric-title">Resultado mes</div>
-              <div id="ivg-resultado" class="ivg-metric-value">$ 0,00</div>
-            </div>
-          </div>
-        </div>
+  <!-- ===== INGRESOS VS GASTOS ===== -->
+  <div class="col-12 col-md-6">
+    <div class="dashboard-card">
 
-        <canvas id="chartIVG" height="110"></canvas>
-<!-- TARJETAS AÑO -->
-<div class="row g-2 mt-3">
-  <div class="col-12 col-md-4">
-    <div class="ivg-metric-card text-center">
-      <div class="ivg-metric-title">Ingresos año</div>
-      <div id="ivg-ingresos-anio" class="ivg-metric-value">$ 0,00</div>
-    </div>
-  </div>
-  <div class="col-12 col-md-4">
-    <div class="ivg-metric-card text-center">
-      <div class="ivg-metric-title">Gastos año</div>
-      <div id="ivg-gastos-anio" class="ivg-metric-value">$ 0,00</div>
-    </div>
-  </div>
-  <div class="col-12 col-md-4">
-    <div class="ivg-metric-card text-center">
-      <div class="ivg-metric-title">Resultado año</div>
-      <div id="ivg-resultado-anio" class="ivg-metric-value">$ 0,00</div>
-    </div>
-  </div>
-</div>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <div class="card-title-tsmc">Ingresos vs Gastos</div>
+          <div class="card-subtitle-tsmc">Comparativo mensual</div>
+        </div>
+        <div class="d-flex align-items-center" style="gap:6px;">
+          <button class="btn btn-sm btn-primary" onclick="cambiarMesIVG('prev')">◀</button>
+          <span id="titulo-mes-ivg" style="min-width:120px;text-align:center;">-</span>
+          <button class="btn btn-sm btn-primary" onclick="cambiarMesIVG('next')">▶</button>
+        </div>
       </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-12 col-md-4">
+          <div class="ivg-metric-card text-center">
+            <div class="ivg-metric-title">Ingresos mes</div>
+            <div id="ivg-ingresos" class="ivg-metric-value">$ 0,00</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="ivg-metric-card text-center">
+            <div class="ivg-metric-title">Gastos mes</div>
+            <div id="ivg-gastos" class="ivg-metric-value">$ 0,00</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="ivg-metric-card text-center">
+            <div class="ivg-metric-title">Resultado mes</div>
+            <div id="ivg-resultado" class="ivg-metric-value">$ 0,00</div>
+          </div>
+        </div>
+      </div>
+
+      <canvas id="chartIVG" height="110"></canvas>
+
+      <div class="row g-2 mt-3">
+        <div class="col-12 col-md-4">
+          <div class="ivg-metric-card text-center">
+            <div class="ivg-metric-title">Ingresos año</div>
+            <div id="ivg-ingresos-anio" class="ivg-metric-value">$ 0,00</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="ivg-metric-card text-center">
+            <div class="ivg-metric-title">Gastos año</div>
+            <div id="ivg-gastos-anio" class="ivg-metric-value">$ 0,00</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="ivg-metric-card text-center">
+            <div class="ivg-metric-title">Resultado año</div>
+            <div id="ivg-resultado-anio" class="ivg-metric-value">$ 0,00</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
+
+  <!-- ===== NUEVO REPORTE: INGRESOS Y GASTOS POR TIPO ===== -->
+  <div class="col-12 col-md-6">
+    <div class="dashboard-card">
+
+      <div class="card-title-tsmc">Ingresos y Gastos por Tipo</div>
+      <div class="card-subtitle-tsmc">Detalle mensual por categoría</div>
+
+      <div class="text-center mb-2">
+        <span id="titulo-mes-tipo" class="fw-bold text-primary">-</span>
+      </div>
+
+      <div class="row">
+        <div class="col-12 col-md-6 text-center">
+          <div class="fw-bold mb-1">Ingresos</div>
+          <canvas id="chartIngresosTipo" height="160"></canvas>
+        </div>
+        <div class="col-12 col-md-6 text-center">
+          <div class="fw-bold mb-1">Gastos</div>
+          <canvas id="chartGastosTipo" height="160"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+
 
 </div>
 
@@ -711,6 +744,7 @@ function refrescarIVG() {
   if (!row) return;
 
   document.getElementById("titulo-mes-ivg").textContent = formatearMesYYYYMM(row.mes);
+  cargarIngresosGastosPorTipo(row.mes);
 
   const ingresos = Number(row.ingresos || 0);
   const gastos   = Number(row.gastos || 0);
@@ -793,6 +827,55 @@ function renderTabla(id, columnas, datos){
 
   html += "</tbody></table>";
   cont.innerHTML = html;
+}
+
+let chartIngresosTipo = null;
+let chartGastosTipo = null;
+
+async function cargarIngresosGastosPorTipo(mes) {
+  const r = await fetchConToken(`/reportes/ingresos-gastos-por-tipo?mes=${mes}`);
+  const data = await r.json();
+
+  document.getElementById("titulo-mes-tipo").textContent = formatearMesYYYYMM(mes);
+
+  const ingLabels = data.ingresos.map(x => x.tipo);
+  const ingData = data.ingresos.map(x => Number(x.monto));
+
+  const gasLabels = data.gastos.map(x => x.tipo);
+  const gasData = data.gastos.map(x => Number(x.monto));
+
+  if (chartIngresosTipo) chartIngresosTipo.destroy();
+  if (chartGastosTipo) chartGastosTipo.destroy();
+
+  chartIngresosTipo = new Chart(
+    document.getElementById("chartIngresosTipo"),
+    {
+      type: 'doughnut',
+      data: {
+        labels: ingLabels,
+        datasets: [{
+          data: ingData,
+          backgroundColor: ['#2ecc71','#27ae60','#1abc9c','#16a085','#3498db']
+        }]
+      },
+      options: { plugins: { legend: { position: 'bottom' } } }
+    }
+  );
+
+  chartGastosTipo = new Chart(
+    document.getElementById("chartGastosTipo"),
+    {
+      type: 'doughnut',
+      data: {
+        labels: gasLabels,
+        datasets: [{
+          data: gasData,
+          backgroundColor: ['#e74c3c','#c0392b','#d35400','#e67e22','#f39c12']
+        }]
+      },
+      options: { plugins: { legend: { position: 'bottom' } } }
+    }
+  );
 }
 
 /* ================= LOAD ================= */
