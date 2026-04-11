@@ -199,10 +199,12 @@
     margin-bottom: 2px;
   }
   .ivg-metric-value {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #1c4e80;
-  }
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1c4e80;
+  white-space: nowrap;
+}
+
   #ivg-resultado { font-weight: 800; }
 
 /* ========================= INGRESOS VS GASTOS (NUEVO) ======================== */
@@ -803,9 +805,11 @@ function formatearMesYYYYMM(m) {
 }
 
 function formatoMoneda(n) {
-  return "$ " + Number(n || 0).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return "$\u00A0" + Number(n || 0).toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 }
-
 function renderTabla(id, columnas, datos){
   const cont = document.getElementById(id);
   if (!datos.length){
@@ -833,49 +837,70 @@ let chartIngresosTipo = null;
 let chartGastosTipo = null;
 
 async function cargarIngresosGastosPorTipo(mes) {
-  const r = await fetchConToken(`/reportes/ingresos-gastos-por-tipo?mes=${mes}`);
-  const data = await r.json();
+  try {
+    const res = await fetchConToken(`/reportes/ingresos-gastos-por-tipo?mes=${mes}`);
 
-  document.getElementById("titulo-mes-tipo").textContent = formatearMesYYYYMM(mes);
+    // Si el backend falla (500/400), no explotamos
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error("Error endpoint por tipo:", res.status, err);
+      document.getElementById("titulo-mes-tipo").textContent = formatearMesYYYYMM(mes);
 
-  const ingLabels = data.ingresos.map(x => x.tipo);
-  const ingData = data.ingresos.map(x => Number(x.monto));
-
-  const gasLabels = data.gastos.map(x => x.tipo);
-  const gasData = data.gastos.map(x => Number(x.monto));
-
-  if (chartIngresosTipo) chartIngresosTipo.destroy();
-  if (chartGastosTipo) chartGastosTipo.destroy();
-
-  chartIngresosTipo = new Chart(
-    document.getElementById("chartIngresosTipo"),
-    {
-      type: 'doughnut',
-      data: {
-        labels: ingLabels,
-        datasets: [{
-          data: ingData,
-          backgroundColor: ['#2ecc71','#27ae60','#1abc9c','#16a085','#3498db']
-        }]
-      },
-      options: { plugins: { legend: { position: 'bottom' } } }
+      // Limpia gráficos si existían
+      if (chartIngresosTipo) chartIngresosTipo.destroy();
+      if (chartGastosTipo) chartGastosTipo.destroy();
+      return;
     }
-  );
 
-  chartGastosTipo = new Chart(
-    document.getElementById("chartGastosTipo"),
-    {
-      type: 'doughnut',
-      data: {
-        labels: gasLabels,
-        datasets: [{
-          data: gasData,
-          backgroundColor: ['#e74c3c','#c0392b','#d35400','#e67e22','#f39c12']
-        }]
-      },
-      options: { plugins: { legend: { position: 'bottom' } } }
-    }
-  );
+    const data = await res.json();
+
+    const ingresosArr = Array.isArray(data.ingresos) ? data.ingresos : [];
+    const gastosArr = Array.isArray(data.gastos) ? data.gastos : [];
+
+    document.getElementById("titulo-mes-tipo").textContent = formatearMesYYYYMM(mes);
+
+    const ingLabels = ingresosArr.map(x => x.tipo);
+    const ingData = ingresosArr.map(x => Number(x.monto));
+
+    const gasLabels = gastosArr.map(x => x.tipo);
+    const gasData = gastosArr.map(x => Number(x.monto));
+
+    if (chartIngresosTipo) chartIngresosTipo.destroy();
+    if (chartGastosTipo) chartGastosTipo.destroy();
+
+    chartIngresosTipo = new Chart(
+      document.getElementById("chartIngresosTipo"),
+      {
+        type: 'doughnut',
+        data: {
+          labels: ingLabels,
+          datasets: [{
+            data: ingData,
+            backgroundColor: ['#2ecc71','#27ae60','#1abc9c','#16a085','#3498db','#9b59b6','#2c3e50']
+          }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+      }
+    );
+
+    chartGastosTipo = new Chart(
+      document.getElementById("chartGastosTipo"),
+      {
+        type: 'doughnut',
+        data: {
+          labels: gasLabels,
+          datasets: [{
+            data: gasData,
+            backgroundColor: ['#e74c3c','#c0392b','#d35400','#e67e22','#f39c12','#7f8c8d','#34495e']
+          }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+      }
+    );
+
+  } catch (e) {
+    console.error("Error cargarIngresosGastosPorTipo:", e);
+  }
 }
 
 /* ================= LOAD ================= */

@@ -360,6 +360,7 @@ router.get('/ingresos-vs-gastos-anio', verificarToken, async (req, res) => {
 // ============================================================
 // 📊 5) INGRESOS Y GASTOS POR TIPO (MENSUAL)
 // GET /reportes/ingresos-gastos-por-tipo?mes=YYYY-MM
+// Devuelve: { mes, ingresos:[{tipo,monto}], gastos:[{tipo,monto}] }
 // ============================================================
 router.get('/ingresos-gastos-por-tipo', verificarToken, async (req, res) => {
   try {
@@ -369,64 +370,69 @@ router.get('/ingresos-gastos-por-tipo', verificarToken, async (req, res) => {
     }
 
     const q = `
-    WITH mes_sel AS (
-      SELECT to_date($1 || '-01', 'YYYY-MM-DD') AS mes
-    ),
-
-    ingresos AS (
-      -- Cuotas
-      SELECT
-        'Cuotas' AS tipo,
-        SUM(pm.monto)::numeric AS monto
-      FROM pagos_mensuales pm
-      JOIN mes_sel m
-        ON make_date(pm.anio, pm.mes, 1) = m.mes
-
-      UNION ALL
-
-      -- Otros ingresos
-      SELECT
-        ti.nombre AS tipo,
-        SUM(p.monto)::numeric AS monto
-      FROM pagos p
-      JOIN tipos_ingreso ti ON ti.id = p.tipo_ingreso_id
-      JOIN mes_sel m
-        ON date_trunc('month', p.fecha_pago) = m.mes
-      GROUP BY ti.nombre
-    ),
-
-    gastos AS (
-      SELECT
-        tg.nombre AS tipo,
-        SUM(g.monto)::numeric AS monto
-      FROM gastos g
-      JOIN tipos_gasto tg ON tg.id = g.tipo_gasto_id
-      JOIN mes_sel m
-        ON make_date(g.anio, g.mes, 1) = m.mes
-      GROUP BY tg.nombre
-    )
-
-    SELECT json_build_object(
-      'mes', $1,
-      'ingresos', COALESCE(
-        json_agg(json_build_object('tipo', i.tipo, 'monto', i.monto))
-          FILTER (WHERE i.monto IS NOT NULL),
-        '[]'
+      WITH mes_sel AS (
+        SELECT to_date($1 || '-01', 'YYYY-MM-DD')::date AS mes
       ),
-      'gastos', COALESCE(
-        (SELECT json_agg(json_build_object('tipo', g.tipo, 'monto', g.monto)) FROM gastos g),
-        '[]'
+
+      -- Ingresos por cuotas (pagos_mensuales)
+      ingresos_cuotas AS (
+        SELECT
+          'Cuotas'::text AS tipo,
+          COALESCE(SUM(pm.monto), 0)::numeric AS monto
+        FROM pagos_mensuales pm
+        JOIN mes_sel m ON make_date(pm.anio, pm.mes, 1) = m.mes
+      ),
+
+      -- Otros ingresos (pagos con tipo_ingreso_id)
+      ingresos_otros AS (
+        SELECT
+          COALESCE(ti.nombre, 'Sin tipo') AS tipo,
+          COALESCE(SUM(p.monto), 0)::numeric AS monto
+        FROM pagos p
+        LEFT JOIN tipos_ingreso ti ON ti.id = p.tipo_ingreso_id
+        JOIN mes_sel m ON date_trunc('month', p.fecha_pago) = m.mes
+        GROUP BY 1
+      ),
+
+      ingresos AS (
+        SELECT * FROM ingresos_cuotas
+        UNION ALL
+        SELECT * FROM ingresos_otros
+      ),
+
+      -- Gastos por tipo
+      gastos AS (
+        SELECT
+          COALESCE(tg.nombre, 'Sin tipo') AS tipo,
+          COALESCE(SUM(g.monto), 0)::numeric AS monto
+        FROM gastos g
+        LEFT JOIN tipos_gasto tg ON tg.id = g.tipo_gasto_id
+        JOIN mes_sel m ON make_date(g.anio, g.mes, 1) = m.mes
+        GROUP BY 1
       )
-    ) AS data
-    FROM ingresos i;
+
+      SELECT
+        $1::text AS mes,
+        COALESCE(
+          (SELECT json_agg(json_build_object('tipo', tipo, 'monto', monto) ORDER BY monto DESC)
+           FROM ingresos
+           WHERE monto <> 0),
+          '[]'::json
+        ) AS ingresos,
+        COALESCE(
+          (SELECT json_agg(json_build_object('tipo', tipo, 'monto', monto) ORDER BY monto DESC)
+           FROM gastos
+           WHERE monto <> 0),
+          '[]'::json
+        ) AS gastos;
     `;
 
     const { rows } = await db.query(q, [mes]);
-    res.json(rows[0].data);
+    res.json(rows[0] || { mes, ingresos: [], gastos: [] });
 
   } catch (err) {
-    console.error('❌ Error ingresos/gastos por tipo:', err);
-    res.status(500).json({ error: 'Error al obtener reporte por tipo' });
+    console.error('❌ Error ingresos-gastos-por-tipo:', err);
+    res.status(500).json({ error: 'Error al obtener ingresos/gastos por tipo' });
   }
 });
 
