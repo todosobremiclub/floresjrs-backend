@@ -369,48 +369,10 @@ router.get('/ingresos-gastos-por-tipo', verificarToken, async (req, res) => {
       return res.status(400).json({ error: 'Mes inválido (YYYY-MM)' });
     }
 
-    // --- Detectar columnas existentes en gastos ---
-    const colRes = await db.query(`
-      SELECT column_name
-      FROM information_schema.columns
-      WHERE table_schema='public' AND table_name='gastos'
-    `);
-    const cols = new Set(colRes.rows.map(r => r.column_name));
+    // ✅ GASTOS: en tu tabla el tipo es tipo_id (no tipo_gasto_id)
+const gastosJoin = `JOIN tipos_gasto tg ON tg.id = g.tipo_id`;
+const gastosTipoExpr = `COALESCE(tg.nombre, 'Sin tipo')`;
 
-    // Preferimos FK si existe; si no, probamos texto; si no, "Sin tipo"
-    let gastosTipoExpr = `'Sin tipo'::text`;
-    let gastosJoin = '';
-
-    // Preferimos FK si existe; pero si el FK está NULL, usamos texto como fallback
-let gastosTipoExpr = `'Sin tipo'::text`;
-let gastosJoin = '';
-
-const tieneTipoGastoTexto = cols.has('tipo_gasto');
-const tieneTipoTexto = cols.has('tipo');
-const tieneConceptoTexto = cols.has('concepto');
-
-if (cols.has('tipo_gasto_id')) {
-  gastosJoin = `LEFT JOIN tipos_gasto tg ON tg.id = g.tipo_gasto_id`;
-
-  // Armamos fallback a columnas texto si existen (evita "Sin tipo" cuando el FK está vacío)
-  const fallbacks = [];
-  if (tieneTipoGastoTexto) fallbacks.push(`g.tipo_gasto::text`);
-  if (tieneTipoTexto) fallbacks.push(`g.tipo::text`);
-  if (tieneConceptoTexto) fallbacks.push(`g.concepto::text`);
-
-  if (fallbacks.length > 0) {
-    gastosTipoExpr = `COALESCE(tg.nombre, ${fallbacks.join(', ')}, 'Sin tipo')`;
-  } else {
-    gastosTipoExpr = `COALESCE(tg.nombre, 'Sin tipo')`;
-  }
-
-} else if (tieneTipoGastoTexto) {
-  gastosTipoExpr = `COALESCE(g.tipo_gasto::text, 'Sin tipo')`;
-} else if (tieneTipoTexto) {
-  gastosTipoExpr = `COALESCE(g.tipo::text, 'Sin tipo')`;
-} else if (tieneConceptoTexto) {
-  gastosTipoExpr = `COALESCE(g.concepto::text, 'Sin tipo')`;
-}
 
 
     // --- Detectar si pagos tiene tipo_ingreso_id (otros ingresos) ---
